@@ -157,10 +157,11 @@
       box-shadow: 0 8px 18px rgba(37, 211, 102, 0.3);
     }
 
-    /* HERO SECTION - MOBILE FIRST */
+    /* ========== HERO SECTION CORRIGIDA ========== */
     .hero {
       position: relative;
-      padding: 24px 0 40px;
+      padding: 40px 0 60px;
+      overflow: hidden;
     }
 
     .hero-backdrop {
@@ -177,7 +178,17 @@
     .hero-content {
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 40px;
+    }
+
+    /* Layout em duas colunas para telas maiores */
+    @media (min-width: 1024px) {
+      .hero-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 60px;
+      }
     }
 
     .hero-badge {
@@ -193,16 +204,16 @@
       font-size: 14px;
       color: var(--secondary);
       border: 1px solid rgba(44,74,59,0.15);
-      margin-bottom: 8px;
+      margin-bottom: 16px;
     }
 
     .hero-title {
-      font-size: clamp(36px, 8vw, 60px);
+      font-size: clamp(36px, 6vw, 56px);
       font-weight: 800;
       line-height: 1.1;
       letter-spacing: -0.02em;
       color: var(--text);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .hero-title span {
@@ -227,7 +238,7 @@
       font-size: 18px;
       color: var(--text-light);
       max-width: 600px;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .hero-cta {
@@ -291,7 +302,7 @@
       background: rgba(44, 74, 59, 0.02);
     }
 
-    /* CARD DE IMAGEM PRINCIPAL */
+    /* CARD DE IMAGEM PRINCIPAL - AGORA SEM SOBREPOSIÇÃO */
     .hero-image-card {
       width: 100%;
       border-radius: var(--radius-lg);
@@ -299,7 +310,7 @@
       box-shadow: var(--shadow-lg);
       position: relative;
       aspect-ratio: 4/5;
-      max-width: 400px;
+      max-width: 500px;
       margin: 0 auto;
     }
 
@@ -806,11 +817,12 @@
   </header>
 
   <main id="main">
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION CORRIGIDA -->
     <section class="hero">
       <div class="hero-backdrop"></div>
       <div class="container">
         <div class="hero-content">
+          <!-- COLUNA DE TEXTO -->
           <div>
             <span class="hero-badge">
               <span class="dot"></span>
@@ -835,6 +847,7 @@
             </div>
           </div>
 
+          <!-- COLUNA DA IMAGEM -->
           <div class="hero-image-card">
             <img src="Janelão.jpg"
                  alt="Vista do Parque Nacional Cavernas do Peruaçu (Gruta do Janelão)"
