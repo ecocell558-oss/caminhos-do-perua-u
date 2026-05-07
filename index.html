@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -63,7 +62,7 @@
     .hero-text { font-size: 1.125rem; color: var(--gray-600); margin-bottom: 2rem; }
     .btn-primary { background: var(--brand-primary); color: white; padding: 14px 28px; border-radius: 48px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .btn-primary:hover { background: var(--brand-primary-dark); transform: translateY(-2px); }
-    .hero-image-card { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); aspect-ratio: 4/5; max-width: 520px; margin: 0 auto; position: relative; }
+    .hero-image-card { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); aspect-ratio: 4/5; max-width: 520px; margin: 0 auto; position: relative; cursor: pointer; }
     .hero-image-card img { width: 100%; height: 100%; object-fit: cover; }
 
     /* Cards e grid */
@@ -84,17 +83,24 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
     .gallery-item:hover img { transform: scale(1.03); }
 
-    /* Lightbox overlay */
+    /* Lightbox overlay - OTIMIZADO PARA TOQUE E CELULAR */
     .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.25s; backdrop-filter: blur(8px); }
     .lightbox.active { visibility: visible; opacity: 1; }
     .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
     .lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .close-lightbox { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; background: none; border: none; font-weight: 300; transition: 0.2s; }
+    .close-lightbox { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; background: none; border: none; font-weight: 300; transition: 0.2s; z-index: 2001; }
     .close-lightbox:hover { transform: scale(1.1); }
-    .nav-lightbox { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; font-size: 2rem; padding: 12px 20px; cursor: pointer; border-radius: 60px; transition: 0.2s; }
-    .nav-lightbox.prev { left: 20px; }
-    .nav-lightbox.next { right: 20px; }
+    .nav-lightbox { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; font-size: 2rem; padding: 12px 20px; cursor: pointer; border-radius: 60px; transition: 0.2s; z-index: 2001; min-width: 56px; text-align: center; font-weight: bold; backdrop-filter: blur(4px); }
+    /* Garantia de cliques em touch */
+    .nav-lightbox.prev { left: 16px; }
+    .nav-lightbox.next { right: 16px; }
     .nav-lightbox:hover { background: var(--brand-primary); }
+    @media (max-width: 768px) { 
+      .nav-lightbox { font-size: 2rem; padding: 10px 18px; background: rgba(0,0,0,0.8); }
+      .nav-lightbox.prev { left: 8px; }
+      .nav-lightbox.next { right: 8px; }
+      .close-lightbox { top: 12px; right: 20px; font-size: 44px; }
+    }
 
     /* atrativos detalhados */
     .attraction-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
@@ -108,7 +114,7 @@
     .attraction-info h3 { font-size: 1.5rem; margin-bottom: 12px; color: var(--gray-900); }
     .attraction-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
     .meta-badge { background: var(--gray-100); padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 500; }
-    .info-row { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; font-size: 0.9rem; color: var(--gray-600); }
+    .info-row { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; font-size: 0.9rem; color: var(--gray-600); flex-wrap: wrap; }
     .info-row strong { min-width: 100px; color: var(--gray-800); }
 
     /* contato e footer */
@@ -192,13 +198,12 @@
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    /* evita rolagem enquanto splash ativo */
     body.splash-active { overflow: hidden; }
   </style>
 </head>
 <body>
 
-<!-- TELA DE ABERTURA PROFISSIONAL -->
+<!-- TELA DE ABERTURA -->
 <div id="splashScreen" class="splash-screen">
   <div class="splash-content">
     <img src="logo2.png" alt="Caminhos do Peruaçu" class="splash-logo" onerror="this.src='https://placehold.co/140x140/2C6E49/white?text=CP'">
@@ -208,7 +213,6 @@
   </div>
 </div>
 
-<!-- CONTEÚDO PRINCIPAL DO SITE (inicialmente invisível até splash sumir) -->
 <div id="mainContent" style="opacity: 0; transition: opacity 0.6s ease-in-out;">
 <header class="header">
   <div class="container"><div class="header-content">
@@ -223,7 +227,7 @@
     <h1 class="hero-title">Descubra o <span>Peruaçu</span> com quem realmente conhece</h1>
     <p class="hero-text">Roteiros exclusivos para cavernas milenares, arte rupestre e paisagens únicas. Agendamento fácil, seguro e com guia credenciado. Todas as visitas com condução obrigatória — experiência segura e única.</p>
     <div class="hero-cta"><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20agendar%20minha%20visita%20ao%20Peruaçu." class="btn-primary">Agendar agora</a><a href="#roteiros" class="btn-secondary" style="background:transparent; border:1.5px solid var(--gray-200); padding:14px 28px; border-radius:48px; text-decoration:none;">Ver roteiros</a></div></div>
-    <div class="hero-image-card"><img src="Janelão.jpg" alt="Gruta do Janelão" onerror="this.src='https://placehold.co/600x750/2C6E49/white?text=Janel%C3%A3o'"></div>
+    <div class="hero-image-card" id="heroImageCard"><img src="peruacu.png" alt="Gruta do Janelão" onerror="this.src='https://placehold.co/600x750/2C6E49/white?text=Janel%C3%A3o'"></div>
   </div></div></section>
 
   <section style="padding:48px 0;"><div class="container"><h2 class="section-title">Por que explorar o Peruaçu?</h2><p class="section-subtitle">Um dos sítios arqueológicos mais impressionantes do Brasil, com paisagens de tirar o fôlego. A vocação do destino está nos atrativos arqueológicos, paleontológicos, culturais e naturais. Sertão, comunidades, cavernas e o Rio São Francisco.</p>
@@ -237,7 +241,7 @@
     <div class="tour-card"><div class="tour-content"><h3 style="font-size:1.75rem;">Expedição (2-4 dias)</h3><div class="tour-tags"><span class="tag">Completo</span><span class="tag">Aventura</span><span class="tag">Fotografia</span></div><ul class="tour-features" style="list-style:none"><li>✔ Todas as cavernas principais</li><li>✔ Arco do André + Lapa Bonita</li><li>✔ Logística completa inclusa</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20Expedição%20Peruaçu" class="btn-tour">Explorar expedição</a></div></div>
   </div></div></section>
 
-  <!-- GALERIA EXPANDIDA COM MAIS 3 FOTOS (total 11 imagens) -->
+  <!-- GALERIA COMPLETA -->
   <section style="padding:64px 0;"><div class="container"><h2 class="section-title">Galeria completa</h2><p class="section-subtitle">Clique em qualquer foto para ampliar e navegar pelas imagens.</p><div class="gallery" id="galleryContainer">
     <div class="gallery-item large" data-index="0"><img src="Janelão.jpg" alt="Gruta do Janelão"></div>
     <div class="gallery-item" data-index="1"><img src="arte.jpg" alt="Pintura rupestre Lapa dos Desenhos" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Arte+Rupestre'"></div>
@@ -248,19 +252,19 @@
     <div class="gallery-item" data-index="6"><img src="lapa_do_indio.jpg" alt="Lapa do Índio Mirante" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Lapa+%C3%8Dndio'"></div>
     <div class="gallery-item" data-index="7"><img src="lapa_rezar.jpg" alt="Lapa do Rezar 500 degraus" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Lapa+Rezar'"></div>
     <div class="gallery-item" data-index="8"><img src="trilha_peruacu.jpg.jpeg" alt="Trilha no Parque Nacional Peruaçu" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Trilha+Perua%C3%A7u'"></div>
-    <div class="gallery-item" data-index="9"><img src="estalactite_perna_bailarina.jpeg" alt="Mirante do Mundo Inteiro" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Mirante+Mundo+Inteiro'"></div>
-    <div class="gallery-item" data-index="10"><img src="mirante_mundo_inteiro.jpeg" alt="Perna da Bailarina - maior estalactite" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Estalactite+Gigante'"></div>
+    <div class="gallery-item" data-index="9"><img src="estalactite_perna_bailarina.jpeg" alt="Perna da Bailarina - maior estalactite" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Estalactite+Gigante'"></div>
+    <div class="gallery-item" data-index="10"><img src="mirante_mundo_inteiro.jpeg" alt="Mirante do Mundo Inteiro" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Mirante+Mundo+Inteiro'"></div>
   </div></div></section>
 
-  <!-- ATRATIVOS DETALHADOS (informações completas) -->
+  <!-- ATRATIVOS DETALHADOS COM TEMPO ESTIMADO CORRETO PARA TODOS -->
   <section style="background:var(--gray-50); padding:64px 0;"><div class="container"><h2 class="section-title">Conheça cada atrativo</h2><p class="section-subtitle">Trilhas, cavernas, pinturas e sítios arqueológicos. Informações oficiais de dificuldade, distância e horários.</p>
   <div class="attraction-grid">
     <div class="attraction-card"><div class="attraction-img"><img src="Janelão.jpg" alt="Gruta do Janelão" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Gruta do Janelão</h3><div class="attraction-meta"><span class="meta-badge">⭐ Principal atrativo</span><span class="meta-badge">Maior estalactite do mundo</span></div><div class="info-row"><strong>Dificuldade:</strong> Semipesado</div><div class="info-row"><strong>Distância:</strong> 4,8 km (ida e volta)</div><div class="info-row"><strong>Tempo estimado:</strong> 5h30</div><p>Conta com enormes dolinas, salões gigantescos e a Perna da Bailarina com 28m. Paredão com pinturas rupestres na entrada.</p></div></div>
     <div class="attraction-card"><div class="attraction-img"><img src="arco_andre.jpg" alt="Arco do André" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Arco do André</h3><div class="attraction-meta"><span class="meta-badge">Mirante das Cinco Torres</span><span class="meta-badge">Caverna Troncos</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 8 km (ida e volta)</div><div class="info-row"><strong>Tempo estimado:</strong> 7h</div><p>Trilha rústica com subidas íngremes, mirantes únicos e o Rio Peruaçu com tom esmeralda dentro das cavernas.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="lapa_bonita.jpg" alt="Lapa Bonita" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa Bonita & Lapa do Índio</h3><div class="attraction-meta"><span class="meta-badge">Salão Vermelho</span><span class="meta-badge">Mirante do Índio</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1.500m (Lapa Índio) / 2h20</div><p>Pinturas rupestres que cobrem paredes e teto. Lapa Bonita com espeleotemas exuberantes e sedimentos avermelhados.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="boquete.jpg" alt="Lapa do Boquete" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa do Boquete</h3><div class="attraction-meta"><span class="meta-badge">Sítio arqueológico</span><span class="meta-badge">Silo pré-histórico</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1,2 km</div><p>Principal sítio arqueológico do parque, com sepultamentos e estruturas de armazenamento de alimentos (silos).</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="arte.jpg" alt="Lapa dos Desenhos" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa dos Desenhos</h3><div class="attraction-meta"><span class="meta-badge">Fabulosos painéis</span><span class="meta-badge">Arte rupestre</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 2,6 km</div><p>Maior concentração de pinturas rupestres em diferentes estilos. Trilha margeando o Rio Peruaçu.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="lapa_rezar.jpg" alt="Lapa do Rezar" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa do Rezar</h3><div class="attraction-meta"><span class="meta-badge">500 degraus</span><span class="meta-badge">Claraboia natural</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 2,4 km</div><p>Salão de 90m largura e 40m altura, pinturas e gravuras rupestres, recompensa após os degraus.</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="lapa_bonita.jpg" alt="Lapa Bonita" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa Bonita & Lapa do Índio</h3><div class="attraction-meta"><span class="meta-badge">Salão Vermelho</span><span class="meta-badge">Mirante do Índio</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1.500m (Lapa Índio) / 2h20</div><div class="info-row"><strong>Tempo estimado:</strong> 2h20</div><p>Pinturas rupestres que cobrem paredes e teto. Lapa Bonita com espeleotemas exuberantes e sedimentos avermelhados.</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="boquete.jpg" alt="Lapa do Boquete" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa do Boquete</h3><div class="attraction-meta"><span class="meta-badge">Sítio arqueológico</span><span class="meta-badge">Silo pré-histórico</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1,2 km</div><div class="info-row"><strong>Tempo estimado:</strong>  1h30</div><p>Principal sítio arqueológico do parque, com sepultamentos e estruturas de armazenamento de alimentos (silos).</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="arte.jpg" alt="Lapa dos Desenhos" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa dos Desenhos</h3><div class="attraction-meta"><span class="meta-badge">Fabulosos painéis</span><span class="meta-badge">Arte rupestre</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 2,6 km</div><div class="info-row"><strong>Tempo estimado:</strong> 2h20</div><p>Maior concentração de pinturas rupestres em diferentes estilos. Trilha margeando o Rio Peruaçu.</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="lapa_rezar.jpg" alt="Lapa do Rezar" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa do Rezar</h3><div class="attraction-meta"><span class="meta-badge">500 degraus</span><span class="meta-badge">Claraboia natural</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 2,4 km</div><div class="info-row"><strong>Tempo estimado:</strong>  3h30</div><p>Salão de 90m largura e 40m altura, pinturas e gravuras rupestres, recompensa após os degraus.</p></div></div>
   </div>
   <div style="margin-top: 32px; background: var(--brand-accent-light); border-radius: 24px; padding: 24px; text-align: center;"><p style="font-weight: 600;">📍 Horário de funcionamento: entrada das 08h às 12h | saída até às 18h. <br> Centro de visitantes, passarelas de proteção a sítios arqueológicos e condutores ambientais treinados .</p></div>
   </div></section>
@@ -285,43 +289,47 @@
 </div>
 
 <script>
-  // SPLASH SCREEN + TRANSIÇÃO PROFISSIONAL
+  // SPLASH SCREEN + TRANSIÇÃO
   (function() {
     const splash = document.getElementById('splashScreen');
     const mainContent = document.getElementById('mainContent');
     const body = document.body;
-    
-    // Bloqueia rolagem enquanto splash está ativo
     body.classList.add('splash-active');
-    
-    // Força exibição do splash antes de qualquer interação
     setTimeout(() => {
-      // Aplica fade-out na splash screen
       splash.classList.add('fade-out');
-      
-      // Aguarda transição CSS e depois revela o conteúdo principal com fade suave
       setTimeout(() => {
-        // Remove splash do DOM completamente
         splash.style.display = 'none';
-        // Remove restrição de rolagem
         body.classList.remove('splash-active');
-        // Revela site principal com animação
         mainContent.style.opacity = '1';
-      }, 800); // tempo sincronizado com a transição do splash
-    }, 1600); // tempo de exibição da tela de abertura (1.6 segundos elegante)
+      }, 800);
+    }, 1600);
   })();
 
-  // Funções originais: form e lightbox e ano
+  // ANO
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // FORMULÁRIO
   const form = document.getElementById('quickForm');
   if(form) {
     form.addEventListener('submit', function(e) { e.preventDefault(); const nome = document.getElementById('nome').value.trim(); if(!nome){ alert('Informe seu nome'); return; } const pessoas = document.getElementById('pessoas').value; const dias = document.getElementById('dias').value; if(!pessoas || !dias) { alert('Selecione quantidade e roteiro'); return; } const data = document.getElementById('data').value; const msg = document.getElementById('msg').value; let texto = `Olá! Me chamo ${nome}. Gostaria de agendar roteiro para ${pessoas}, duração ${dias}. `; if(data) texto += `Data: ${data}. `; if(msg) texto += `Obs: ${msg}. `; window.open(`https://wa.me/5538991307687?text=${encodeURIComponent(texto)}`, '_blank'); });
   }
 
-  // LIGHTBOX completo com navegação 11 imagens
+  // LIGHTBOX MELHORADA: Hero + Galeria + Navegação universal (toque/clique)
   const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
-  const imagesList = galleryItems.map(item => ({ src: item.querySelector('img').src, alt: item.querySelector('img').alt }));
+  const heroImageCard = document.getElementById('heroImageCard');
+  // Lista completa de imagens: inclui hero + todas da galeria
+  const heroImg = heroImageCard ? heroImageCard.querySelector('img') : null;
+  let imagesList = [];
+  if(heroImg && heroImg.src) {
+    imagesList.push({ src: heroImg.src, alt: heroImg.alt || "Imagem destaque Peruaçu" });
+  }
+  galleryItems.forEach(item => {
+    const imgEl = item.querySelector('img');
+    if(imgEl && imgEl.src) imagesList.push({ src: imgEl.src, alt: imgEl.alt });
+  });
+
   let currentIndex = 0;
+  // Cria lightbox com navegação visível e responsiva
   const lightbox = document.createElement('div'); lightbox.className = 'lightbox';
   lightbox.innerHTML = `<button class="close-lightbox">&times;</button><button class="nav-lightbox prev">‹</button><button class="nav-lightbox next">›</button><div class="lightbox-content"><img class="lightbox-img" src="" alt=""></div>`;
   document.body.appendChild(lightbox);
@@ -330,14 +338,42 @@
   const prevBtn = lightbox.querySelector('.prev');
   const nextBtn = lightbox.querySelector('.next');
 
-  function openLightbox(index) { currentIndex = index; lightboxImg.src = imagesList[currentIndex].src; lightbox.classList.add('active'); }
+  function openLightbox(index) {
+    if(index < 0) index = 0;
+    if(index >= imagesList.length) index = imagesList.length -1;
+    currentIndex = index;
+    if(imagesList[currentIndex]) lightboxImg.src = imagesList[currentIndex].src;
+    lightbox.classList.add('active');
+  }
   function closeLightbox() { lightbox.classList.remove('active'); }
-  function showNext() { currentIndex = (currentIndex + 1) % imagesList.length; lightboxImg.src = imagesList[currentIndex].src; }
-  function showPrev() { currentIndex = (currentIndex - 1 + imagesList.length) % imagesList.length; lightboxImg.src = imagesList[currentIndex].src; }
-  galleryItems.forEach((item, idx) => { item.addEventListener('click', () => openLightbox(idx)); });
-  closeBtn.addEventListener('click', closeLightbox); nextBtn.addEventListener('click', showNext); prevBtn.addEventListener('click', showPrev);
+  function showNext() { if(imagesList.length) { currentIndex = (currentIndex + 1) % imagesList.length; lightboxImg.src = imagesList[currentIndex].src; } }
+  function showPrev() { if(imagesList.length) { currentIndex = (currentIndex - 1 + imagesList.length) % imagesList.length; lightboxImg.src = imagesList[currentIndex].src; } }
+
+  // Evento para clique na imagem do hero (abre lightbox começando pelo índice 0)
+  if(heroImageCard) {
+    heroImageCard.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(0);
+    });
+  }
+  // Eventos para cada item da galeria (índice deslocado 1 pelo hero)
+  galleryItems.forEach((item, idx) => {
+    const realIndex = heroImg ? idx + 1 : idx; // se hero existe, galeria começa após
+    item.addEventListener('click', () => openLightbox(realIndex));
+  });
+  // Navegação
+  closeBtn.addEventListener('click', closeLightbox);
+  nextBtn.addEventListener('click', showNext);
+  prevBtn.addEventListener('click', showPrev);
   lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
-  document.addEventListener('keydown', (e) => { if(!lightbox.classList.contains('active')) return; if(e.key === 'Escape') closeLightbox(); if(e.key === 'ArrowRight') showNext(); if(e.key === 'ArrowLeft') showPrev(); });
+  document.addEventListener('keydown', (e) => {
+    if(!lightbox.classList.contains('active')) return;
+    if(e.key === 'Escape') closeLightbox();
+    if(e.key === 'ArrowRight') showNext();
+    if(e.key === 'ArrowLeft') showPrev();
+  });
+  // Previne comportamento de arrasto no touchscreen
+  lightbox.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
 </script>
 </body>
 </html>
