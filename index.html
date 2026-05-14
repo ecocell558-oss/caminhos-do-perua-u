@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Caminhos do Peruaçu · Guia Oficial no Parque Nacional</title>
@@ -15,12 +15,13 @@
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" sizes="32x32" href="logo2.png">
   <link rel="apple-touch-icon" href="logo2.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --brand-primary: hsla(45, 99%, 49%, 0.863);
-      --brand-primary-dark: #f2c01d;
-      --brand-accent: #2C4A3B;
+      --brand-primary: #F5B81B;
+      --brand-primary-dark: #e0a30f;
+      --brand-accent: #1E3A2F;
       --brand-accent-light: #FAF7F2;
       --gray-50: #F9F9F9;
       --gray-100: #F2F2F2;
@@ -29,9 +30,10 @@
       --gray-800: #2C2C2C;
       --gray-900: #1A1A1A;
       --white: #FFFFFF;
+      --black: #000000;
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03);
       --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
       --radius-md: 20px;
       --radius-lg: 32px;
       --max-width: 1280px;
@@ -53,17 +55,199 @@
     .btn-whatsapp-header { background: var(--brand-primary); color: white; padding: 10px 20px; border-radius: 40px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
     @media (max-width: 560px) { .btn-whatsapp-header span { display: none; } .btn-whatsapp-header { padding: 10px 14px; } }
 
-    /* Hero */
-    .hero { padding: 56px 0 72px; }
-    .hero-content { display: flex; flex-direction: column; gap: 48px; }
-    @media (min-width: 1024px) { .hero-content { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 64px; } }
-    .hero-title { font-size: clamp(2rem, 6vw, 3.25rem); font-weight: 700; line-height: 1.2; margin-bottom: 1.25rem; }
-    .hero-title span { color: var(--brand-primary); }
-    .hero-text { font-size: 1.125rem; color: var(--gray-600); margin-bottom: 2rem; }
-    .btn-primary { background: var(--brand-primary); color: white; padding: 14px 28px; border-radius: 48px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .btn-primary:hover { background: var(--brand-primary-dark); transform: translateY(-2px); }
-    .hero-image-card { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); aspect-ratio: 4/5; max-width: 520px; margin: 0 auto; position: relative; cursor: pointer; }
-    .hero-image-card img { width: 100%; height: 100%; object-fit: cover; }
+    /* HERO SLIDER PROFISSIONAL COM OVERLAY E TEXTO */
+    .hero-full {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 680px;
+      max-height: 900px;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+    .hero-slider-modern {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1.2s cubic-bezier(0.25, 0.1, 0.2, 1);
+      z-index: 1;
+    }
+    .slide.active {
+      opacity: 1;
+      z-index: 2;
+    }
+    .slide-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.45) contrast(1.05);
+      transform: scale(1);
+      transition: transform 6s ease-out;
+    }
+    .slide.active .slide-bg {
+      transform: scale(1.05);
+    }
+    .slide-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.4) 100%);
+      z-index: 3;
+    }
+    .slide-content {
+      position: absolute;
+      bottom: 18%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 32px;
+      text-align: center;
+      color: white;
+      transform: translateY(30px);
+      opacity: 0;
+      transition: transform 0.8s ease, opacity 0.8s ease;
+    }
+    .slide.active .slide-content {
+      transform: translateY(0);
+      opacity: 1;
+      transition-delay: 0.3s;
+    }
+    .slide-tag {
+      display: inline-block;
+      background: rgba(245, 184, 27, 0.9);
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(4px);
+      text-transform: uppercase;
+    }
+    .slide-title {
+      font-size: clamp(2.2rem, 7vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      letter-spacing: -0.02em;
+    }
+    .slide-desc {
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      max-width: 650px;
+      margin: 0 auto 28px;
+      opacity: 0.9;
+      font-weight: 400;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+    }
+    .hero-cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-btn-primary {
+      background: var(--brand-primary);
+      color: #1a1a1a;
+      padding: 14px 34px;
+      border-radius: 50px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: 0.25s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .hero-btn-primary:hover { background: #ffcd4a; transform: translateY(-3px); }
+    .hero-btn-outline {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+      padding: 12px 32px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.25s;
+      backdrop-filter: blur(6px);
+    }
+    .hero-btn-outline:hover { background: rgba(255,255,255,0.15); border-color: var(--brand-primary); }
+    
+    /* slider controls */
+    .slider-nav {
+      position: absolute;
+      bottom: 32px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      z-index: 15;
+    }
+    .slider-dot {
+      width: 12px;
+      height: 12px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: 0.25s;
+      backdrop-filter: blur(2px);
+    }
+    .slider-dot.active {
+      background: var(--brand-primary);
+      width: 32px;
+      border-radius: 20px;
+    }
+    .slider-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      color: white;
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 60px;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+    .slider-arrow:hover { background: var(--brand-primary); color: #1a1a1a; }
+    .arrow-left { left: 24px; }
+    .arrow-right { right: 24px; }
+    @media (max-width: 768px) {
+      .hero-full { min-height: 580px; height: 85vh; }
+      .slide-content { bottom: 12%; padding: 0 20px; }
+      .slider-arrow { width: 40px; height: 40px; font-size: 24px; }
+      .arrow-left { left: 12px; }
+      .arrow-right { right: 12px; }
+      .hero-btn-primary, .hero-btn-outline { padding: 10px 24px; font-size: 0.9rem; }
+    }
+    @media (max-width: 480px) {
+      .hero-full { min-height: 520px; }
+      .slide-tag { font-size: 0.7rem; }
+    }
 
     /* Cards e grid */
     .grid-2 { display: grid; grid-template-columns: 1fr; gap: 24px; }
@@ -83,297 +267,253 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
     .gallery-item:hover img { transform: scale(1.03); }
 
-    /* Lightbox overlay - OTIMIZADO PARA TOQUE E CELULAR */
     .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.25s; backdrop-filter: blur(8px); }
     .lightbox.active { visibility: visible; opacity: 1; }
     .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
-    .lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .close-lightbox { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; background: none; border: none; font-weight: 300; transition: 0.2s; z-index: 2001; }
-    .close-lightbox:hover { transform: scale(1.1); }
-    .nav-lightbox { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; font-size: 2rem; padding: 12px 20px; cursor: pointer; border-radius: 60px; transition: 0.2s; z-index: 2001; min-width: 56px; text-align: center; font-weight: bold; backdrop-filter: blur(4px); }
-    /* Garantia de cliques em touch */
+    .lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 20px; }
+    .close-lightbox { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; background: none; border: none; }
+    .nav-lightbox { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; font-size: 2rem; padding: 12px 20px; cursor: pointer; border-radius: 60px; }
     .nav-lightbox.prev { left: 16px; }
     .nav-lightbox.next { right: 16px; }
-    .nav-lightbox:hover { background: var(--brand-primary); }
-    @media (max-width: 768px) { 
-      .nav-lightbox { font-size: 2rem; padding: 10px 18px; background: rgba(0,0,0,0.8); }
-      .nav-lightbox.prev { left: 8px; }
-      .nav-lightbox.next { right: 8px; }
-      .close-lightbox { top: 12px; right: 20px; font-size: 44px; }
-    }
 
-    /* atrativos detalhados */
     .attraction-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
     @media (min-width: 768px) { .attraction-grid { grid-template-columns: repeat(2,1fr); } }
-    .attraction-card { background: var(--white); border-radius: var(--radius-md); border: 1px solid var(--gray-200); overflow: hidden; transition: 0.2s; box-shadow: var(--shadow-sm); }
-    .attraction-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .attraction-card { background: var(--white); border-radius: var(--radius-md); border: 1px solid var(--gray-200); overflow: hidden; transition: 0.2s; }
     .attraction-img { height: 220px; overflow: hidden; }
     .attraction-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
-    .attraction-card:hover .attraction-img img { transform: scale(1.03); }
     .attraction-info { padding: 24px; }
-    .attraction-info h3 { font-size: 1.5rem; margin-bottom: 12px; color: var(--gray-900); }
-    .attraction-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-    .meta-badge { background: var(--gray-100); padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 500; }
-    .info-row { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; font-size: 0.9rem; color: var(--gray-600); flex-wrap: wrap; }
-    .info-row strong { min-width: 100px; color: var(--gray-800); }
-
-    /* contato e footer */
+    .info-row { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; font-size: 0.9rem; }
     .contact-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
     @media (min-width: 768px) { .contact-grid { grid-template-columns: 1fr 1fr; } }
     .contact-info { background: var(--brand-primary); color: white; border-radius: var(--radius-md); padding: 32px; }
     .form-card { background: var(--white); border-radius: var(--radius-md); padding: 32px; border: 1px solid var(--gray-200); }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px 18px; border: 1.5px solid var(--gray-200); border-radius: 32px; font-size: 1rem; }
     .btn-form { background: var(--brand-primary); color: white; border: none; padding: 16px; border-radius: 48px; width: 100%; font-weight: 600; cursor: pointer; }
-    .whatsapp-float { position: fixed; bottom: 24px; right: 24px; z-index: 1000; background: #25D366; border-radius: 60px; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); text-decoration: none; transition: 0.2s; }
-    @media (max-width: 1023px) { .whatsapp-float { display: none; } }
+    .whatsapp-float { position: fixed; bottom: 24px; right: 24px; z-index: 1000; background: #25D366; border-radius: 60px; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); text-decoration: none; }
+    @media (max-width: 1023px) { .whatsapp-float { display: flex; } }
     .footer { background: var(--gray-900); color: #ccc; padding: 56px 0 32px; margin-top: 60px; }
-    @media (max-width: 640px) { .container { padding: 0 20px; } .card, .tour-content, .contact-info, .form-card { padding: 20px; } }
     details { background: var(--white); border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--gray-200); }
-    summary { padding: 20px 24px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-    summary::-webkit-details-marker { display: none; }
+    summary { padding: 20px 24px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; }
     .faq-answer { padding: 0 24px 24px 24px; color: var(--gray-600); }
-
-    /* SPLASH SCREEN - TELA DE ABERTURA PROFISSIONAL */
+    
+    /* splash screen */
     .splash-screen {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #2d271b 0%, #a69f8b 100%);
+      background: linear-gradient(135deg, #1e2a1a 0%, #0f0f0a 100%);
       z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1), visibility 0.8s ease;
+      transition: opacity 0.8s ease;
       opacity: 1;
       visibility: visible;
     }
-    .splash-screen.fade-out {
-      opacity: 0;
-      visibility: hidden;
-    }
-    .splash-content {
-      text-align: center;
-      animation: splashZoom 0.9s ease-out forwards;
-      transform: scale(0.92);
-    }
-    @keyframes splashZoom {
-      0% { transform: scale(0.85); opacity: 0; }
-      40% { transform: scale(1.02); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .splash-logo {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--brand-primary);
-      box-shadow: 0 20px 35px rgba(0,0,0,0.3);
-      margin-bottom: 24px;
-    }
-    .splash-title {
-      font-size: 2.2rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      background: linear-gradient(120deg, #FFE6A3, #FFD966);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-bottom: 12px;
-    }
-    .splash-sub {
-      color: #C0C0A0;
-      font-weight: 500;
-      letter-spacing: 1px;
-      font-size: 1rem;
-    }
-    .splash-loader {
-      width: 48px;
-      height: 48px;
-      margin: 32px auto 0;
-      border: 4px solid rgba(255,215,0,0.25);
-      border-top: 4px solid var(--brand-primary);
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
+    .splash-screen.fade-out { opacity: 0; visibility: hidden; }
+    .splash-content { text-align: center; animation: splashZoom 0.9s ease-out; }
+    @keyframes splashZoom { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .splash-logo { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--brand-primary); margin-bottom: 24px; }
+    .splash-title { font-size: 2rem; font-weight: 800; background: linear-gradient(120deg, #FFE6A3, #FFD966); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .splash-loader { width: 48px; height: 48px; margin: 32px auto 0; border: 4px solid rgba(245,184,27,0.2); border-top: 4px solid var(--brand-primary); border-radius: 50%; animation: spin 0.9s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     body.splash-active { overflow: hidden; }
   </style>
 </head>
 <body>
-
-<!-- TELA DE ABERTURA -->
 <div id="splashScreen" class="splash-screen">
   <div class="splash-content">
-    <img src="logo2.png" alt="Caminhos do Peruaçu" class="splash-logo" onerror="this.src='https://placehold.co/140x140/2C6E49/white?text=CP'">
+    <img src="logo2.png" alt="Caminhos do Peruaçu" class="splash-logo" onerror="this.src='https://placehold.co/130x130/2C6E49/white?text=CP'">
     <div class="splash-title">Caminhos do Peruaçu</div>
-    <div class="splash-sub">Guia Credenciado · Parque Nacional</div>
     <div class="splash-loader"></div>
   </div>
 </div>
 
-<div id="mainContent" style="opacity: 0; transition: opacity 0.6s ease-in-out;">
+<div id="mainContent" style="opacity:0; transition:opacity 0.6s;">
 <header class="header">
   <div class="container"><div class="header-content">
-    <a href="#" class="logo"><div class="logo-icon"><img src="logo2.png" alt="Logo" onerror="this.src='https://placehold.co/48x48/2C6E49/white?text=CP'"></div><div class="logo-text"><strong>Caminhos do Peruaçu</strong><span></span></div></a>
+    <a href="#" class="logo"><div class="logo-icon"><img src="logo2.png" alt="Logo" onerror="this.src='https://placehold.co/48x48/2C6E49/white?text=CP'"></div><div class="logo-text"><strong>Caminhos do Peruaçu</strong></div></a>
     <a href="https://wa.me/5538991307687?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20agendar%20um%20roteiro." class="btn-whatsapp-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>WhatsApp</span></a>
   </div></div>
 </header>
 
 <main>
-  <section class="hero"><div class="container"><div class="hero-content">
-    <div><span class="hero-badge" style="display:inline-flex; background:#FAF7F2; padding:6px 14px; border-radius:40px; margin-bottom:20px;"><span style="background:#25D366; width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;"></span> Parque Nacional Cavernas do Peruaçu</span>
-    <h1 class="hero-title">Descubra o <span>Peruaçu</span> com quem realmente conhece</h1>
-    <p class="hero-text">Roteiros exclusivos para cavernas milenares, arte rupestre e paisagens únicas. Agendamento fácil, seguro e com guia credenciado. Todas as visitas com condução obrigatória — experiência segura e única.</p>
-    <div class="hero-cta"><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20agendar%20minha%20visita%20ao%20Peruaçu." class="btn-primary">Agendar agora</a><a href="#roteiros" class="btn-secondary" style="background:transparent; border:1.5px solid var(--gray-200); padding:14px 28px; border-radius:48px; text-decoration:none;">Ver roteiros</a></div></div>
-    <div class="hero-image-card" id="heroImageCard"><img src="peruacu.png" alt="Gruta do Janelão" onerror="this.src='https://placehold.co/600x750/2C6E49/white?text=Janel%C3%A3o'"></div>
-  </div></div></section>
-
-  <section style="padding:48px 0;"><div class="container"><h2 class="section-title">Por que explorar o Peruaçu?</h2><p class="section-subtitle">Um dos sítios arqueológicos mais impressionantes do Brasil, com paisagens de tirar o fôlego. A vocação do destino está nos atrativos arqueológicos, paleontológicos, culturais e naturais. Sertão, comunidades, cavernas e o Rio São Francisco.</p>
-  <div class="grid-3"><div class="card"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/></svg></div><h3>Arte rupestre</h3><p>Pinturas com mais de 10 mil anos em paredões preservados. Tradições rupestres únicas no mundo.</p></div>
-  <div class="card"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 10c0 4-8 10-8 10s-8-6-8-10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3>Cavernas gigantes</h3><p>Gruta do Janelão, Lapa do Boquete e formações geológicas únicas, com a maior estalactite do mundo.</p></div>
-  <div class="card"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div><h3>Ecoturismo responsável</h3><p>Visitação controlada, trilhas, mirantes, passarelas e condutores credenciados pelo ICMBio, garantindo segurança.</p></div>
-  </div></div></section>
-
-  <section id="roteiros" style="background:var(--gray-50);padding:64px 0;"><div class="container"><h2 class="section-title">Roteiros em destaque</h2><p class="section-subtitle">Escolha a experiência que combina com você. Todos com guia exclusivo.</p><div class="grid-2">
-    <div class="tour-card"><div class="tour-content"><h3 style="font-size:1.75rem;">Clássico (1 dia)</h3><div class="tour-tags"><span class="tag">Gruta do Janelão</span><span class="tag">Lapa do Boquete</span><span class="tag">Pinturas</span></div><ul class="tour-features" style="list-style:none"><li>✔ Visita à maior caverna da região</li><li>✔ Painéis de arte rupestre</li><li>✔ Trilha cênica no cânion</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Tenho%20interesse%20no%20roteiro%20Clássico" class="btn-tour">Quero este roteiro</a></div></div>
-    <div class="tour-card"><div class="tour-content"><h3 style="font-size:1.75rem;">Expedição (2-4 dias)</h3><div class="tour-tags"><span class="tag">Completo</span><span class="tag">Aventura</span><span class="tag">Fotografia</span></div><ul class="tour-features" style="list-style:none"><li>✔ Todas as cavernas principais</li><li>✔ Arco do André + Lapa Bonita</li><li>✔ Logística completa inclusa</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20Expedição%20Peruaçu" class="btn-tour">Explorar expedição</a></div></div>
-  </div></div></section>
-
-  <!-- GALERIA COMPLETA -->
-  <section style="padding:64px 0;"><div class="container"><h2 class="section-title">Galeria completa</h2><p class="section-subtitle">Clique em qualquer foto para ampliar e navegar pelas imagens.</p><div class="gallery" id="galleryContainer">
-    <div class="gallery-item large" data-index="0"><img src="Janelão.jpg" alt="Gruta do Janelão"></div>
-    <div class="gallery-item" data-index="1"><img src="arte.jpg" alt="Pintura rupestre Lapa dos Desenhos" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Arte+Rupestre'"></div>
-    <div class="gallery-item" data-index="2"><img src="gruta-peruacu.jpg" alt="Cânion do Peruaçu" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=C%C3%A2nion'"></div>
-    <div class="gallery-item" data-index="3"><img src="boquete.jpg" alt="Lapa do Boquete" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Lapa+Boquete'"></div>
-    <div class="gallery-item" data-index="4"><img src="arco_andre.jpg" alt="Arco do André" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Arco+Andr%C3%A9'"></div>
-    <div class="gallery-item" data-index="5"><img src="lapa_bonita.jpg" alt="Lapa Bonita Salão Vermelho" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Lapa+Bonita'"></div>
-    <div class="gallery-item" data-index="6"><img src="lapa_do_indio.jpg" alt="Lapa do Índio Mirante" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Lapa+%C3%8Dndio'"></div>
-    <div class="gallery-item" data-index="7"><img src="lapa_rezar.jpg" alt="Lapa do Rezar 500 degraus" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Lapa+Rezar'"></div>
-    <div class="gallery-item" data-index="8"><img src="trilha_peruacu.jpg.jpeg" alt="Trilha no Parque Nacional Peruaçu" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Trilha+Perua%C3%A7u'"></div>
-    <div class="gallery-item" data-index="9"><img src="estalactite_perna_bailarina.jpeg" alt="Perna da Bailarina - maior estalactite" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Estalactite+Gigante'"></div>
-    <div class="gallery-item" data-index="10"><img src="mirante_mundo_inteiro.jpeg" alt="Mirante do Mundo Inteiro" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Mirante+Mundo+Inteiro'"></div>
-  </div></div></section>
-
-  <!-- ATRATIVOS DETALHADOS COM TEMPO ESTIMADO CORRETO PARA TODOS -->
-  <section style="background:var(--gray-50); padding:64px 0;"><div class="container"><h2 class="section-title">Conheça cada atrativo</h2><p class="section-subtitle">Trilhas, cavernas, pinturas e sítios arqueológicos. Informações oficiais de dificuldade, distância e horários.</p>
-  <div class="attraction-grid">
-    <div class="attraction-card"><div class="attraction-img"><img src="Janelão.jpg" alt="Gruta do Janelão" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Gruta do Janelão</h3><div class="attraction-meta"><span class="meta-badge">⭐ Principal atrativo</span><span class="meta-badge">Maior estalactite do mundo</span></div><div class="info-row"><strong>Dificuldade:</strong> Semipesado</div><div class="info-row"><strong>Distância:</strong> 4,8 km (ida e volta)</div><div class="info-row"><strong>Tempo estimado:</strong> 5h30</div><p>Conta com enormes dolinas, salões gigantescos e a Perna da Bailarina com 28m. Paredão com pinturas rupestres na entrada.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="arco_andre.jpg" alt="Arco do André" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Arco do André</h3><div class="attraction-meta"><span class="meta-badge">Mirante das Cinco Torres</span><span class="meta-badge">Caverna Troncos</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 8 km (ida e volta)</div><div class="info-row"><strong>Tempo estimado:</strong> 7h</div><p>Trilha rústica com subidas íngremes, mirantes únicos e o Rio Peruaçu com tom esmeralda dentro das cavernas.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="indiobonita.webp" alt="Lapa Bonita" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa Bonita & Lapa do Índio</h3><div class="attraction-meta"><span class="meta-badge">Salão Vermelho</span><span class="meta-badge">Mirante do Índio</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1.500m (Lapa Índio) </div><div class="info-row"><strong>Tempo estimado:</strong> 2h20</div><p>Pinturas rupestres que cobrem paredes e teto. Lapa Bonita com espeleotemas exuberantes e sedimentos avermelhados.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="boquete1.jpg" alt="Lapa do Boquete" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa do Boquete</h3><div class="attraction-meta"><span class="meta-badge">Sítio arqueológico</span><span class="meta-badge">Silo pré-histórico</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1,2 km</div><div class="info-row"><strong>Tempo estimado:</strong>  1h30</div><p>Principal sítio arqueológico do parque, com sepultamentos e estruturas de armazenamento de alimentos (silos).</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="arte.jpg" alt="Lapa dos Desenhos" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa dos Desenhos</h3><div class="attraction-meta"><span class="meta-badge">Fabulosos painéis</span><span class="meta-badge">Arte rupestre</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 2,6 km</div><div class="info-row"><strong>Tempo estimado:</strong> 2h20</div><p>Maior concentração de pinturas rupestres em diferentes estilos. Trilha margeando o Rio Peruaçu.</p></div></div>
-    <div class="attraction-card"><div class="attraction-img"><img src="lapa_rezar.jpg" alt="Lapa do Rezar" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa do Rezar</h3><div class="attraction-meta"><span class="meta-badge">500 degraus</span><span class="meta-badge">Claraboia natural</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 2,4 km</div><div class="info-row"><strong>Tempo estimado:</strong>  3h30</div><p>Salão de 90m largura e 40m altura, pinturas e gravuras rupestres, recompensa após os degraus.</p></div></div>
+  <!-- Hero Slider Profissional com imagens da galeria e texto integrado -->
+  <div class="hero-full" id="heroFull">
+    <div class="hero-slider-modern" id="heroSliderModern">
+      <!-- Slides serão injetados via JS -->
+    </div>
+    <button class="slider-arrow arrow-left" id="prevSlide">‹</button>
+    <button class="slider-arrow arrow-right" id="nextSlide">›</button>
+    <div class="slider-nav" id="sliderDotsModern"></div>
   </div>
-  <div style="margin-top: 32px; background: var(--brand-accent-light); border-radius: 24px; padding: 24px; text-align: center;"><p style="font-weight: 600;">📍 Horário de funcionamento: entrada das 08h às 12h | saída até às 18h. <br> Centro de visitantes, passarelas de proteção a sítios arqueológicos e condutores ambientais treinados .</p></div>
-  </div></section>
 
-  <section style="padding:64px 0;"><div class="container"><h2 class="section-title">Dúvidas frequentes</h2>
-    <div class="faq-item"><details><summary>Preciso de guia para visitar? <span style="font-size:1.5rem;">+</span></summary><div class="faq-answer">Sim. A visitação no Parque Nacional Cavernas do Peruaçu é obrigatoriamente acompanhada por condutores credenciados pelo ICMBio. Isso garante segurança e preservação.</div></details></div>
-    <div class="faq-item"><details><summary>Quanto tempo dura a visita? <span style="font-size:1.5rem;">+</span></summary><div class="faq-answer">Roteiros de meio dia (4-5h), dia completo (8-9h) e expedições de 2 a 4 dias.</div></details></div>
-    <div class="faq-item"><details><summary>O que levar? <span style="font-size:1.5rem;">+</span></summary><div class="faq-answer">Calçado fechado, água (min 2L), lanche, protetor solar, repelente, lanterna e roupa leve. Enviamos lista completa no agendamento.</div></details></div>
-  </div></section>
+  <section style="padding:64px 0 48px;"><div class="container"><h2 class="section-title">Por que explorar o Peruaçu?</h2><p class="section-subtitle">Um dos sítios arqueológicos mais impressionantes do Brasil, com paisagens de tirar o fôlego.</p>
+  <div class="grid-3"><div class="card"><h3>🪨 Arte rupestre</h3><p>Pinturas com mais de 10 mil anos em paredões preservados. Tradições rupestres únicas no mundo.</p></div>
+  <div class="card"><h3>🏞️ Cavernas gigantes</h3><p>Gruta do Janelão, Lapa do Boquete e formações geológicas únicas, com a maior estalactite do mundo.</p></div>
+  <div class="card"><h3>🌿 Ecoturismo responsável</h3><p>Visitação controlada, trilhas, mirantes e condutores credenciados pelo ICMBio.</p></div>
+  </div></div></section>
 
-  <section id="contato" style="padding:64px 0; background: var(--gray-50);"><div class="container"><h2 class="section-title">Fale comigo e agende</h2><p class="section-subtitle">Resposta rápida, planejamento sob medida.</p><div class="contact-grid">
-    <div class="contact-info"><h3>Contato direto</h3><div class="contact-item" style="display:flex; gap:16px; margin-bottom:20px;"><svg width="22" viewBox="0 0 24 24" fill="none" stroke="white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 10a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/></svg><a href="tel:+5538991307687" style="color:white;">(38) 99130-7687</a></div>
-    <div class="contact-item" style="display:flex; gap:16px; margin-bottom:20px;"><svg width="22" viewBox="0 0 24 24" fill="none" stroke="white"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><a href="https://wa.me/5538991307687" style="color:white;">WhatsApp (clique)</a></div>
-    <div><p style="background:rgba(255,255,255,0.2); border-radius:20px; padding:16px;"><strong>⚡ Resposta rápida</strong><br>Mensagens respondidas em até 30 minutos.</p></div></div>
-    <div class="form-card"><h3>Pré-agendamento rápido</h3><form id="quickForm"><div class="form-group"><label>Seu nome *</label><input type="text" id="nome" required></div><div class="form-group"><label>Quantas pessoas? *</label><select id="pessoas" required><option value="">Selecione</option><option>1 pessoa</option><option>2 pessoas</option><option>3-4 pessoas</option><option>5+ pessoas</option></select></div><div class="form-group"><label>Roteiro desejado *</label><select id="dias" required><option value="">Selecione</option><option>Meio dia (4-5h)</option><option>1 dia completo</option><option>2 dias</option><option>3-4 dias</option></select></div><div class="form-group"><label>Data prevista</label><input type="text" id="data" placeholder="Ex: maio"></div><div class="form-group"><label>Mensagem</label><textarea id="msg" rows="3" placeholder="Quero focar em fotografia, cavernas..."></textarea></div><button type="submit" class="btn-form">Enviar pelo WhatsApp</button></form></div>
+  <section id="roteiros" style="background:var(--gray-50);padding:64px 0;"><div class="container"><h2 class="section-title">Roteiros em destaque</h2><div class="grid-2">
+    <div class="tour-card"><div class="tour-content"><h3>Clássico (1 dia)</h3><ul><li>✔ Gruta do Janelão</li><li>✔ Lapa do Boquete</li><li>✔ Painéis de arte rupestre</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Roteiro%20Clássico" class="btn-tour">Quero este roteiro</a></div></div>
+    <div class="tour-card"><div class="tour-content"><h3>Expedição (2-4 dias)</h3><ul><li>✔ Todas as cavernas principais</li><li>✔ Arco do André + Lapa Bonita</li><li>✔ Logística completa inclusa</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Expedição%20Peruaçu" class="btn-tour">Explorar expedição</a></div></div>
+  </div></div></section>
+
+  <section style="padding:64px 0;"><div class="container"><h2 class="section-title">Galeria completa</h2><div class="gallery" id="galleryContainer">
+    <div class="gallery-item large"><img src="Janelão.jpg" alt="Gruta do Janelão"></div>
+    <div class="gallery-item"><img src="arte.jpg" alt="Pintura rupestre"></div>
+    <div class="gallery-item"><img src="gruta-peruacu.jpg" alt="Cânion"></div>
+    <div class="gallery-item"><img src="boquete.jpg" alt="Lapa do Boquete"></div>
+    <div class="gallery-item"><img src="arco_andre.jpg" alt="Arco do André"></div>
+    <div class="gallery-item"><img src="lapa_bonita.jpg" alt="Lapa Bonita"></div>
+    <div class="gallery-item"><img src="lapa_do_indio.jpg" alt="Lapa do Índio"></div>
+    <div class="gallery-item"><img src="lapa_rezar.jpg" alt="Lapa do Rezar"></div>
+    <div class="gallery-item"><img src="trilha_peruacu.jpg.jpeg" alt="Trilha"></div>
+    <div class="gallery-item"><img src="estalactite_perna_bailarina.jpeg" alt="Estalactite"></div>
+    <div class="gallery-item"><img src="mirante_mundo_inteiro.jpeg" alt="Mirante"></div>
+  </div></div></section>
+
+  <section style="background:var(--gray-50); padding:64px 0;"><div class="container"><h2 class="section-title">Conheça cada atrativo</h2><div class="attraction-grid">
+    <div class="attraction-card"><div class="attraction-img"><img src="Janelão.jpg" alt="Janelão"></div><div class="attraction-info"><h3>Gruta do Janelão</h3><div class="info-row"><strong>Dificuldade:</strong> Semipesado · 5h30</div><p>Maior estalactite do mundo (28m), salões gigantescos.</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="arco_andre.jpg" alt="Arco André"></div><div class="attraction-info"><h3>Arco do André</h3><div class="info-row"><strong>Pesado · 7h</strong></div><p>Trilha íngreme e mirantes espetaculares.</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="arte.jpg" alt="Arte"></div><div class="attraction-info"><h3>Lapa dos Desenhos</h3><div class="info-row"><strong>Leve · 2h20</strong></div><p>Maior concentração de pinturas rupestres.</p></div></div>
+    <div class="attraction-card"><div class="attraction-img"><img src="lapa_rezar.jpg" alt="Rezar"></div><div class="attraction-info"><h3>Lapa do Rezar</h3><div class="info-row"><strong>Pesado · 3h30</strong></div><p>500 degraus e salão monumental.</p></div></div>
+  </div></div></section>
+
+  <section id="contato" style="padding:64px 0;"><div class="container"><h2 class="section-title">Fale comigo e agende</h2><div class="contact-grid">
+    <div class="contact-info"><h3>Contato direto</h3><p>📞 (38) 99130-7687</p><p>💬 <a href="https://wa.me/5538991307687" style="color:white;">WhatsApp (clique)</a></p><p style="margin-top:20px;">Resposta rápida em até 30 min.</p></div>
+    <div class="form-card"><h3>Pré-agendamento</h3><form id="quickForm"><input type="text" id="nome" placeholder="Seu nome" required><select id="pessoas" required><option>Quantas pessoas?</option><option>1 pessoa</option><option>2 pessoas</option><option>3-4</option></select><select id="dias" required><option>Roteiro</option><option>Meio dia</option><option>1 dia completo</option><option>2+ dias</option></select><input type="text" id="data" placeholder="Data prevista"><textarea id="msg" rows="2" placeholder="Mensagem"></textarea><button type="submit" class="btn-form">Enviar via WhatsApp</button></form></div>
   </div></div></section>
 </main>
-
-<a href="https://wa.me/5538991307687?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20agendar." class="whatsapp-float" target="_blank"><svg width="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
-
-<footer class="footer"><div class="container"><div style="display:flex; flex-wrap:wrap; justify-content:space-between;"><div><strong style="font-size:1.5rem;">Caminhos do Peruaçu</strong><p>Guia credenciado • Itacarambi - MG</p></div><div style="display:flex; gap:20px;"><a href="https://www.instagram.com/caminhosdoperuacu/" style="color:#ccc;">Instagram</a><a href="https://wa.me/5538991307687" style="color:#ccc;">WhatsApp</a></div></div><div style="border-top:1px solid rgba(255,255,255,0.1); margin-top:32px; padding-top:24px; text-align:center;">© <span id="year"></span> Caminhos do Peruaçu - Todos os direitos reservados. Parque Nacional Cavernas do Peruaçu | ICMBio</div></div></footer>
+<a href="https://wa.me/5538991307687" class="whatsapp-float" target="_blank"><svg width="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
+<footer class="footer"><div class="container"><div style="display:flex; justify-content:space-between; flex-wrap:wrap;"><div><strong>Caminhos do Peruaçu</strong><p>Itacarambi - MG</p></div><div><a href="https://www.instagram.com/caminhosdoperuacu/" style="color:#ccc;">Instagram</a> | <a href="https://wa.me/5538991307687" style="color:#ccc;">WhatsApp</a></div></div><div style="text-align:center; margin-top:32px;">© <span id="year"></span> Caminhos do Peruaçu · ICMBio</div></div></footer>
 </div>
 
 <script>
-  // SPLASH SCREEN + TRANSIÇÃO
-  (function() {
+  // splash + ano + form
+  (function(){
     const splash = document.getElementById('splashScreen');
-    const mainContent = document.getElementById('mainContent');
-    const body = document.body;
-    body.classList.add('splash-active');
-    setTimeout(() => {
-      splash.classList.add('fade-out');
-      setTimeout(() => {
-        splash.style.display = 'none';
-        body.classList.remove('splash-active');
-        mainContent.style.opacity = '1';
-      }, 800);
-    }, 1600);
+    const main = document.getElementById('mainContent');
+    document.body.classList.add('splash-active');
+    setTimeout(()=>{ splash.classList.add('fade-out'); setTimeout(()=>{ splash.style.display='none'; document.body.classList.remove('splash-active'); main.style.opacity='1'; },800); },1500);
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const qf = document.getElementById('quickForm');
+    if(qf) qf.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const nome = document.getElementById('nome').value.trim();
+      if(!nome) return alert('Digite seu nome');
+      const pessoas = document.getElementById('pessoas').value;
+      const dias = document.getElementById('dias').value;
+      const data = document.getElementById('data').value;
+      const msg = document.getElementById('msg').value;
+      let txt = `Olá! Sou ${nome}. Desejo roteiro para ${pessoas}, duração ${dias}. ${data?`Data: ${data}. `:''}${msg}`;
+      window.open(`https://wa.me/5538991307687?text=${encodeURIComponent(txt)}`,'_blank');
+    });
   })();
 
-  // ANO
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  // FORMULÁRIO
-  const form = document.getElementById('quickForm');
-  if(form) {
-    form.addEventListener('submit', function(e) { e.preventDefault(); const nome = document.getElementById('nome').value.trim(); if(!nome){ alert('Informe seu nome'); return; } const pessoas = document.getElementById('pessoas').value; const dias = document.getElementById('dias').value; if(!pessoas || !dias) { alert('Selecione quantidade e roteiro'); return; } const data = document.getElementById('data').value; const msg = document.getElementById('msg').value; let texto = `Olá! Me chamo ${nome}. Gostaria de agendar roteiro para ${pessoas}, duração ${dias}. `; if(data) texto += `Data: ${data}. `; if(msg) texto += `Obs: ${msg}. `; window.open(`https://wa.me/5538991307687?text=${encodeURIComponent(texto)}`, '_blank'); });
-  }
-
-  // LIGHTBOX MELHORADA: Hero + Galeria + Navegação universal (toque/clique)
-  const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
-  const heroImageCard = document.getElementById('heroImageCard');
-  // Lista completa de imagens: inclui hero + todas da galeria
-  const heroImg = heroImageCard ? heroImageCard.querySelector('img') : null;
-  let imagesList = [];
-  if(heroImg && heroImg.src) {
-    imagesList.push({ src: heroImg.src, alt: heroImg.alt || "Imagem destaque Peruaçu" });
-  }
-  galleryItems.forEach(item => {
-    const imgEl = item.querySelector('img');
-    if(imgEl && imgEl.src) imagesList.push({ src: imgEl.src, alt: imgEl.alt });
-  });
-
+  // HERO SLIDER PROFISSIONAL com imagens da galeria + textos
+  const galleryImgs = Array.from(document.querySelectorAll('#galleryContainer img')).map(img => ({ src: img.src, alt: img.alt }));
+  const uniqueMap = new Map();
+  for(let img of galleryImgs) if(!uniqueMap.has(img.src)) uniqueMap.set(img.src, img);
+  let uniqueSlides = Array.from(uniqueMap.values());
+  if(uniqueSlides.length < 3) uniqueSlides = [...uniqueSlides, {src:"Janelão.jpg", alt:"Gruta do Janelão"}, {src:"arte.jpg", alt:"Arte Rupestre"}];
+  const slidesData = uniqueSlides.slice(0,7);
+  
+  const titles = [
+    "Gruta do Janelão",
+    "Arte Rupestre Milenar",
+    "Cânion do Peruaçu",
+    "Lapa do Boquete",
+    "Arco do André",
+    "Lapa Bonita",
+    "Mirante do Mundo Inteiro"
+  ];
+  const descs = [
+    "A maior caverna da região com a estalactite 'Perna da Bailarina' de 28 metros. Uma experiência única de geologia e arqueologia.",
+    "Pinturas com mais de 10 mil anos que contam a história dos primeiros habitantes. Patrimônio da humanidade.",
+    "Trilhas em meio à mata atlântica e formações rochosas que esculpiram cânions impressionantes.",
+    "Sítio arqueológico com estruturas pré-históricas e sepultamentos, um dos mais importantes do parque.",
+    "Caminhada desafiadora com recompensa: mirantes e o encontro do rio com cavernas de água cristalina.",
+    "Salão Vermelho e espeleotemas exuberantes em uma caverna de beleza surreal.",
+    "Vista panorâmica de 360° sobre o parque, onde o céu encontra a serra."
+  ];
+  
+  const heroSlider = document.getElementById('heroSliderModern');
+  const dotsContainer = document.getElementById('sliderDotsModern');
+  const prevBtn = document.getElementById('prevSlide');
+  const nextBtn = document.getElementById('nextSlide');
   let currentIndex = 0;
-  // Cria lightbox com navegação visível e responsiva
-  const lightbox = document.createElement('div'); lightbox.className = 'lightbox';
-  lightbox.innerHTML = `<button class="close-lightbox">&times;</button><button class="nav-lightbox prev">‹</button><button class="nav-lightbox next">›</button><div class="lightbox-content"><img class="lightbox-img" src="" alt=""></div>`;
-  document.body.appendChild(lightbox);
-  const lightboxImg = lightbox.querySelector('.lightbox-img');
-  const closeBtn = lightbox.querySelector('.close-lightbox');
-  const prevBtn = lightbox.querySelector('.prev');
-  const nextBtn = lightbox.querySelector('.next');
-
-  function openLightbox(index) {
-    if(index < 0) index = 0;
-    if(index >= imagesList.length) index = imagesList.length -1;
-    currentIndex = index;
-    if(imagesList[currentIndex]) lightboxImg.src = imagesList[currentIndex].src;
-    lightbox.classList.add('active');
-  }
-  function closeLightbox() { lightbox.classList.remove('active'); }
-  function showNext() { if(imagesList.length) { currentIndex = (currentIndex + 1) % imagesList.length; lightboxImg.src = imagesList[currentIndex].src; } }
-  function showPrev() { if(imagesList.length) { currentIndex = (currentIndex - 1 + imagesList.length) % imagesList.length; lightboxImg.src = imagesList[currentIndex].src; } }
-
-  // Evento para clique na imagem do hero (abre lightbox começando pelo índice 0)
-  if(heroImageCard) {
-    heroImageCard.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openLightbox(0);
+  let slidesElements = [];
+  let intervalId;
+  
+  function buildSlides() {
+    heroSlider.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    slidesData.forEach((slide, idx) => {
+      const slideDiv = document.createElement('div');
+      slideDiv.className = `slide ${idx === 0 ? 'active' : ''}`;
+      slideDiv.innerHTML = `
+        <img class="slide-bg" src="${slide.src}" alt="${slide.alt}" onerror="this.src='https://placehold.co/1600x900/2C6E49/white?text=Perua%C3%A7u'">
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="slide-tag">Parque Nacional Cavernas do Peruaçu</div>
+          <h2 class="slide-title">${titles[idx % titles.length]}</h2>
+          <p class="slide-desc">${descs[idx % descs.length]}</p>
+          <div class="hero-cta-group">
+            <a href="https://wa.me/5538991307687?text=Quero%20agendar%20minha%20visita%20ao%20Peruaçu" class="hero-btn-primary">Agendar agora →</a>
+            <a href="#roteiros" class="hero-btn-outline">Ver roteiros</a>
+          </div>
+        </div>
+      `;
+      heroSlider.appendChild(slideDiv);
+      
+      const dot = document.createElement('div');
+      dot.className = `slider-dot ${idx === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => goToSlide(idx));
+      dotsContainer.appendChild(dot);
     });
+    slidesElements = document.querySelectorAll('.slide');
   }
-  // Eventos para cada item da galeria (índice deslocado 1 pelo hero)
-  galleryItems.forEach((item, idx) => {
-    const realIndex = heroImg ? idx + 1 : idx; // se hero existe, galeria começa após
-    item.addEventListener('click', () => openLightbox(realIndex));
-  });
-  // Navegação
-  closeBtn.addEventListener('click', closeLightbox);
-  nextBtn.addEventListener('click', showNext);
-  prevBtn.addEventListener('click', showPrev);
-  lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
-  document.addEventListener('keydown', (e) => {
-    if(!lightbox.classList.contains('active')) return;
-    if(e.key === 'Escape') closeLightbox();
-    if(e.key === 'ArrowRight') showNext();
-    if(e.key === 'ArrowLeft') showPrev();
-  });
-  // Previne comportamento de arrasto no touchscreen
-  lightbox.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+  
+  function goToSlide(index) {
+    if(index === currentIndex) return;
+    slidesElements[currentIndex].classList.remove('active');
+    dotsContainer.children[currentIndex]?.classList.remove('active');
+    currentIndex = (index + slidesElements.length) % slidesElements.length;
+    slidesElements[currentIndex].classList.add('active');
+    dotsContainer.children[currentIndex]?.classList.add('active');
+    resetInterval();
+  }
+  
+  function nextSlide() { goToSlide(currentIndex + 1); }
+  function prevSlide() { goToSlide(currentIndex - 1); }
+  function resetInterval() { if(intervalId) clearInterval(intervalId); intervalId = setInterval(nextSlide, 5500); }
+  
+  buildSlides();
+  prevBtn.addEventListener('click', () => { prevSlide(); resetInterval(); });
+  nextBtn.addEventListener('click', () => { nextSlide(); resetInterval(); });
+  resetInterval();
+  
+  // Lightbox da galeria
+  const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
+  let lightboxImgs = galleryItems.map(item => ({ src: item.querySelector('img').src, alt: item.querySelector('img').alt }));
+  let lbIndex = 0;
+  const lightbox = document.createElement('div'); lightbox.className = 'lightbox';
+  lightbox.innerHTML = `<button class="close-lightbox">&times;</button><button class="nav-lightbox prev">‹</button><button class="nav-lightbox next">›</button><div class="lightbox-content"><img class="lightbox-img" src=""></div>`;
+  document.body.appendChild(lightbox);
+  const lbImg = lightbox.querySelector('.lightbox-img');
+  function openLB(idx) { lbIndex = idx; lbImg.src = lightboxImgs[idx].src; lightbox.classList.add('active'); }
+  function closeLB() { lightbox.classList.remove('active'); }
+  function nextLB() { lbIndex = (lbIndex+1)%lightboxImgs.length; lbImg.src = lightboxImgs[lbIndex].src; }
+  function prevLB() { lbIndex = (lbIndex-1+lightboxImgs.length)%lightboxImgs.length; lbImg.src = lightboxImgs[lbIndex].src; }
+  galleryItems.forEach((item, i) => item.addEventListener('click', () => openLB(i)));
+  lightbox.querySelector('.close-lightbox').addEventListener('click', closeLB);
+  lightbox.querySelector('.nav-lightbox.next').addEventListener('click', nextLB);
+  lightbox.querySelector('.nav-lightbox.prev').addEventListener('click', prevLB);
+  lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLB(); });
+  document.addEventListener('keydown', (e) => { if(lightbox.classList.contains('active')){ if(e.key==='Escape') closeLB(); if(e.key==='ArrowRight') nextLB(); if(e.key==='ArrowLeft') prevLB(); } });
 </script>
 </body>
 </html>
