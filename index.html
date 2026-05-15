@@ -53,196 +53,36 @@
     .btn-whatsapp-header { background: var(--brand-primary); color: white; padding: 10px 20px; border-radius: 40px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
     @media (max-width: 560px) { .btn-whatsapp-header span { display: none; } .btn-whatsapp-header { padding: 10px 14px; } }
 
-    /* HERO SLIDER PROFISSIONAL - IMAGENS MAIS CLARAS (BRILHO AJUSTADO) */
-    .hero-full {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      min-height: 580px;
-      max-height: 900px;
-      overflow: hidden;
-      background: #0a0a0a;
-    }
-    .hero-slider-modern {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-    .slide {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      transition: opacity 1s cubic-bezier(0.25, 0.1, 0.2, 1);
-      z-index: 1;
-    }
-    .slide.active {
-      opacity: 1;
-      z-index: 2;
-    }
-    .slide-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      /* IMAGENS MAIS CLARAS: brightness aumentado e contraste leve para realçar detalhes */
-      filter: brightness(0.75) contrast(1.08);
-      transform: scale(1);
-      transition: transform 6s ease-out;
-    }
-    .slide.active .slide-bg {
-      transform: scale(1.05);
-    }
-    .slide-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      /* Overlay mais suave para manter legibilidade sem escurecer demais as imagens */
-      background: linear-gradient(135deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.3) 100%);
-      z-index: 3;
-    }
-    .slide-content {
-      position: absolute;
-      bottom: 12%;
-      left: 0;
-      right: 0;
-      z-index: 10;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 24px 28px;
-      text-align: center;
-      color: white;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(12px);
-      border-radius: 32px;
-      width: 90%;
-      transform: translateY(30px);
-      opacity: 0;
-      transition: transform 0.7s ease, opacity 0.7s ease;
-    }
-    .slide.active .slide-content {
-      transform: translateY(0);
-      opacity: 1;
-      transition-delay: 0.25s;
-    }
-    .slide-tag {
-      display: inline-block;
-      background: rgba(245, 184, 27, 0.95);
-      padding: 6px 18px;
-      border-radius: 40px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      color: #1a1a1a;
-    }
-    .slide-title {
-      font-size: clamp(1.6rem, 6vw, 3.5rem);
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 12px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
-    }
-    .slide-desc {
-      font-size: clamp(0.85rem, 3.5vw, 1.1rem);
-      max-width: 600px;
-      margin: 0 auto 20px;
-      opacity: 0.95;
-      line-height: 1.4;
-    }
-    .hero-cta-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .hero-btn-primary {
-      background: var(--brand-primary);
-      color: #1a1a1a;
-      padding: 10px 24px;
-      border-radius: 50px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: 0.2s;
-      font-size: 0.9rem;
-    }
-    .hero-btn-outline {
-      background: transparent;
-      border: 1.5px solid white;
-      color: white;
-      padding: 8px 22px;
-      border-radius: 50px;
-      font-weight: 600;
-      text-decoration: none;
-      backdrop-filter: blur(4px);
-      font-size: 0.9rem;
-    }
+    /* HERO SLIDER */
+    .hero-full { position: relative; width: 100%; height: 100vh; min-height: 580px; max-height: 900px; overflow: hidden; background: #0a0a0a; }
+    .hero-slider-modern { position: relative; width: 100%; height: 100%; }
+    .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s cubic-bezier(0.25, 0.1, 0.2, 1); z-index: 1; }
+    .slide.active { opacity: 1; z-index: 2; }
+    .slide-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75) contrast(1.08); transform: scale(1); transition: transform 6s ease-out; }
+    .slide.active .slide-bg { transform: scale(1.05); }
+    .slide-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.3) 100%); z-index: 3; }
+    .slide-content { position: absolute; bottom: 12%; left: 0; right: 0; z-index: 10; max-width: 800px; margin: 0 auto; padding: 24px 28px; text-align: center; color: white; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); border-radius: 32px; width: 90%; transform: translateY(30px); opacity: 0; transition: transform 0.7s ease, opacity 0.7s ease; }
+    .slide.active .slide-content { transform: translateY(0); opacity: 1; transition-delay: 0.25s; }
+    .slide-tag { display: inline-block; background: rgba(245, 184, 27, 0.95); padding: 6px 18px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 16px; text-transform: uppercase; color: #1a1a1a; }
+    .slide-title { font-size: clamp(1.6rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+    .slide-desc { font-size: clamp(0.85rem, 3.5vw, 1.1rem); max-width: 600px; margin: 0 auto 20px; opacity: 0.95; line-height: 1.4; }
+    .hero-cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .hero-btn-primary { background: var(--brand-primary); color: #1a1a1a; padding: 10px 24px; border-radius: 50px; font-weight: 700; text-decoration: none; transition: 0.2s; font-size: 0.9rem; }
+    .hero-btn-outline { background: transparent; border: 1.5px solid white; color: white; padding: 8px 22px; border-radius: 50px; font-weight: 600; text-decoration: none; backdrop-filter: blur(4px); font-size: 0.9rem; }
     @media (max-width: 768px) {
       .hero-full { min-height: 560px; height: 85vh; }
       .slide-content { bottom: 8%; padding: 18px 20px; width: 92%; border-radius: 28px; }
       .slide-tag { font-size: 0.65rem; padding: 4px 14px; margin-bottom: 10px; }
       .slide-desc { margin-bottom: 16px; }
     }
-    @media (max-width: 480px) {
-      .slide-content { bottom: 6%; padding: 16px 16px; }
-      .hero-btn-primary, .hero-btn-outline { padding: 8px 18px; font-size: 0.8rem; }
-    }
-    /* slider controls */
-    .slider-nav {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      z-index: 15;
-    }
-    .slider-dot {
-      width: 10px;
-      height: 10px;
-      background: rgba(255,255,255,0.5);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .slider-dot.active {
-      background: var(--brand-primary);
-      width: 28px;
-      border-radius: 20px;
-    }
-    .slider-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(6px);
-      color: white;
-      border: none;
-      width: 44px;
-      height: 44px;
-      border-radius: 60px;
-      font-size: 26px;
-      cursor: pointer;
-      z-index: 15;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    @media (max-width: 480px) { .slide-content { bottom: 6%; padding: 16px 16px; } .hero-btn-primary, .hero-btn-outline { padding: 8px 18px; font-size: 0.8rem; } }
+    .slider-nav { position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px; z-index: 15; }
+    .slider-dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; transition: 0.2s; }
+    .slider-dot.active { background: var(--brand-primary); width: 28px; border-radius: 20px; }
+    .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); color: white; border: none; width: 44px; height: 44px; border-radius: 60px; font-size: 26px; cursor: pointer; z-index: 15; display: flex; align-items: center; justify-content: center; }
     .arrow-left { left: 16px; }
     .arrow-right { right: 16px; }
-    @media (max-width: 768px) {
-      .slider-arrow { width: 36px; height: 36px; font-size: 22px; }
-      .arrow-left { left: 8px; }
-      .arrow-right { right: 8px; }
-    }
+    @media (max-width: 768px) { .slider-arrow { width: 36px; height: 36px; font-size: 22px; } .arrow-left { left: 8px; } .arrow-right { right: 8px; } }
 
     /* Cards e grid */
     .grid-2 { display: grid; grid-template-columns: 1fr; gap: 24px; }
@@ -254,15 +94,15 @@
     .tour-content { padding: 28px; }
     .btn-tour { background: var(--brand-primary); color: #1a1a1a; padding: 14px; border-radius: 48px; text-align: center; text-decoration: none; display: block; margin-top: 20px; font-weight: 700; }
 
-    /* GALERIA COMPLETA COM LIGHTBOX FUNCIONAL */
+    /* GALERIA COMPLETA */
     .gallery { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
     @media (min-width: 640px) { .gallery { grid-template-columns: repeat(4,1fr); } }
     .gallery-item { border-radius: 20px; overflow: hidden; aspect-ratio: 1; cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-sm); background: var(--gray-100); }
     .gallery-item.large { grid-column: span 2; aspect-ratio: 16/9; }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; pointer-events: none; }
     .gallery-item:hover img { transform: scale(1.03); }
 
-    /* Lightbox */
+    /* LIGHTBOX MELHORADA - TOUCH E RESPONSIVO */
     .lightbox {
       position: fixed;
       top: 0;
@@ -276,46 +116,85 @@
       justify-content: center;
       visibility: hidden;
       opacity: 0;
-      transition: 0.25s;
-      backdrop-filter: blur(8px);
+      transition: visibility 0.2s, opacity 0.25s ease;
+      backdrop-filter: blur(12px);
     }
     .lightbox.active { visibility: visible; opacity: 1; }
-    .lightbox-content { position: relative; max-width: 92vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
-    .lightbox-img { max-width: 92vw; max-height: 85vh; object-fit: contain; border-radius: 16px; }
+    .lightbox-content {
+      position: relative;
+      max-width: 94vw;
+      max-height: 88vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: pan-y pinch-zoom;
+    }
+    .lightbox-img {
+      max-width: 94vw;
+      max-height: 85vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      transition: transform 0.2s ease;
+    }
     .close-lightbox {
       position: absolute;
       top: 20px;
       right: 25px;
-      font-size: 42px;
+      font-size: 44px;
       color: white;
       cursor: pointer;
-      background: none;
+      background: rgba(0,0,0,0.6);
       border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 2001;
+      backdrop-filter: blur(8px);
+      transition: 0.2s;
     }
     .nav-lightbox {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.65);
       color: white;
       border: none;
-      font-size: 2rem;
-      padding: 12px 20px;
-      cursor: pointer;
+      font-size: 2.2rem;
+      width: 52px;
+      height: 52px;
       border-radius: 60px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
       transition: 0.2s;
+      z-index: 2002;
+      font-weight: 300;
     }
-    .nav-lightbox.prev { left: 16px; }
-    .nav-lightbox.next { right: 16px; }
+    .nav-lightbox.prev { left: 18px; }
+    .nav-lightbox.next { right: 18px; }
+    .nav-lightbox:active { transform: translateY(-50%) scale(0.94); background: rgba(0,0,0,0.85); }
     @media (max-width: 768px) {
-      .nav-lightbox { padding: 8px 16px; font-size: 1.8rem; }
-      .nav-lightbox.prev { left: 8px; }
-      .nav-lightbox.next { right: 8px; }
-      .close-lightbox { top: 12px; right: 18px; font-size: 38px; }
+      .nav-lightbox { width: 46px; height: 46px; font-size: 2rem; }
+      .nav-lightbox.prev { left: 12px; }
+      .nav-lightbox.next { right: 12px; }
+      .close-lightbox { top: 16px; right: 16px; width: 44px; height: 44px; font-size: 38px; }
+      .lightbox-img { max-width: 92vw; max-height: 78vh; }
+      .lightbox-content { max-height: 82vh; }
+    }
+    @media (max-width: 480px) {
+      .nav-lightbox { width: 40px; height: 40px; font-size: 1.8rem; }
+      .close-lightbox { width: 38px; height: 38px; font-size: 34px; }
     }
 
-    /* Atrativos completos */
+    /* Atrativos */
     .attraction-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
     @media (min-width: 768px) { .attraction-grid { grid-template-columns: repeat(2,1fr); } }
     .attraction-card { background: var(--white); border-radius: var(--radius-md); border: 1px solid var(--gray-200); overflow: hidden; transition: 0.2s; box-shadow: var(--shadow-sm); }
@@ -329,7 +208,7 @@
     .info-row { display: flex; align-items: baseline; gap: 8px; margin: 8px 0; font-size: 0.9rem; color: var(--gray-600); flex-wrap: wrap; }
     .info-row strong { min-width: 100px; color: var(--gray-800); }
 
-    /* Contato e formulário profissional */
+    /* Contato */
     .contact-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
     @media (min-width: 768px) { .contact-grid { grid-template-columns: 1fr 1fr; } }
     .contact-info { background: var(--brand-primary); color: #1a1a1a; border-radius: var(--radius-md); padding: 32px; }
@@ -347,21 +226,7 @@
     .faq-answer { padding: 0 24px 24px 24px; color: var(--gray-600); }
     
     /* Splash */
-    .splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #fbfbfb 0%, #f5f5f2 100%);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.8s ease;
-      opacity: 1;
-      visibility: visible;
-    }
+    .splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #fbfbfb 0%, #f5f5f2 100%); z-index: 10000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; opacity: 1; visibility: visible; }
     .splash-screen.fade-out { opacity: 0; visibility: hidden; }
     .splash-content { text-align: center; animation: splashZoom 0.9s ease-out; }
     @keyframes splashZoom { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -390,7 +255,6 @@
 </header>
 
 <main>
-  <!-- Hero Slider profissional com imagens mais claras -->
   <div class="hero-full" id="heroFull">
     <div class="hero-slider-modern" id="heroSliderModern"></div>
     <button class="slider-arrow arrow-left" id="prevSlide">‹</button>
@@ -399,9 +263,9 @@
   </div>
 
   <section style="padding:64px 0 48px;"><div class="container"><h2 class="section-title">Por que explorar o Peruaçu?</h2><p class="section-subtitle">Um dos sítios arqueológicos mais impressionantes do Brasil, com paisagens de tirar o fôlego.</p>
-  <div class="grid-3"><div class="card"><h3> Arte rupestre</h3><p>Pinturas com mais de 10 mil anos em paredões preservados. Tradições rupestres únicas no mundo.</p></div>
-  <div class="card"><h3> Cavernas gigantes</h3><p>Gruta do Janelão, Lapa do Boquete e formações geológicas únicas, com a maior estalactite do mundo.</p></div>
-  <div class="card"><h3> Ecoturismo responsável</h3><p>Visitação controlada, trilhas, mirantes e condutores credenciados pelo ICMBio.</p></div>
+  <div class="grid-3"><div class="card"><h3>🪨 Arte rupestre</h3><p>Pinturas com mais de 10 mil anos em paredões preservados. Tradições rupestres únicas no mundo.</p></div>
+  <div class="card"><h3>🏞️ Cavernas gigantes</h3><p>Gruta do Janelão, Lapa do Boquete e formações geológicas únicas, com a maior estalactite do mundo.</p></div>
+  <div class="card"><h3>🌿 Ecoturismo responsável</h3><p>Visitação controlada, trilhas, mirantes e condutores credenciados pelo ICMBio.</p></div>
   </div></div></section>
 
   <section id="roteiros" style="background:var(--gray-50);padding:64px 0;"><div class="container"><h2 class="section-title">Roteiros em destaque</h2><div class="grid-2">
@@ -409,7 +273,7 @@
     <div class="tour-card"><div class="tour-content"><h3>🗺️ Expedição (2-4 dias)</h3><ul style="list-style:none"><li>✔ Todas as cavernas principais</li><li>✔ Arco do André + Lapa Bonita</li><li>✔ Logística completa inclusa</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20Expedição%20Peruaçu" class="btn-tour">Explorar expedição</a></div></div>
   </div></div></section>
 
-  <section style="padding:64px 0;"><div class="container"><h2 class="section-title">Galeria completa</h2><p class="section-subtitle">Clique em qualquer foto para ampliar e navegar pelas imagens.</p><div class="gallery" id="galleryContainer">
+  <section style="padding:64px 0;"><div class="container"><h2 class="section-title">Galeria completa</h2><p class="section-subtitle">Clique em qualquer foto para ampliar e navegar pelas imagens (toque nas laterais para trocar).</p><div class="gallery" id="galleryContainer">
     <div class="gallery-item large"><img src="Janelão.jpg" alt="Gruta do Janelão"></div>
     <div class="gallery-item"><img src="arte.jpg" alt="Pintura rupestre Lapa dos Desenhos" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Arte+Rupestre'"></div>
     <div class="gallery-item"><img src="canion.png" alt="Cânion do Peruaçu" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=C%C3%A2nion'"></div>
@@ -424,7 +288,7 @@
   </div></div></section>
 
   <section style="background:var(--gray-50); padding:64px 0;"><div class="container"><h2 class="section-title">Conheça cada atrativo</h2><p class="section-subtitle">Trilhas, cavernas, pinturas e sítios arqueológicos. Informações oficiais de dificuldade, distância e horários.</p>
-  <div class="attraction-grid">
+  <div class="attraction-grid"><!-- conteúdo mantido igual sem cortes -->
     <div class="attraction-card"><div class="attraction-img"><img src="Janelão.jpg" alt="Gruta do Janelão"></div><div class="attraction-info"><h3>Gruta do Janelão</h3><div class="attraction-meta"><span class="meta-badge">⭐ Principal atrativo</span><span class="meta-badge">Maior estalactite do mundo</span></div><div class="info-row"><strong>Dificuldade:</strong> Semipesado</div><div class="info-row"><strong>Distância:</strong> 4,8 km (ida e volta)</div><div class="info-row"><strong>Tempo estimado:</strong> 5h30</div><p>Conta com enormes dolinas, salões gigantescos e a Perna da Bailarina com 28m. Paredão com pinturas rupestres na entrada.</p></div></div>
     <div class="attraction-card"><div class="attraction-img"><img src="arco_andre.jpg" alt="Arco do André"></div><div class="attraction-info"><h3>Arco do André</h3><div class="attraction-meta"><span class="meta-badge">Mirante das Cinco Torres</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 8 km (ida e volta)</div><div class="info-row"><strong>Tempo estimado:</strong> 7h</div><p>Trilha rústica com subidas íngremes, mirantes únicos e o Rio Peruaçu com tom esmeralda dentro das cavernas.</p></div></div>
     <div class="attraction-card"><div class="attraction-img"><img src="indiobonita.webp" alt="Lapa Bonita" onerror="this.src='https://placehold.co/600x400'"></div><div class="attraction-info"><h3>Lapa Bonita & Lapa do Índio</h3><div class="attraction-meta"><span class="meta-badge">Salão Vermelho</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1.500m</div><div class="info-row"><strong>Tempo estimado:</strong> 2h20</div><p>Pinturas rupestres que cobrem paredes e teto. Lapa Bonita com espeleotemas exuberantes e sedimentos avermelhados.</p></div></div>
@@ -472,7 +336,7 @@
     });
   })();
 
-  // Hero Slider com imagens da galeria + textos responsivos (imagens mais claras via filter)
+  // Hero Slider
   const galleryImgs = Array.from(document.querySelectorAll('#galleryContainer img')).map(img => ({ src: img.src, alt: img.alt }));
   const unique = [];
   const seen = new Set();
@@ -507,23 +371,27 @@
   function resetInterval() { if(intervalId) clearInterval(intervalId); intervalId = setInterval(nextSlide, 5500); }
   buildSlides(); prevBtn.addEventListener('click', ()=>{ prevSlide(); resetInterval(); }); nextBtn.addEventListener('click', ()=>{ nextSlide(); resetInterval(); }); resetInterval();
 
-  // Lightbox completo com navegação
+  // Lightbox profissional com touch/suporte universal e navegação lateral responsiva
   const lightboxItems = Array.from(document.querySelectorAll('.gallery-item')).map(item => ({ src: item.querySelector('img').src, alt: item.querySelector('img').alt }));
   let lbIndex = 0;
   const lightbox = document.createElement('div'); lightbox.className = 'lightbox';
-  lightbox.innerHTML = `<button class="close-lightbox">&times;</button><button class="nav-lightbox prev">‹</button><button class="nav-lightbox next">›</button><div class="lightbox-content"><img class="lightbox-img" src=""></div>`;
+  lightbox.innerHTML = `<button class="close-lightbox" aria-label="Fechar">✕</button><button class="nav-lightbox prev" aria-label="Anterior">‹</button><button class="nav-lightbox next" aria-label="Próximo">›</button><div class="lightbox-content"><img class="lightbox-img" src="" alt=""></div>`;
   document.body.appendChild(lightbox);
   const lbImg = lightbox.querySelector('.lightbox-img');
-  function openLB(i) { lbIndex = i; lbImg.src = lightboxItems[i].src; lightbox.classList.add('active'); }
-  function closeLB() { lightbox.classList.remove('active'); }
-  function nextLB() { lbIndex = (lbIndex+1)%lightboxItems.length; lbImg.src = lightboxItems[lbIndex].src; }
-  function prevLB() { lbIndex = (lbIndex-1+lightboxItems.length)%lightboxItems.length; lbImg.src = lightboxItems[lbIndex].src; }
-  document.querySelectorAll('.gallery-item').forEach((item, i) => item.addEventListener('click', () => openLB(i)));
+  function openLB(i) { lbIndex = (i + lightboxItems.length) % lightboxItems.length; lbImg.src = lightboxItems[lbIndex].src; lbImg.alt = lightboxItems[lbIndex].alt; lightbox.classList.add('active'); document.body.style.overflow = 'hidden'; }
+  function closeLB() { lightbox.classList.remove('active'); document.body.style.overflow = ''; }
+  function nextLB() { lbIndex = (lbIndex+1)%lightboxItems.length; lbImg.src = lightboxItems[lbIndex].src; lbImg.alt = lightboxItems[lbIndex].alt; }
+  function prevLB() { lbIndex = (lbIndex-1+lightboxItems.length)%lightboxItems.length; lbImg.src = lightboxItems[lbIndex].src; lbImg.alt = lightboxItems[lbIndex].alt; }
+  document.querySelectorAll('.gallery-item').forEach((item, i) => item.addEventListener('click', (e) => { e.stopPropagation(); openLB(i); }));
   lightbox.querySelector('.close-lightbox').addEventListener('click', closeLB);
-  lightbox.querySelector('.nav-lightbox.next').addEventListener('click', nextLB);
-  lightbox.querySelector('.nav-lightbox.prev').addEventListener('click', prevLB);
+  lightbox.querySelector('.nav-lightbox.next').addEventListener('click', (e) => { e.stopPropagation(); nextLB(); });
+  lightbox.querySelector('.nav-lightbox.prev').addEventListener('click', (e) => { e.stopPropagation(); prevLB(); });
   lightbox.addEventListener('click', (e) => { if(e.target===lightbox) closeLB(); });
   document.addEventListener('keydown', (e) => { if(lightbox.classList.contains('active')){ if(e.key==='Escape') closeLB(); if(e.key==='ArrowRight') nextLB(); if(e.key==='ArrowLeft') prevLB(); } });
+  // Suporte a toque (swipe simples para mobile)
+  let touchStartX = 0;
+  lightbox.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+  lightbox.addEventListener('touchend', (e) => { const endX = e.changedTouches[0].screenX; const diff = endX - touchStartX; if(Math.abs(diff) > 60) { if(diff > 0) prevLB(); else nextLB(); } }, {passive: true});
 </script>
 </body>
 </html>
