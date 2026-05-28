@@ -235,64 +235,65 @@
     .slide.active .slide-content { transform: translateY(0); opacity: 1; transition-delay: 0.25s; }
     
     /* ============================================ */
-    /* BADGE RETANGULAR - SOBRIO, ELEGANTE E MODERNO */
+    /* BADGE SEM RETANGULO - APENAS TEXTO E LEGANTE */
     /* ============================================ */
     .hero-badge {
-      display: inline-flex;
-      align-items: center;
+      display: flex;
+      align-items: baseline;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 12px;
-      background: rgba(10, 10, 10, 0.75);
-      backdrop-filter: blur(12px);
-      padding: 10px 28px;
+      gap: 10px;
       margin-bottom: 24px;
-      border-radius: 8px;
-      border: 0.5px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-      transition: all 0.25s ease;
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0;
+      border: none;
+      box-shadow: none;
     }
     
     .hero-badge-line {
-      width: 28px;
+      width: 30px;
       height: 1.5px;
       background: var(--brand-primary);
       display: inline-block;
-      opacity: 0.9;
+      opacity: 0.85;
       border-radius: 2px;
     }
     
     .hero-badge-primary {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.95);
       font-family: 'Inter', sans-serif;
+      background: transparent;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     
     .hero-badge-highlight {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 1.8px;
+      letter-spacing: 2px;
       color: var(--brand-primary);
       text-transform: uppercase;
-      background: none;
+      background: transparent;
       padding: 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     
     @media (max-width: 640px) {
-      .hero-badge { padding: 8px 20px; gap: 8px; margin-bottom: 18px; border-radius: 6px; }
-      .hero-badge-primary { font-size: 0.6rem; letter-spacing: 1.5px; }
-      .hero-badge-highlight { font-size: 0.6rem; letter-spacing: 1.2px; }
-      .hero-badge-line { width: 22px; height: 1.2px; }
+      .hero-badge { gap: 8px; margin-bottom: 18px; }
+      .hero-badge-primary { font-size: 0.65rem; letter-spacing: 2px; }
+      .hero-badge-highlight { font-size: 0.65rem; letter-spacing: 1.5px; }
+      .hero-badge-line { width: 24px; height: 1.2px; }
     }
     
     @media (max-width: 480px) {
-      .hero-badge { padding: 6px 16px; gap: 6px; margin-bottom: 14px; border-radius: 6px; }
-      .hero-badge-primary { font-size: 0.55rem; letter-spacing: 1.2px; }
-      .hero-badge-highlight { font-size: 0.55rem; letter-spacing: 1px; }
-      .hero-badge-line { width: 18px; }
+      .hero-badge { gap: 6px; margin-bottom: 14px; }
+      .hero-badge-primary { font-size: 0.58rem; letter-spacing: 1.8px; }
+      .hero-badge-highlight { font-size: 0.58rem; letter-spacing: 1.2px; }
+      .hero-badge-line { width: 20px; }
     }
     
     .slide-title { font-size: clamp(1.6rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
