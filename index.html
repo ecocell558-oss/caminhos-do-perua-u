@@ -324,7 +324,7 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; pointer-events: none; }
     .gallery-item:hover img { transform: scale(1.03); }
 
-    /* Lightbox moderno com ações (download + compartilhar) */
+    /* LIGHTBOX MODERNO - FULLY FIXED MOBILE ALIGNMENT */
     .lightbox {
       position: fixed;
       top: 0;
@@ -344,50 +344,111 @@
     .lightbox.active { visibility: visible; opacity: 1; }
     .lightbox-content { position: relative; max-width: 94vw; max-height: 88vh; display: flex; align-items: center; justify-content: center; touch-action: pan-y pinch-zoom; }
     .lightbox-img { max-width: 94vw; max-height: 85vh; width: auto; height: auto; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    
+    /* ACTIONS PERFEITAMENTE ALINHADAS RESPONSIVO */
     .lightbox-actions {
       position: absolute;
       bottom: 24px;
-      left: 0;
-      right: 0;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       justify-content: center;
-      gap: 16px;
+      align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
       z-index: 2002;
-      background: rgba(20,20,20,0.75);
-      backdrop-filter: blur(16px);
-      padding: 12px 20px;
+      background: rgba(20,20,20,0.85);
+      backdrop-filter: blur(20px);
+      padding: 10px 20px;
       border-radius: 60px;
-      width: fit-content;
+      width: auto;
+      min-width: 280px;
+      max-width: 90vw;
       margin: 0 auto;
       border: 1px solid rgba(255,255,255,0.2);
+      box-sizing: border-box;
     }
     .lightbox-action-btn {
       background: transparent;
       border: none;
       color: white;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 500;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
+      gap: 6px;
+      padding: 6px 14px;
       border-radius: 40px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       font-family: 'Inter', sans-serif;
+      white-space: nowrap;
     }
     .lightbox-action-btn svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       fill: none;
       stroke: white;
       stroke-width: 1.8;
+      flex-shrink: 0;
     }
     .lightbox-action-btn:hover {
       background: rgba(255,255,255,0.2);
       transform: translateY(-1px);
     }
+    
+    /* RESPONSIVO EXTREMO PARA CELULARES PEQUENOS */
+    @media (max-width: 620px) {
+      .lightbox-actions {
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 48px;
+        min-width: auto;
+        width: auto;
+        bottom: 16px;
+      }
+      .lightbox-action-btn {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+        gap: 4px;
+        white-space: nowrap;
+      }
+      .lightbox-action-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+    @media (max-width: 480px) {
+      .lightbox-actions {
+        gap: 4px;
+        padding: 6px 10px;
+        bottom: 12px;
+      }
+      .lightbox-action-btn {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+        gap: 3px;
+      }
+      .lightbox-action-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+    @media (max-width: 400px) {
+      .lightbox-action-btn {
+        padding: 4px 6px;
+        font-size: 0.6rem;
+      }
+      .lightbox-action-btn svg {
+        width: 13px;
+        height: 13px;
+      }
+      .lightbox-actions {
+        gap: 3px;
+        padding: 5px 8px;
+      }
+    }
+    
     .close-lightbox {
       position: absolute;
       top: 20px;
@@ -435,9 +496,6 @@
       .nav-lightbox.prev { left: 12px; }
       .nav-lightbox.next { right: 12px; }
       .close-lightbox { top: 16px; right: 16px; width: 44px; height: 44px; font-size: 28px; }
-      .lightbox-actions { gap: 8px; padding: 8px 14px; bottom: 16px; }
-      .lightbox-action-btn { padding: 6px 12px; font-size: 0.75rem; gap: 4px; }
-      .lightbox-action-btn svg { width: 16px; height: 16px; }
     }
     
     .attraction-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 32px; }
@@ -599,7 +657,7 @@
   function resetInterval() { if(intervalId) clearInterval(intervalId); intervalId = setInterval(nextSlide, 5500); }
   buildSlides(); resetInterval();
   
-  // LIGHTBOX COM DOWNLOAD E COMPARTILHAMENTO
+  // LIGHTBOX COM BOTÕES PERFEITAMENTE ALINHADOS EM DISPOSITIVOS MÓVEIS
   const lightboxItems = Array.from(document.querySelectorAll('.gallery-item')).map(item => ({ src: item.querySelector('img').src, alt: item.querySelector('img').alt }));
   let lbIndex = 0;
   const lightbox = document.createElement('div'); lightbox.className = 'lightbox';
@@ -609,10 +667,10 @@
     <button class="nav-lightbox next">›</button>
     <div class="lightbox-content"><img class="lightbox-img" src="" alt=""></div>
     <div class="lightbox-actions">
-      <button class="lightbox-action-btn" id="lightboxDownload"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar</button>
-      <button class="lightbox-action-btn" id="lightboxShareWhatsApp"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> WhatsApp</button>
-      <button class="lightbox-action-btn" id="lightboxShareFacebook"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg> Facebook</button>
-      <button class="lightbox-action-btn" id="lightboxShareTwitter"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg> Twitter</button>
+      <button class="lightbox-action-btn" id="lightboxDownload"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Baixar</span></button>
+      <button class="lightbox-action-btn" id="lightboxShareWhatsApp"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>WhatsApp</span></button>
+      <button class="lightbox-action-btn" id="lightboxShareFacebook"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg><span>Facebook</span></button>
+      <button class="lightbox-action-btn" id="lightboxShareTwitter"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg><span>Twitter</span></button>
     </div>
   `;
   document.body.appendChild(lightbox);
@@ -631,7 +689,6 @@
   lightbox.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
   lightbox.addEventListener('touchend', (e) => { const endX = e.changedTouches[0].screenX; const diff = endX - touchStartX; if(Math.abs(diff) > 60) { if(diff > 0) prevLB(); else nextLB(); } }, {passive: true});
   
-  // Download
   document.getElementById('lightboxDownload')?.addEventListener('click', () => {
     const url = lbImg.src;
     fetch(url).then(res => res.blob()).then(blob => {
@@ -653,7 +710,6 @@
       document.body.removeChild(a);
     });
   });
-  // Compartilhar
   document.getElementById('lightboxShareWhatsApp')?.addEventListener('click', () => {
     const text = `📸 ${lightboxItems[lbIndex].alt} - ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
