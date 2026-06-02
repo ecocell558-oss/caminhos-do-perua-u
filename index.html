@@ -324,7 +324,7 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; pointer-events: none; }
     .gallery-item:hover img { transform: scale(1.03); }
 
-    /* LIGHTBOX MODERNO - FULLY FIXED MOBILE ALIGNMENT */
+    /* LIGHTBOX - BOTÕES EM UMA ÚNICA LINHA HORIZONTAL PARA TODOS OS CELULARES */
     .lightbox {
       position: fixed;
       top: 0;
@@ -345,29 +345,46 @@
     .lightbox-content { position: relative; max-width: 94vw; max-height: 88vh; display: flex; align-items: center; justify-content: center; touch-action: pan-y pinch-zoom; }
     .lightbox-img { max-width: 94vw; max-height: 85vh; width: auto; height: auto; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
     
-    /* ACTIONS PERFEITAMENTE ALINHADAS RESPONSIVO */
+    /* ACTIONS: Layout em linha única horizontal com rolagem suave se necessário */
     .lightbox-actions {
       position: absolute;
-      bottom: 24px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
       z-index: 2002;
       background: rgba(20,20,20,0.85);
       backdrop-filter: blur(20px);
       padding: 10px 20px;
       border-radius: 60px;
       width: auto;
-      min-width: 280px;
-      max-width: 90vw;
-      margin: 0 auto;
+      max-width: 95vw;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
       border: 1px solid rgba(255,255,255,0.2);
       box-sizing: border-box;
     }
+    /* Esconde scrollbar em alguns navegadores mas mantém funcional */
+    .lightbox-actions::-webkit-scrollbar {
+      height: 3px;
+    }
+    .lightbox-actions::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+    .lightbox-actions::-webkit-scrollbar-thumb {
+      background: var(--brand-primary);
+      border-radius: 10px;
+    }
+    
     .lightbox-action-btn {
       background: transparent;
       border: none;
@@ -377,12 +394,13 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 8px 14px;
       border-radius: 40px;
       cursor: pointer;
       transition: all 0.2s ease;
       font-family: 'Inter', sans-serif;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .lightbox-action-btn svg {
       width: 18px;
@@ -397,21 +415,17 @@
       transform: translateY(-1px);
     }
     
-    /* RESPONSIVO EXTREMO PARA CELULARES PEQUENOS */
-    @media (max-width: 620px) {
+    /* Ajuste fino para celulares menores: reduz gap e padding, mas mantém TUDO em linha */
+    @media (max-width: 640px) {
       .lightbox-actions {
-        gap: 6px;
-        padding: 8px 12px;
-        border-radius: 48px;
-        min-width: auto;
-        width: auto;
+        gap: 8px;
+        padding: 8px 14px;
         bottom: 16px;
       }
       .lightbox-action-btn {
         padding: 5px 10px;
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         gap: 4px;
-        white-space: nowrap;
       }
       .lightbox-action-btn svg {
         width: 16px;
@@ -420,9 +434,10 @@
     }
     @media (max-width: 480px) {
       .lightbox-actions {
-        gap: 4px;
-        padding: 6px 10px;
+        gap: 6px;
+        padding: 6px 12px;
         bottom: 12px;
+        max-width: 96vw;
       }
       .lightbox-action-btn {
         padding: 4px 8px;
@@ -434,6 +449,7 @@
         height: 14px;
       }
     }
+    /* Para telas extremamente estreitas (ex: 320px) ainda mantém a linha horizontal */
     @media (max-width: 400px) {
       .lightbox-action-btn {
         padding: 4px 6px;
@@ -444,8 +460,8 @@
         height: 13px;
       }
       .lightbox-actions {
-        gap: 3px;
-        padding: 5px 8px;
+        gap: 4px;
+        padding: 5px 10px;
       }
     }
     
@@ -657,7 +673,7 @@
   function resetInterval() { if(intervalId) clearInterval(intervalId); intervalId = setInterval(nextSlide, 5500); }
   buildSlides(); resetInterval();
   
-  // LIGHTBOX COM BOTÕES PERFEITAMENTE ALINHADOS EM DISPOSITIVOS MÓVEIS
+  // LIGHTBOX COM BOTÕES EM LINHA ÚNICA (HORIZONTAL) RESPONSIVO
   const lightboxItems = Array.from(document.querySelectorAll('.gallery-item')).map(item => ({ src: item.querySelector('img').src, alt: item.querySelector('img').alt }));
   let lbIndex = 0;
   const lightbox = document.createElement('div'); lightbox.className = 'lightbox';
