@@ -234,27 +234,34 @@
     }
     .slide.active .slide-content { transform: translateY(0); opacity: 1; transition-delay: 0.25s; }
     
+    /* ====== BADGE ESTILO PC - PALITINHOS SEMPRE AO LADO ====== */
     .hero-badge {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      gap: 14px;
       margin-bottom: 24px;
-      background: transparent;
-      backdrop-filter: none;
-      padding: 0;
-      border: none;
-      box-shadow: none;
+      flex-wrap: nowrap;
+      white-space: nowrap;
     }
     
     .hero-badge-line {
-      width: 30px;
-      height: 1.5px;
+      width: 35px;
+      height: 2px;
       background: var(--brand-primary);
       display: inline-block;
-      opacity: 0.85;
+      opacity: 0.9;
       border-radius: 2px;
+      flex-shrink: 0;
+    }
+    
+    .hero-badge-text-group {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      white-space: nowrap;
     }
     
     .hero-badge-primary {
@@ -266,6 +273,7 @@
       font-family: 'Inter', sans-serif;
       background: transparent;
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      white-space: nowrap;
     }
     
     .hero-badge-highlight {
@@ -277,13 +285,72 @@
       background: transparent;
       padding: 0;
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      white-space: nowrap;
     }
     
+    /* Responsivo: mantém os palitinhos ao lado mesmo em telas pequenas */
     @media (max-width: 640px) {
-      .hero-badge { gap: 8px; margin-bottom: 18px; }
-      .hero-badge-primary { font-size: 0.65rem; letter-spacing: 2px; }
-      .hero-badge-highlight { font-size: 0.65rem; letter-spacing: 1.5px; }
-      .hero-badge-line { width: 24px; height: 1.2px; }
+      .hero-badge {
+        gap: 8px;
+        margin-bottom: 18px;
+        flex-wrap: nowrap;
+      }
+      .hero-badge-line {
+        width: 28px;
+        height: 2px;
+        flex-shrink: 0;
+      }
+      .hero-badge-primary {
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+        white-space: nowrap;
+      }
+      .hero-badge-highlight {
+        font-size: 0.65rem;
+        letter-spacing: 1.5px;
+        white-space: nowrap;
+      }
+      .hero-badge-text-group {
+        gap: 6px;
+        white-space: nowrap;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero-badge {
+        gap: 6px;
+      }
+      .hero-badge-line {
+        width: 22px;
+      }
+      .hero-badge-primary {
+        font-size: 0.6rem;
+        letter-spacing: 1.5px;
+      }
+      .hero-badge-highlight {
+        font-size: 0.6rem;
+        letter-spacing: 1px;
+      }
+      .hero-badge-text-group {
+        gap: 4px;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .hero-badge-line {
+        width: 18px;
+      }
+      .hero-badge-primary {
+        font-size: 0.55rem;
+        letter-spacing: 1.2px;
+      }
+      .hero-badge-highlight {
+        font-size: 0.55rem;
+        letter-spacing: 0.8px;
+      }
+      .hero-badge-text-group {
+        gap: 3px;
+      }
     }
     
     .slide-title { font-size: clamp(1.6rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
@@ -372,7 +439,6 @@
       border: 1px solid rgba(255,255,255,0.2);
       box-sizing: border-box;
     }
-    /* Esconde scrollbar em alguns navegadores mas mantém funcional */
     .lightbox-actions::-webkit-scrollbar {
       height: 3px;
     }
@@ -415,7 +481,6 @@
       transform: translateY(-1px);
     }
     
-    /* Ajuste fino para celulares menores: reduz gap e padding, mas mantém TUDO em linha */
     @media (max-width: 640px) {
       .lightbox-actions {
         gap: 8px;
@@ -449,7 +514,6 @@
         height: 14px;
       }
     }
-    /* Para telas extremamente estreitas (ex: 320px) ainda mantém a linha horizontal */
     @media (max-width: 400px) {
       .lightbox-action-btn {
         padding: 4px 6px;
@@ -658,16 +722,20 @@
   const descs = ["A maior caverna da região com a estalactite 'Perna da Bailarina' de 28 metros.", "Pinturas com mais de 10 mil anos que contam a história dos primeiros habitantes.", "Trilhas em meio à mata atlântica e formações rochosas que esculpiram cânions.", "Sítio arqueológico com estruturas pré-históricas e sepultamentos.", "Caminhada desafiadora com recompensa: mirantes e águas cristalinas.", "Salão Vermelho e espeleotemas exuberantes em uma caverna de beleza surreal.", "Vista panorâmica de 360° sobre o parque, onde o céu encontra a serra."];
   const heroSlider = document.getElementById('heroSliderModern'), dotsContainer = document.getElementById('sliderDotsModern');
   let currentIdx = 0, slidesElements = [], intervalId;
+  
+  // Função para construir os slides com o badge ajustado (palitinhos ao lado do texto)
   function buildSlides() {
     heroSlider.innerHTML = ''; dotsContainer.innerHTML = '';
     slidesData.forEach((slide, idx) => {
       const div = document.createElement('div'); div.className = `slide ${idx===0?'active':''}`;
-      div.innerHTML = `<img class="slide-bg" src="${slide.src}" alt="${slide.alt}" onerror="this.src='https://placehold.co/1600x900/2C6E49/white?text=Perua%C3%A7u'"><div class="slide-overlay"></div><div class="slide-content"><div class="hero-badge"><span class="hero-badge-line"></span><span class="hero-badge-primary">PARQUE NACIONAL</span><span class="hero-badge-highlight">CAVERNAS DO PERUAÇU</span><span class="hero-badge-line"></span></div><h2 class="slide-title">${titles[idx%titles.length]}</h2><p class="slide-desc">${descs[idx%descs.length]}</p><div class="hero-cta-group"><a href="https://wa.me/5538991307687?text=Quero%20agendar%20minha%20visita%20ao%20Peruaçu" class="hero-btn-primary">Agendar agora →</a><a href="#roteiros" class="hero-btn-outline">Ver roteiros</a></div></div>`;
+      // Badge com layout de linha única: palitinho + texto + palitinho
+      div.innerHTML = `<img class="slide-bg" src="${slide.src}" alt="${slide.alt}" onerror="this.src='https://placehold.co/1600x900/2C6E49/white?text=Perua%C3%A7u'"><div class="slide-overlay"></div><div class="slide-content"><div class="hero-badge"><span class="hero-badge-line"></span><div class="hero-badge-text-group"><span class="hero-badge-primary">PARQUE NACIONAL</span><span class="hero-badge-highlight">CAVERNAS DO PERUAÇU</span></div><span class="hero-badge-line"></span></div><h2 class="slide-title">${titles[idx%titles.length]}</h2><p class="slide-desc">${descs[idx%descs.length]}</p><div class="hero-cta-group"><a href="https://wa.me/5538991307687?text=Quero%20agendar%20minha%20visita%20ao%20Peruaçu" class="hero-btn-primary">Agendar agora →</a><a href="#roteiros" class="hero-btn-outline">Ver roteiros</a></div></div>`;
       heroSlider.appendChild(div);
       const dot = document.createElement('div'); dot.className = `slider-dot ${idx===0?'active':''}`; dot.addEventListener('click', () => goToSlide(idx)); dotsContainer.appendChild(dot);
     });
     slidesElements = document.querySelectorAll('.slide');
   }
+  
   function goToSlide(index) { if(index===currentIdx) return; slidesElements[currentIdx].classList.remove('active'); dotsContainer.children[currentIdx]?.classList.remove('active'); currentIdx = (index+slidesElements.length)%slidesElements.length; slidesElements[currentIdx].classList.add('active'); dotsContainer.children[currentIdx]?.classList.add('active'); resetInterval(); }
   function nextSlide() { goToSlide(currentIdx+1); }
   function resetInterval() { if(intervalId) clearInterval(intervalId); intervalId = setInterval(nextSlide, 5500); }
