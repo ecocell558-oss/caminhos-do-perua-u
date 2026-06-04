@@ -81,55 +81,58 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .back-home:hover { background: var(--brand-gold); }
     
-    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR - ESTILO PROFISSIONAL CENTRALIZADO */
+    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR - IGUAL À IMAGEM */
     @media (max-width: 768px) {
       .header-container {
-        flex-direction: row;
+        display: flex;
         justify-content: space-between;
         align-items: center;
         height: auto;
         padding: 12px 0;
-        gap: 8px;
       }
       .logo-area {
-        flex: 1;
-        min-width: 0;
+        display: flex;
+        align-items: center;
         gap: 10px;
+        flex-shrink: 1;
       }
       .logo-icon {
         width: 42px;
         height: 42px;
+        flex-shrink: 0;
       }
       .logo-text {
-        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
       .logo-text h1 {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         line-height: 1.25;
         white-space: nowrap;
       }
       .logo-text span {
-        font-size: 0.58rem;
+        font-size: 0.55rem;
         white-space: nowrap;
         letter-spacing: 0.2px;
       }
       .header-actions {
+        display: flex;
         gap: 8px;
         flex-shrink: 0;
       }
       .share-blog-btn {
-        padding: 7px 14px;
-        font-size: 0.75rem;
+        padding: 6px 12px;
+        font-size: 0.7rem;
       }
       .share-blog-btn i {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
       }
       .back-home {
-        padding: 7px 14px;
-        font-size: 0.75rem;
+        padding: 6px 12px;
+        font-size: 0.7rem;
       }
       .back-home i {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
       }
     }
     
@@ -142,15 +145,7 @@
         font-size: 1rem;
       }
       .logo-text span {
-        font-size: 0.55rem;
-      }
-      .share-blog-btn {
-        padding: 6px 12px;
-        font-size: 0.7rem;
-      }
-      .back-home {
-        padding: 6px 12px;
-        font-size: 0.7rem;
+        font-size: 0.52rem;
       }
     }
     
@@ -162,66 +157,51 @@
         width: 38px;
         height: 38px;
       }
-      .logo-area {
-        gap: 8px;
-      }
       .logo-text h1 {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
       .logo-text span {
-        font-size: 0.52rem;
+        font-size: 0.5rem;
       }
       .share-blog-btn {
         padding: 5px 10px;
-        font-size: 0.65rem;
-      }
-      .share-blog-btn i {
         font-size: 0.65rem;
       }
       .back-home {
         padding: 5px 10px;
         font-size: 0.65rem;
       }
-      .back-home i {
-        font-size: 0.65rem;
-      }
     }
     
     @media (max-width: 400px) {
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+      }
       .logo-text h1 {
         font-size: 0.85rem;
       }
       .logo-text span {
         font-size: 0.48rem;
       }
-      .share-blog-btn span {
-        display: inline;
-      }
-      .back-home span {
-        display: inline;
-      }
     }
     
     @media (max-width: 360px) {
+      .logo-icon {
+        width: 34px;
+        height: 34px;
+      }
       .logo-text h1 {
         font-size: 0.8rem;
       }
       .logo-text span {
         font-size: 0.45rem;
       }
-      .share-blog-btn {
-        padding: 5px 8px;
-        font-size: 0.6rem;
-      }
       .share-blog-btn span {
         display: none;
       }
       .share-blog-btn i {
         margin: 0;
-      }
-      .back-home {
-        padding: 5px 8px;
-        font-size: 0.6rem;
       }
       .back-home span {
         display: none;
