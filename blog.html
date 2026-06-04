@@ -81,54 +81,47 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .back-home:hover { background: var(--brand-gold); }
     
-    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR - IGUAL À IMAGEM */
+    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR - ESTILO IGUAL À IMAGEM 2 */
     @media (max-width: 768px) {
       .header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        height: auto;
-        padding: 12px 0;
+        padding: 10px 0;
       }
       .logo-area {
         display: flex;
         align-items: center;
-        gap: 10px;
-        flex-shrink: 1;
+        gap: 8px;
       }
       .logo-icon {
-        width: 42px;
-        height: 42px;
-        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
       }
       .logo-text {
         display: flex;
         flex-direction: column;
       }
       .logo-text h1 {
-        font-size: 1.05rem;
+        font-size: 1rem;
         line-height: 1.25;
-        white-space: nowrap;
       }
       .logo-text span {
-        font-size: 0.55rem;
-        white-space: nowrap;
+        font-size: 0.52rem;
         letter-spacing: 0.2px;
       }
       .header-actions {
-        display: flex;
-        gap: 8px;
-        flex-shrink: 0;
+        gap: 6px;
       }
       .share-blog-btn {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 0.7rem;
       }
       .share-blog-btn i {
         font-size: 0.7rem;
       }
       .back-home {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 0.7rem;
       }
       .back-home i {
@@ -138,42 +131,21 @@
     
     @media (max-width: 600px) {
       .logo-icon {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
       }
       .logo-text h1 {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
       .logo-text span {
-        font-size: 0.52rem;
+        font-size: 0.5rem;
       }
     }
     
     @media (max-width: 480px) {
       .header-container {
-        padding: 10px 0;
+        padding: 8px 0;
       }
-      .logo-icon {
-        width: 38px;
-        height: 38px;
-      }
-      .logo-text h1 {
-        font-size: 0.9rem;
-      }
-      .logo-text span {
-        font-size: 0.5rem;
-      }
-      .share-blog-btn {
-        padding: 5px 10px;
-        font-size: 0.65rem;
-      }
-      .back-home {
-        padding: 5px 10px;
-        font-size: 0.65rem;
-      }
-    }
-    
-    @media (max-width: 400px) {
       .logo-icon {
         width: 36px;
         height: 36px;
@@ -184,12 +156,20 @@
       .logo-text span {
         font-size: 0.48rem;
       }
+      .share-blog-btn {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
+      .back-home {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
     }
     
-    @media (max-width: 360px) {
+    @media (max-width: 380px) {
       .logo-icon {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
       }
       .logo-text h1 {
         font-size: 0.8rem;
@@ -730,7 +710,6 @@
   
   // ========== FUNÇÕES DE NOTIFICAÇÕES PUSH ==========
   
-  // Converter VAPID key de Base64 para Uint8Array (necessário para o navegador)
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -771,7 +750,6 @@
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
       
-      // Salvar inscrição no Firestore
       await saveSubscription(subscription);
       localStorage.setItem('pushEnabled', 'true');
       console.log('✅ Inscrito em notificações push com sucesso!');
@@ -823,7 +801,6 @@
     }
   }
   
-  // Função para enviar notificação aos inscritos
   async function sendPushToAllSubscribers(title, body, url) {
     try {
       const snapshot = await getDocs(subscriptionsCollection);
