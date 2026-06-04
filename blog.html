@@ -81,43 +81,56 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .back-home:hover { background: var(--brand-gold); }
     
-    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR */
+    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR - AJUSTADO PROFISSIONALMENTE */
     @media (max-width: 768px) {
       .header-container {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
         height: auto;
-        padding: 12px 0;
+        padding: 10px 0;
         gap: 8px;
       }
       .logo-area {
         flex: 1;
         min-width: 0;
+        gap: 8px;
       }
       .logo-icon {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
+      }
+      .logo-text {
+        flex: 1;
+        min-width: 0;
       }
       .logo-text h1 {
         font-size: 1rem;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .logo-text span {
         font-size: 0.55rem;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
       }
       .header-actions {
-        gap: 8px;
+        gap: 6px;
+        flex-shrink: 0;
       }
       .share-blog-btn {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 0.7rem;
       }
       .share-blog-btn i {
         font-size: 0.7rem;
       }
       .back-home {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 0.7rem;
       }
       .back-home i {
@@ -126,23 +139,62 @@
     }
     
     @media (max-width: 480px) {
+      .header-container {
+        padding: 8px 0;
+      }
       .logo-icon {
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
+      }
+      .logo-area {
+        gap: 6px;
       }
       .logo-text h1 {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
       }
       .logo-text span {
         font-size: 0.5rem;
       }
       .share-blog-btn {
-        padding: 5px 10px;
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
+      .share-blog-btn i {
         font-size: 0.65rem;
       }
       .back-home {
-        padding: 5px 10px;
+        padding: 5px 8px;
         font-size: 0.65rem;
+      }
+      .back-home i {
+        font-size: 0.65rem;
+      }
+    }
+    
+    @media (max-width: 380px) {
+      .logo-text h1 {
+        font-size: 0.8rem;
+      }
+      .logo-text span {
+        font-size: 0.45rem;
+      }
+      .share-blog-btn span {
+        display: none;
+      }
+      .share-blog-btn i {
+        margin: 0;
+      }
+      .share-blog-btn {
+        padding: 6px 8px;
+      }
+      .back-home span {
+        display: none;
+      }
+      .back-home i {
+        margin: 0;
+      }
+      .back-home {
+        padding: 6px 8px;
       }
     }
     
@@ -405,6 +457,124 @@
     }
     .admin-status.logged { display: flex; align-items: center; gap: 8px; }
     @media (max-width: 700px) { .modal-body { padding: 20px; } }
+
+    /* Estilos para Cookie Consent e Notification Prompt */
+    .cookie-consent {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--blog-black);
+      color: white;
+      padding: 16px 20px;
+      z-index: 9999;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border-top: 3px solid var(--brand-gold);
+      transform: translateY(0);
+      transition: transform 0.3s ease;
+    }
+    .cookie-consent.hidden {
+      transform: translateY(100%);
+      pointer-events: none;
+    }
+    .cookie-text {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+    .cookie-text i {
+      color: var(--brand-gold);
+      margin-right: 10px;
+    }
+    .cookie-text a {
+      color: var(--brand-gold);
+      text-decoration: none;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .cookie-btn {
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 0.8rem;
+    }
+    .cookie-btn.accept {
+      background: var(--brand-gold);
+      color: var(--blog-black);
+    }
+    .cookie-btn.decline {
+      background: transparent;
+      border: 1px solid #666;
+      color: white;
+    }
+    .notification-prompt {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      z-index: 9998;
+      max-width: 320px;
+      display: none;
+      border-left: 4px solid var(--brand-gold);
+    }
+    .notification-prompt.show {
+      display: block;
+    }
+    .notification-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .notification-header i {
+      font-size: 24px;
+      color: var(--brand-gold);
+    }
+    .notification-header strong {
+      display: block;
+      font-size: 1rem;
+    }
+    .notification-header small {
+      color: #666;
+      font-size: 0.75rem;
+    }
+    .notification-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .notif-btn {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .notif-btn.enable {
+      background: var(--brand-gold);
+      color: var(--blog-black);
+    }
+    .notif-btn.later {
+      background: #EAEAEA;
+      color: #333;
+    }
+    @media (max-width: 480px) {
+      .cookie-text { font-size: 0.7rem; }
+      .cookie-btn { padding: 6px 14px; font-size: 0.7rem; }
+      .notification-prompt { right: 10px; left: 10px; max-width: none; bottom: 80px; }
+    }
   </style>
 </head>
 <body>
@@ -418,8 +588,8 @@
       <div class="logo-text"><h1>Caminhos do Peruaçu</h1><span>INFORMAÇÃO • PESQUISA • TURISMO</span></div>
     </div>
     <div class="header-actions">
-      <button class="share-blog-btn" id="shareBlogBtn"><i class="fas fa-share-alt"></i> Compartilhar Blog</button>
-      <a href="index.html" class="back-home"><i class="fas fa-home"></i> Início</a>
+      <button class="share-blog-btn" id="shareBlogBtn"><i class="fas fa-share-alt"></i> <span>Compartilhar</span></button>
+      <a href="index.html" class="back-home"><i class="fas fa-home"></i> <span>Início</span></a>
     </div>
   </div>
 </header>
@@ -430,7 +600,7 @@
   <i class="fas fa-film" style="color:var(--brand-gold); font-size:1.8rem; margin-right:12px;"></i> <strong>Aqui você encontra :</strong> reportagens sobre espeleologia, arqueologia e biodiversidade; entrevistas com pesquisadores; guias de visitação; e alertas sobre conservação do parque. <strong>Vídeos e links:</strong> suporte a YouTube/Vimeo e links externos. <strong>Clique nas imagens:</strong> amplie, baixe e compartilhe!
 </div></div></main>
 
-<footer class="footer"><div class="container"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px;"><div><strong style="color:var(--brand-gold);">Caminhos do Peruaçu</strong><br>Itacarambi – MG</div><div><i class="fab fa-instagram"></i> @caminhosdoperuacu | <i class="fab fa-whatsapp"></i> (38) 99130-7687</div></div><div style="text-align:center; margin-top:40px; font-size:0.7rem;">© 2025 · Carrossel + Vídeos + Compartilhamento</div></div></footer>
+<footer class="footer"><div class="container"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px;"><div><strong style="color:var(--brand-gold);">Caminhos do Peruaçu</strong><br>Itacarambi – MG</div><div><i class="fab fa-instagram"></i> @caminhosdoperuacu | <i class="fab fa-whatsapp"></i> (38) 99130-7687</div></div><div style="text-align:center; margin-top:40px; font-size:0.7rem;">© 2025 · Carrossel + Vídeos + Compartilhamento + Notificações Push</div></div></footer>
 
 <div id="newsModal" class="modal-g1"><div class="modal-g1-container"><div class="modal-header"><span><i class="fas fa-play-circle"></i> Conteúdo completo</span><button class="modal-close" id="closeModalBtn">&times;</button></div><div class="modal-body" id="modalBodyContent"></div></div></div>
 
@@ -486,9 +656,37 @@
   <button id="logoutAdminBtn" class="btn-admin" style="background:#666; margin-top:10px;"><i class="fas fa-sign-out-alt"></i> Sair do Admin</button>
 </div>
 
+<!-- COOKIE CONSENT BANNER -->
+<div id="cookieConsent" class="cookie-consent">
+  <div class="cookie-text">
+    <i class="fas fa-cookie-bite"></i> Usamos cookies para melhorar sua experiência e permitir notificações de novos conteúdos. 
+    <a href="#" id="cookieMoreLink">Saiba mais</a>
+  </div>
+  <div class="cookie-buttons">
+    <button id="acceptCookies" class="cookie-btn accept">Aceitar</button>
+    <button id="declineCookies" class="cookie-btn decline">Recusar</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION PROMPT -->
+<div id="notificationPrompt" class="notification-prompt">
+  <div class="notification-header">
+    <i class="fas fa-bell"></i>
+    <div>
+      <strong>Fique por dentro!</strong>
+      <small>Receba notificações quando publicarmos novos conteúdos</small>
+    </div>
+  </div>
+  <div class="notification-buttons">
+    <button id="enableNotifications" class="notif-btn enable">Ativar notificações</button>
+    <button id="dismissNotifications" class="notif-btn later">Agora não</button>
+  </div>
+</div>
+
 <script type="module">
   // ============================================
-  // CÓDIGO PRINCIPAL COM FIREBASE
+  // CÓDIGO PRINCIPAL COM FIREBASE + NOTIFICAÇÕES PUSH
+  // CHAVES VAPID CONFIGURADAS
   // ============================================
   
   import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
@@ -497,6 +695,10 @@
   const db = window.db;
   const auth = window.auth;
   const postsCollection = collection(db, "posts");
+  const subscriptionsCollection = collection(db, "push_subscriptions");
+  
+  // ⚠️ SUAS VAPID KEYS GERADAS ⚠️
+  const VAPID_PUBLIC_KEY = "BCgtdZsQpzwWGBEExdfBO7SQKyQmFz45drGSlkdcMfP6nuaNaaNX4JeJ4jZjG4MTec8Pkyxfjleplw_Y6p9QRdw";
   
   let posts = [];
   let currentPage = 1;
@@ -508,7 +710,129 @@
   let currentLightboxImages = [];
   let currentLightboxIndex = 0;
   let carouselIntervals = [];
+  let swRegistration = null;
   
+  // ========== FUNÇÕES DE NOTIFICAÇÕES PUSH ==========
+  
+  // Converter VAPID key de Base64 para Uint8Array (necessário para o navegador)
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+  
+  async function registerServiceWorker() {
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.log('Notificações push não suportadas neste navegador');
+      return false;
+    }
+    
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      swRegistration = registration;
+      console.log('Service Worker registrado com sucesso');
+      return true;
+    } catch(error) {
+      console.error('Erro ao registrar Service Worker:', error);
+      return false;
+    }
+  }
+  
+  async function subscribeToPush() {
+    if(!swRegistration) {
+      console.log('Service Worker não registrado');
+      return false;
+    }
+    
+    try {
+      const subscription = await swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+      
+      // Salvar inscrição no Firestore
+      await saveSubscription(subscription);
+      localStorage.setItem('pushEnabled', 'true');
+      console.log('✅ Inscrito em notificações push com sucesso!');
+      return true;
+    } catch(error) {
+      console.error('Erro ao inscrever em push:', error);
+      return false;
+    }
+  }
+  
+  async function saveSubscription(subscription) {
+    try {
+      await addDoc(subscriptionsCollection, {
+        endpoint: subscription.endpoint,
+        keys: subscription.toJSON().keys,
+        createdAt: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+      console.log('Inscrição salva no Firestore');
+    } catch(error) {
+      console.error('Erro ao salvar inscrição:', error);
+    }
+  }
+  
+  async function requestNotificationPermission() {
+    if(Notification.permission === 'granted') {
+      await subscribeToPush();
+      return true;
+    }
+    
+    if(Notification.permission === 'default') {
+      const permission = await Notification.requestPermission();
+      if(permission === 'granted') {
+        await subscribeToPush();
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  function showNotificationPrompt() {
+    const cookiesAccepted = localStorage.getItem('cookiesAccepted');
+    const pushEnabled = localStorage.getItem('pushEnabled');
+    
+    if(cookiesAccepted === 'true' && pushEnabled !== 'true' && pushEnabled !== 'declined' && Notification.permission === 'default') {
+      setTimeout(() => {
+        document.getElementById('notificationPrompt').classList.add('show');
+      }, 3000);
+    }
+  }
+  
+  // Função para enviar notificação aos inscritos (simulação - para produção real precisa de backend)
+  async function sendPushToAllSubscribers(title, body, url) {
+    try {
+      const snapshot = await getDocs(subscriptionsCollection);
+      const subscribers = [];
+      snapshot.forEach(doc => subscribers.push({ id: doc.id, ...doc.data() }));
+      
+      console.log(`📢 Notificação disparada para ${subscribers.length} inscritos: ${title}`);
+      
+      // Mostrar notificação local para teste (se o usuário já permitiu)
+      if(Notification.permission === 'granted') {
+        new Notification(title, {
+          body: body,
+          icon: '/logoperuacu.png',
+          data: { url: url }
+        });
+      }
+      
+      return subscribers.length;
+    } catch(error) {
+      console.error('Erro ao enviar notificações:', error);
+      return 0;
+    }
+  }
+  
+  // ========== FUNÇÕES DO BLOG (ORIGINAIS) ==========
   async function loadPostsFromFirebase() {
     try {
       const q = query(postsCollection, orderBy("date", "desc"));
@@ -528,6 +852,7 @@
   
   async function savePostToFirebase(postData, editId = null) {
     try {
+      const isNewPost = !editId;
       if (editId) {
         const postRef = doc(db, "posts", editId);
         await updateDoc(postRef, postData);
@@ -535,6 +860,15 @@
         await addDoc(postsCollection, postData);
       }
       await loadPostsFromFirebase();
+      
+      // Se for um novo post, enviar notificação push para todos inscritos
+      if(isNewPost) {
+        await sendPushToAllSubscribers(
+          `📢 Novo artigo: ${postData.title.substring(0, 50)}`,
+          (postData.excerpt || postData.title).substring(0, 120),
+          window.location.href
+        );
+      }
       return true;
     } catch (error) {
       console.error("Erro ao salvar:", error);
@@ -795,7 +1129,7 @@
     pag.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.classList.contains('disabled'))return; let v=btn.dataset.page; if(v==='prev'&&currentPage>1)currentPage--; else if(v==='next'&&currentPage<total)currentPage++; else if(!isNaN(parseInt(v)))currentPage=parseInt(v); renderGrid(); renderPagination(); document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'}); }));
   }
   
-  // ADMIN FUNCTIONS
+  // ========== ADMIN FUNCTIONS ==========
   function showLoginModal() {
     document.getElementById('loginModal').style.display = 'flex';
     document.getElementById('adminEmail').value = '';
@@ -895,7 +1229,55 @@
     })); 
   }
   
-  // EVENT LISTENERS
+  // ========== COOKIE CONSENT FUNCTIONS ==========
+  function initCookieConsent() {
+    const cookieConsent = document.getElementById('cookieConsent');
+    const cookiesAccepted = localStorage.getItem('cookiesAccepted');
+    
+    if(cookiesAccepted === 'true') {
+      cookieConsent.classList.add('hidden');
+      return;
+    }
+    
+    if(cookiesAccepted === 'false') {
+      cookieConsent.classList.add('hidden');
+      return;
+    }
+    
+    cookieConsent.classList.remove('hidden');
+  }
+  
+  // ========== EVENT LISTENERS ==========
+  document.getElementById('acceptCookies')?.addEventListener('click', () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    document.getElementById('cookieConsent').classList.add('hidden');
+    // Mostrar prompt de notificação após aceitar cookies
+    showNotificationPrompt();
+    // Registrar Service Worker
+    registerServiceWorker();
+  });
+  
+  document.getElementById('declineCookies')?.addEventListener('click', () => {
+    localStorage.setItem('cookiesAccepted', 'false');
+    document.getElementById('cookieConsent').classList.add('hidden');
+  });
+  
+  document.getElementById('enableNotifications')?.addEventListener('click', async () => {
+    document.getElementById('notificationPrompt').classList.remove('show');
+    await registerServiceWorker();
+    await requestNotificationPermission();
+  });
+  
+  document.getElementById('dismissNotifications')?.addEventListener('click', () => {
+    document.getElementById('notificationPrompt').classList.remove('show');
+    localStorage.setItem('pushEnabled', 'declined');
+  });
+  
+  document.getElementById('cookieMoreLink')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('Utilizamos cookies apenas para melhorar sua experiência e permitir notificações de novos conteúdos. Seus dados não são compartilhados com terceiros.');
+  });
+  
   document.getElementById('loginBtn')?.addEventListener('click', () => {
     const email = document.getElementById('adminEmail').value;
     const password = document.getElementById('adminPassword').value;
@@ -1020,6 +1402,8 @@
     else document.getElementById('adminStatus').classList.remove('logged');
   });
   
+  // Inicialização
+  initCookieConsent();
   await seedInitialPosts();
   await loadPostsFromFirebase();
   
@@ -1028,3 +1412,4 @@
 </script>
 </body>
 </html>
+
