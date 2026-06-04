@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -30,7 +31,6 @@
   
   <!-- Firebase SDKs -->
   <script type="module">
-    // 🔥 CONFIGURAÇÕES DO FIREBASE (SUAS CREDENCIAIS) 🔥
     const firebaseConfig = {
       apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
       authDomain: "caminhos-peruacu-blog.firebaseapp.com",
@@ -81,101 +81,143 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .back-home:hover { background: var(--brand-gold); }
     
-    /* RESPONSIVIDADE DO CABEÇALHO PARA CELULAR - ESTILO IGUAL À IMAGEM 2 */
+    /* CABEÇALHO MOBILE - POSICIONAMENTO PERFEITO IGUAL À IMAGEM 2 */
     @media (max-width: 768px) {
       .header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 0;
+        padding: 12px 0;
+        gap: 8px;
       }
       .logo-area {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        flex: 0 1 auto;
       }
       .logo-icon {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
       }
       .logo-text {
         display: flex;
         flex-direction: column;
+        justify-content: center;
       }
       .logo-text h1 {
-        font-size: 1rem;
-        line-height: 1.25;
+        font-size: 1.1rem;
+        line-height: 1.2;
       }
       .logo-text span {
-        font-size: 0.52rem;
+        font-size: 0.58rem;
         letter-spacing: 0.2px;
       }
       .header-actions {
-        gap: 6px;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
       }
       .share-blog-btn {
-        padding: 6px 10px;
-        font-size: 0.7rem;
+        padding: 7px 14px;
+        font-size: 0.75rem;
       }
       .share-blog-btn i {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
       }
       .back-home {
-        padding: 6px 10px;
-        font-size: 0.7rem;
+        padding: 7px 14px;
+        font-size: 0.75rem;
       }
       .back-home i {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
       }
     }
     
     @media (max-width: 600px) {
       .logo-icon {
-        width: 38px;
-        height: 38px;
+        width: 42px;
+        height: 42px;
+      }
+      .logo-text h1 {
+        font-size: 1rem;
+      }
+      .logo-text span {
+        font-size: 0.55rem;
+      }
+      .share-blog-btn {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+      }
+      .back-home {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+      }
+    }
+    
+    @media (max-width: 500px) {
+      .logo-icon {
+        width: 40px;
+        height: 40px;
       }
       .logo-text h1 {
         font-size: 0.95rem;
       }
       .logo-text span {
-        font-size: 0.5rem;
+        font-size: 0.52rem;
       }
     }
     
-    @media (max-width: 480px) {
-      .header-container {
-        padding: 8px 0;
-      }
+    @media (max-width: 450px) {
       .logo-icon {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
       }
       .logo-text h1 {
-        font-size: 0.85rem;
+        font-size: 0.88rem;
       }
       .logo-text span {
-        font-size: 0.48rem;
+        font-size: 0.5rem;
       }
-      .share-blog-btn {
-        padding: 5px 8px;
-        font-size: 0.65rem;
+      .share-blog-btn span {
+        display: inline;
       }
-      .back-home {
-        padding: 5px 8px;
-        font-size: 0.65rem;
+      .back-home span {
+        display: inline;
       }
     }
     
     @media (max-width: 380px) {
       .logo-icon {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
       }
       .logo-text h1 {
-        font-size: 0.8rem;
+        font-size: 0.82rem;
       }
       .logo-text span {
-        font-size: 0.45rem;
+        font-size: 0.47rem;
+      }
+      .share-blog-btn {
+        padding: 5px 9px;
+        font-size: 0.65rem;
+      }
+      .back-home {
+        padding: 5px 9px;
+        font-size: 0.65rem;
+      }
+    }
+    
+    @media (max-width: 350px) {
+      .logo-icon {
+        width: 34px;
+        height: 34px;
+      }
+      .logo-text h1 {
+        font-size: 0.78rem;
+      }
+      .logo-text span {
+        font-size: 0.44rem;
       }
       .share-blog-btn span {
         display: none;
@@ -451,7 +493,6 @@
     .admin-status.logged { display: flex; align-items: center; gap: 8px; }
     @media (max-width: 700px) { .modal-body { padding: 20px; } }
 
-    /* Estilos para Cookie Consent e Notification Prompt */
     .cookie-consent {
       position: fixed;
       bottom: 0;
@@ -652,7 +693,6 @@
   <button id="logoutAdminBtn" class="btn-admin" style="background:#666; margin-top:10px;"><i class="fas fa-sign-out-alt"></i> Sair do Admin</button>
 </div>
 
-<!-- COOKIE CONSENT BANNER -->
 <div id="cookieConsent" class="cookie-consent">
   <div class="cookie-text">
     <i class="fas fa-cookie-bite"></i> Usamos cookies para melhorar sua experiência e permitir notificações de novos conteúdos. 
@@ -664,7 +704,6 @@
   </div>
 </div>
 
-<!-- NOTIFICATION PROMPT -->
 <div id="notificationPrompt" class="notification-prompt">
   <div class="notification-header">
     <i class="fas fa-bell"></i>
@@ -680,11 +719,6 @@
 </div>
 
 <script type="module">
-  // ============================================
-  // CÓDIGO PRINCIPAL COM FIREBASE + NOTIFICAÇÕES PUSH
-  // CHAVES VAPID CONFIGURADAS
-  // ============================================
-  
   import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
   
@@ -693,7 +727,6 @@
   const postsCollection = collection(db, "posts");
   const subscriptionsCollection = collection(db, "push_subscriptions");
   
-  // ⚠️ SUAS VAPID KEYS GERADAS ⚠️
   const VAPID_PUBLIC_KEY = "BCgtdZsQpzwWGBEExdfBO7SQKyQmFz45drGSlkdcMfP6nuaNaaNX4JeJ4jZjG4MTec8Pkyxfjleplw_Y6p9QRdw";
   
   let posts = [];
@@ -707,8 +740,6 @@
   let currentLightboxIndex = 0;
   let carouselIntervals = [];
   let swRegistration = null;
-  
-  // ========== FUNÇÕES DE NOTIFICAÇÕES PUSH ==========
   
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -726,7 +757,6 @@
       console.log('Notificações push não suportadas neste navegador');
       return false;
     }
-    
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
       swRegistration = registration;
@@ -739,23 +769,18 @@
   }
   
   async function subscribeToPush() {
-    if(!swRegistration) {
-      console.log('Service Worker não registrado');
-      return false;
-    }
-    
+    if(!swRegistration) return false;
     try {
       const subscription = await swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
-      
       await saveSubscription(subscription);
       localStorage.setItem('pushEnabled', 'true');
-      console.log('✅ Inscrito em notificações push com sucesso!');
+      console.log('✅ Inscrito em notificações push!');
       return true;
     } catch(error) {
-      console.error('Erro ao inscrever em push:', error);
+      console.error('Erro ao inscrever:', error);
       return false;
     }
   }
@@ -768,7 +793,6 @@
         createdAt: new Date().toISOString(),
         userAgent: navigator.userAgent
       });
-      console.log('Inscrição salva no Firestore');
     } catch(error) {
       console.error('Erro ao salvar inscrição:', error);
     }
@@ -779,7 +803,6 @@
       await subscribeToPush();
       return true;
     }
-    
     if(Notification.permission === 'default') {
       const permission = await Notification.requestPermission();
       if(permission === 'granted') {
@@ -793,7 +816,6 @@
   function showNotificationPrompt() {
     const cookiesAccepted = localStorage.getItem('cookiesAccepted');
     const pushEnabled = localStorage.getItem('pushEnabled');
-    
     if(cookiesAccepted === 'true' && pushEnabled !== 'true' && pushEnabled !== 'declined' && Notification.permission === 'default') {
       setTimeout(() => {
         document.getElementById('notificationPrompt').classList.add('show');
@@ -806,17 +828,10 @@
       const snapshot = await getDocs(subscriptionsCollection);
       const subscribers = [];
       snapshot.forEach(doc => subscribers.push({ id: doc.id, ...doc.data() }));
-      
-      console.log(`📢 Notificação disparada para ${subscribers.length} inscritos: ${title}`);
-      
+      console.log(`📢 Notificação para ${subscribers.length} inscritos: ${title}`);
       if(Notification.permission === 'granted') {
-        new Notification(title, {
-          body: body,
-          icon: '/logoperuacu.png',
-          data: { url: url }
-        });
+        new Notification(title, { body: body, icon: '/logoperuacu.png', data: { url: url } });
       }
-      
       return subscribers.length;
     } catch(error) {
       console.error('Erro ao enviar notificações:', error);
@@ -824,7 +839,6 @@
     }
   }
   
-  // ========== FUNÇÕES DO BLOG ==========
   async function loadPostsFromFirebase() {
     try {
       const q = query(postsCollection, orderBy("date", "desc"));
@@ -838,7 +852,7 @@
       renderPagination();
     } catch (error) {
       console.error("Erro ao carregar posts:", error);
-      document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">Erro ao carregar publicações. Tente novamente.</div>';
+      document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">Erro ao carregar publicações.</div>';
     }
   }
   
@@ -852,7 +866,6 @@
         await addDoc(postsCollection, postData);
       }
       await loadPostsFromFirebase();
-      
       if(isNewPost) {
         await sendPushToAllSubscribers(
           `📢 Novo artigo: ${postData.title.substring(0, 50)}`,
@@ -1120,7 +1133,6 @@
     pag.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.classList.contains('disabled'))return; let v=btn.dataset.page; if(v==='prev'&&currentPage>1)currentPage--; else if(v==='next'&&currentPage<total)currentPage++; else if(!isNaN(parseInt(v)))currentPage=parseInt(v); renderGrid(); renderPagination(); document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'}); }));
   }
   
-  // ========== ADMIN FUNCTIONS ==========
   function showLoginModal() {
     document.getElementById('loginModal').style.display = 'flex';
     document.getElementById('adminEmail').value = '';
@@ -1220,25 +1232,20 @@
     })); 
   }
   
-  // ========== COOKIE CONSENT FUNCTIONS ==========
   function initCookieConsent() {
     const cookieConsent = document.getElementById('cookieConsent');
     const cookiesAccepted = localStorage.getItem('cookiesAccepted');
-    
     if(cookiesAccepted === 'true') {
       cookieConsent.classList.add('hidden');
       return;
     }
-    
     if(cookiesAccepted === 'false') {
       cookieConsent.classList.add('hidden');
       return;
     }
-    
     cookieConsent.classList.remove('hidden');
   }
   
-  // ========== EVENT LISTENERS ==========
   document.getElementById('acceptCookies')?.addEventListener('click', () => {
     localStorage.setItem('cookiesAccepted', 'true');
     document.getElementById('cookieConsent').classList.add('hidden');
@@ -1391,7 +1398,6 @@
     else document.getElementById('adminStatus').classList.remove('logged');
   });
   
-  // Inicialização
   initCookieConsent();
   await seedInitialPosts();
   await loadPostsFromFirebase();
@@ -1401,3 +1407,4 @@
 </script>
 </body>
 </html>
+```
