@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#0A0A0A">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  meta name="apple-mobile-web-app-capable" content="yes">
   
   <!-- METATAGS CORRIGIDAS PARA COMPARTILHAMENTO -->
   <title>Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo</title>
@@ -81,24 +80,25 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .back-home:hover { background: var(--brand-gold); }
     
-    /* CABEÇALHO MOBILE - POSICIONAMENTO PERFEITO IGUAL À IMAGEM 2 */
+    /* CABEÇALHO MOBILE - CENTRALIZADO E COM ESPAÇAMENTO CORRETO */
     @media (max-width: 768px) {
       .header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
-        gap: 8px;
+        padding: 12px 16px;
+        gap: 12px;
       }
       .logo-area {
         display: flex;
         align-items: center;
-        gap: 10px;
-        flex: 0 1 auto;
+        gap: 12px;
+        flex: 1;
       }
       .logo-icon {
         width: 44px;
         height: 44px;
+        flex-shrink: 0;
       }
       .logo-text {
         display: flex;
@@ -107,15 +107,15 @@
       }
       .logo-text h1 {
         font-size: 1.1rem;
-        line-height: 1.2;
+        line-height: 1.25;
       }
       .logo-text span {
         font-size: 0.58rem;
-        letter-spacing: 0.2px;
+        letter-spacing: 0.3px;
       }
       .header-actions {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         flex-shrink: 0;
       }
       .share-blog-btn {
@@ -135,6 +135,10 @@
     }
     
     @media (max-width: 600px) {
+      .header-container {
+        padding: 10px 14px;
+        gap: 10px;
+      }
       .logo-icon {
         width: 42px;
         height: 42px;
@@ -156,6 +160,10 @@
     }
     
     @media (max-width: 500px) {
+      .header-container {
+        padding: 8px 12px;
+        gap: 8px;
+      }
       .logo-icon {
         width: 40px;
         height: 40px;
@@ -165,6 +173,14 @@
       }
       .logo-text span {
         font-size: 0.52rem;
+      }
+      .share-blog-btn {
+        padding: 5px 10px;
+        font-size: 0.68rem;
+      }
+      .back-home {
+        padding: 5px 10px;
+        font-size: 0.68rem;
       }
     }
     
@@ -179,15 +195,12 @@
       .logo-text span {
         font-size: 0.5rem;
       }
-      .share-blog-btn span {
-        display: inline;
-      }
-      .back-home span {
-        display: inline;
-      }
     }
     
-    @media (max-width: 380px) {
+    @media (max-width: 400px) {
+      .header-container {
+        padding: 8px 10px;
+      }
       .logo-icon {
         width: 36px;
         height: 36px;
@@ -199,16 +212,16 @@
         font-size: 0.47rem;
       }
       .share-blog-btn {
-        padding: 5px 9px;
+        padding: 5px 8px;
         font-size: 0.65rem;
       }
       .back-home {
-        padding: 5px 9px;
+        padding: 5px 8px;
         font-size: 0.65rem;
       }
     }
     
-    @media (max-width: 350px) {
+    @media (max-width: 360px) {
       .logo-icon {
         width: 34px;
         height: 34px;
@@ -230,6 +243,12 @@
       }
       .back-home i {
         margin: 0;
+      }
+      .share-blog-btn {
+        padding: 6px 9px;
+      }
+      .back-home {
+        padding: 6px 9px;
       }
     }
     
@@ -753,17 +772,14 @@
   }
   
   async function registerServiceWorker() {
-    if(!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.log('Notificações push não suportadas neste navegador');
-      return false;
-    }
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
       swRegistration = registration;
-      console.log('Service Worker registrado com sucesso');
+      console.log('Service Worker registrado');
       return true;
     } catch(error) {
-      console.error('Erro ao registrar Service Worker:', error);
+      console.error('Erro no Service Worker:', error);
       return false;
     }
   }
@@ -777,7 +793,7 @@
       });
       await saveSubscription(subscription);
       localStorage.setItem('pushEnabled', 'true');
-      console.log('✅ Inscrito em notificações push!');
+      console.log('✅ Inscrito em push notifications');
       return true;
     } catch(error) {
       console.error('Erro ao inscrever:', error);
@@ -1407,4 +1423,3 @@
 </script>
 </body>
 </html>
-```
