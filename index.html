@@ -53,6 +53,29 @@
     .section-subtitle { font-size: 1.125rem; color: var(--gray-600); margin-bottom: 2rem; max-width: 720px; }
     @media (min-width: 768px) { .section-title { font-size: 2.5rem; } }
 
+    /* ========== SCROLL REVEAL ANIMATIONS ========== */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .reveal-on-scroll.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Stagger delays para elementos filhos */
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .reveal-stagger.revealed > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.revealed > *:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.revealed > *:nth-child(3) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.revealed > *:nth-child(4) { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.revealed > *:nth-child(5) { transition-delay: 0.45s; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.revealed > *:nth-child(6) { transition-delay: 0.55s; opacity: 1; transform: translateY(0); }
+
     /* ========== HEADER ========== */
     .header {
       position: sticky;
@@ -710,9 +733,12 @@
 </div>
 <main>
   <div class="hero-full" id="heroFull"><div class="hero-slider-modern" id="heroSliderModern"></div><div class="slider-nav" id="sliderDotsModern"></div></div>
-  <section style="padding:64px 0 48px;"><div class="container"><h2 class="section-title">Por que explorar o Peruaçu?</h2><p class="section-subtitle">Um dos sítios arqueológicos mais impressionantes do Brasil, com paisagens de tirar o fôlego.</p><div class="grid-3"><div class="card"><h3>Arte rupestre</h3><p>Pinturas com mais de 10 mil anos em paredões preservados. Tradições rupestres únicas no mundo.</p></div><div class="card"><h3>Cavernas gigantes</h3><p>Gruta do Janelão, Lapa do Boquete e formações geológicas únicas, com a maior estalactite do mundo.</p></div><div class="card"><h3>Ecoturismo responsável</h3><p>Visitação controlada, trilhas, mirantes e condutores credenciados pelo ICMBio.</p></div></div></div></section>
-  <section id="roteiros" style="background:var(--gray-50);padding:64px 0;"><div class="container"><h2 class="section-title">Roteiros em destaque</h2><div class="grid-2"><div class="tour-card"><div class="tour-content"><h3>🌟 Clássico (1 dia)</h3><ul style="list-style:none"><li>✔ Gruta do Janelão</li><li>✔ Lapa do Boquete</li><li>✔ Painéis de arte rupestre</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Tenho%20interesse%20no%20roteiro%20Clássico" class="btn-tour">Quero este roteiro</a></div></div><div class="tour-card"><div class="tour-content"><h3>🗺️ Expedição (2-4 dias)</h3><ul style="list-style:none"><li>✔ Todas as cavernas principais</li><li>✔ Arco do André + Lapa Bonita</li><li>✔ Logística completa inclusa</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20Expedição%20Peruaçu" class="btn-tour">Explorar expedição</a></div></div></div></div></section>
-  <section id="galeria" style="padding:64px 0;"><div class="container"><h2 class="section-title">Galeria completa</h2><p class="section-subtitle">Clique em qualquer foto para ampliar, baixar ou compartilhar.</p><div class="gallery" id="galleryContainer">
+  
+  <section style="padding:64px 0 48px;" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Por que explorar o Peruaçu?</h2><p class="section-subtitle">Um dos sítios arqueológicos mais impressionantes do Brasil, com paisagens de tirar o fôlego.</p><div class="grid-3 reveal-stagger"><div class="card"><h3>Arte rupestre</h3><p>Pinturas com mais de 10 mil anos em paredões preservados. Tradições rupestres únicas no mundo.</p></div><div class="card"><h3>Cavernas gigantes</h3><p>Gruta do Janelão, Lapa do Boquete e formações geológicas únicas, com a maior estalactite do mundo.</p></div><div class="card"><h3>Ecoturismo responsável</h3><p>Visitação controlada, trilhas, mirantes e condutores credenciados pelo ICMBio.</p></div></div></div></section>
+  
+  <section id="roteiros" style="background:var(--gray-50);padding:64px 0;" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Roteiros em destaque</h2><div class="grid-2 reveal-stagger"><div class="tour-card"><div class="tour-content"><h3>🌟 Clássico (1 dia)</h3><ul style="list-style:none"><li>✔ Gruta do Janelão</li><li>✔ Lapa do Boquete</li><li>✔ Painéis de arte rupestre</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Tenho%20interesse%20no%20roteiro%20Clássico" class="btn-tour">Quero este roteiro</a></div></div><div class="tour-card"><div class="tour-content"><h3>🗺️ Expedição (2-4 dias)</h3><ul style="list-style:none"><li>✔ Todas as cavernas principais</li><li>✔ Arco do André + Lapa Bonita</li><li>✔ Logística completa inclusa</li></ul><a href="https://wa.me/5538991307687?text=Olá!%20Quero%20Expedição%20Peruaçu" class="btn-tour">Explorar expedição</a></div></div></div></div></section>
+  
+  <section id="galeria" style="padding:64px 0;" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Galeria completa</h2><p class="section-subtitle">Clique em qualquer foto para ampliar, baixar ou compartilhar.</p><div class="gallery" id="galleryContainer">
     <div class="gallery-item large"><img src="Janelão.jpg" alt="Gruta do Janelão"></div>
     <div class="gallery-item"><img src="arte.jpg" alt="Pintura rupestre Lapa dos Desenhos" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Arte+Rupestre'"></div>
     <div class="gallery-item"><img src="canion.png" alt="Cânion do Peruaçu" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=C%C3%A2nion'"></div>
@@ -725,9 +751,12 @@
     <div class="gallery-item"><img src="estalactite_perna_bailarina.jpeg" alt="Perna da Bailarina" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Estalactite+Gigante'"></div>
     <div class="gallery-item"><img src="mirante_mundo_inteiro.jpeg" alt="Mirante do Mundo Inteiro" onerror="this.src='https://placehold.co/400x400/2C6E49/white?text=Mirante'"></div>
   </div></div></section>
-  <section id="atrativos" style="background:var(--gray-50); padding:64px 0;"><div class="container"><h2 class="section-title">Conheça cada atrativo</h2><div class="attraction-grid"><div class="attraction-card"><div class="attraction-img"><img src="Janelão.jpg" alt="Gruta do Janelão"></div><div class="attraction-info"><h3>Gruta do Janelão</h3><div class="attraction-meta"><span class="meta-badge">⭐ Principal atrativo</span><span class="meta-badge">Maior estalactite do mundo</span></div><div class="info-row"><strong>Dificuldade:</strong> Semipesado</div><div class="info-row"><strong>Distância:</strong> 4,8 km</div><div class="info-row"><strong>Tempo:</strong> 5h30</div><p>Perna da Bailarina com 28m. Paredão com pinturas rupestres na entrada.</p></div></div><div class="attraction-card"><div class="attraction-img"><img src="Arco-do-Andre.jpg" alt="Arco do André"></div><div class="attraction-info"><h3>Arco do André</h3><div class="attraction-meta"><span class="meta-badge">Mirante das Cinco Torres</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 8 km</div><div class="info-row"><strong>Tempo:</strong> 7h</div><p>Trilha rústica, mirantes únicos e Rio Peruaçu esmeralda.</p></div></div><div class="attraction-card"><div class="attraction-img"><img src="salãovermelho.jpg" alt="Lapa Bonita"></div><div class="attraction-info"><h3>Lapa Bonita & Lapa do Índio</h3><div class="attraction-meta"><span class="meta-badge">Salão Vermelho</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1.500m</div><div class="info-row"><strong>Tempo:</strong> 2h20</div><p>Pinturas rupestres e espeleotemas exuberantes.</p></div></div><div class="attraction-card"><div class="attraction-img"><img src="boquete1.jpg" alt="Lapa do Boquete"></div><div class="attraction-info"><h3>Lapa do Boquete</h3><div class="attraction-meta"><span class="meta-badge">Sítio arqueológico</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1,2 km</div><div class="info-row"><strong>Tempo:</strong> 1h30</div><p>Sepultamentos e estruturas de armazenamento de alimentos.</p></div></div></div></div></section>
-  <section style="padding:48px 0;"><div class="container"><h2 class="section-title">Dúvidas frequentes</h2><details><summary>Preciso de guia para visitar? <span>+</span></summary><div class="faq-answer">Sim. A visitação no Parque Nacional Cavernas do Peruaçu é obrigatoriamente acompanhada por condutores credenciados pelo ICMBio.</div></details><details><summary>Quanto tempo dura a visita? <span>+</span></summary><div class="faq-answer">Roteiros de meio dia (4-5h), dia completo (8-9h) e expedições de 2 a 4 dias.</div></details><details><summary>O que levar? <span>+</span></summary><div class="faq-answer">Calçado fechado, água (min 2L), lanche, protetor solar, repelente, lanterna.</div></details></div></section>
-  <section id="contato" style="padding:64px 0; background: var(--gray-50);"><div class="container"><h2 class="section-title">Fale comigo e agende</h2><div class="contact-grid"><div class="contact-info"><h3>📞 Contato direto</h3><div style="margin:20px 0"><p><strong>Telefone:</strong> (38) 99130-7687</p><p><strong>WhatsApp:</strong> <a href="https://wa.me/5538991307687" style="color:#1a1a1a; font-weight:bold">Clique e fale agora</a></p></div><p style="background:rgba(0,0,0,0.1); border-radius:20px; padding:16px;"> Resposta rápida em até 30 minutos.</p></div><div class="form-card"><h3>Pré-agendamento rápido</h3><form id="quickForm"><div class="form-group"><input type="text" id="nome" placeholder="Seu nome completo *" required></div><div class="form-group"><select id="pessoas" required><option value="">Quantas pessoas? *</option><option>1 pessoa</option><option>2 pessoas</option><option>3-4 pessoas</option><option>5+ pessoas</option></select></div><div class="form-group"><select id="dias" required><option value="">Roteiro desejado *</option><option>Meio dia (4-5h)</option><option>1 dia completo</option><option>2 dias</option><option>3-4 dias</option></select></div><div class="form-group"><input type="text" id="data" placeholder="Data prevista (ex: maio/junho)"></div><div class="form-group"><textarea id="msg" rows="3" placeholder="Mensagem adicional"></textarea></div><button type="submit" class="btn-form">Enviar pelo WhatsApp →</button></form></div></div></div></section>
+  
+  <section id="atrativos" style="background:var(--gray-50); padding:64px 0;" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Conheça cada atrativo</h2><div class="attraction-grid reveal-stagger"><div class="attraction-card"><div class="attraction-img"><img src="Janelão.jpg" alt="Gruta do Janelão"></div><div class="attraction-info"><h3>Gruta do Janelão</h3><div class="attraction-meta"><span class="meta-badge">⭐ Principal atrativo</span><span class="meta-badge">Maior estalactite do mundo</span></div><div class="info-row"><strong>Dificuldade:</strong> Semipesado</div><div class="info-row"><strong>Distância:</strong> 4,8 km</div><div class="info-row"><strong>Tempo:</strong> 5h30</div><p>Perna da Bailarina com 28m. Paredão com pinturas rupestres na entrada.</p></div></div><div class="attraction-card"><div class="attraction-img"><img src="Arco-do-Andre.jpg" alt="Arco do André"></div><div class="attraction-info"><h3>Arco do André</h3><div class="attraction-meta"><span class="meta-badge">Mirante das Cinco Torres</span></div><div class="info-row"><strong>Dificuldade:</strong> Pesado</div><div class="info-row"><strong>Distância:</strong> 8 km</div><div class="info-row"><strong>Tempo:</strong> 7h</div><p>Trilha rústica, mirantes únicos e Rio Peruaçu esmeralda.</p></div></div><div class="attraction-card"><div class="attraction-img"><img src="salãovermelho.jpg" alt="Lapa Bonita"></div><div class="attraction-info"><h3>Lapa Bonita & Lapa do Índio</h3><div class="attraction-meta"><span class="meta-badge">Salão Vermelho</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1.500m</div><div class="info-row"><strong>Tempo:</strong> 2h20</div><p>Pinturas rupestres e espeleotemas exuberantes.</p></div></div><div class="attraction-card"><div class="attraction-img"><img src="boquete1.jpg" alt="Lapa do Boquete"></div><div class="attraction-info"><h3>Lapa do Boquete</h3><div class="attraction-meta"><span class="meta-badge">Sítio arqueológico</span></div><div class="info-row"><strong>Dificuldade:</strong> Leve</div><div class="info-row"><strong>Distância:</strong> 1,2 km</div><div class="info-row"><strong>Tempo:</strong> 1h30</div><p>Sepultamentos e estruturas de armazenamento de alimentos.</p></div></div></div></div></section>
+  
+  <section style="padding:48px 0;" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Dúvidas frequentes</h2><details><summary>Preciso de guia para visitar? <span>+</span></summary><div class="faq-answer">Sim. A visitação no Parque Nacional Cavernas do Peruaçu é obrigatoriamente acompanhada por condutores credenciados pelo ICMBio.</div></details><details><summary>Quanto tempo dura a visita? <span>+</span></summary><div class="faq-answer">Roteiros de meio dia (4-5h), dia completo (8-9h) e expedições de 2 a 4 dias.</div></details><details><summary>O que levar? <span>+</span></summary><div class="faq-answer">Calçado fechado, água (min 2L), lanche, protetor solar, repelente, lanterna.</div></details></div></section>
+  
+  <section id="contato" style="padding:64px 0; background: var(--gray-50);" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Fale comigo e agende</h2><div class="contact-grid reveal-stagger"><div class="contact-info"><h3>📞 Contato direto</h3><div style="margin:20px 0"><p><strong>Telefone:</strong> (38) 99130-7687</p><p><strong>WhatsApp:</strong> <a href="https://wa.me/5538991307687" style="color:#1a1a1a; font-weight:bold">Clique e fale agora</a></p></div><p style="background:rgba(0,0,0,0.1); border-radius:20px; padding:16px;"> Resposta rápida em até 30 minutos.</p></div><div class="form-card"><h3>Pré-agendamento rápido</h3><form id="quickForm"><div class="form-group"><input type="text" id="nome" placeholder="Seu nome completo *" required></div><div class="form-group"><select id="pessoas" required><option value="">Quantas pessoas? *</option><option>1 pessoa</option><option>2 pessoas</option><option>3-4 pessoas</option><option>5+ pessoas</option></select></div><div class="form-group"><select id="dias" required><option value="">Roteiro desejado *</option><option>Meio dia (4-5h)</option><option>1 dia completo</option><option>2 dias</option><option>3-4 dias</option></select></div><div class="form-group"><input type="text" id="data" placeholder="Data prevista (ex: maio/junho)"></div><div class="form-group"><textarea id="msg" rows="3" placeholder="Mensagem adicional"></textarea></div><button type="submit" class="btn-form">Enviar pelo WhatsApp →</button></form></div></div></div></section>
 </main>
 <footer class="footer"><div class="container"><div style="display:flex; justify-content:space-between; flex-wrap:wrap;"><div><strong>Caminhos do Peruaçu</strong><p>Itacarambi - MG</p></div><div><a href="https://www.instagram.com/caminhosdoperuacu/" style="color:#ccc;">Instagram</a> | <a href="https://wa.me/5538991307687" style="color:#ccc;">WhatsApp</a></div></div><div style="text-align:center; margin-top:32px;">© <span id="year"></span> Caminhos do Peruaçu · Parque Nacional Cavernas do Peruaçu | ICMBio</div></div></footer>
 </div>
@@ -760,6 +789,53 @@
       if(msg) texto += `Obs: ${msg}. `;
       window.open(`https://wa.me/5538991307687?text=${encodeURIComponent(texto)}`, '_blank');
     });
+  })();
+  
+  // ========== SCROLL REVEAL FUNCTION ==========
+  (function initScrollReveal() {
+    const revealElements = document.querySelectorAll('.reveal-on-scroll, .reveal-stagger');
+    
+    // Adiciona classe base para opacidade 0
+    revealElements.forEach(el => {
+      if (!el.classList.contains('revealed')) {
+        // Se for stagger, aplica nos filhos a classe para animação
+        if (el.classList.contains('reveal-stagger')) {
+          // Já está com opacity:0 nos filhos via CSS
+        } else {
+          // Garantir que o próprio elemento comece invisível
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(30px)';
+          el.style.transition = 'opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+        }
+      }
+    });
+    
+    function checkScroll() {
+      const windowHeight = window.innerHeight;
+      const revealThreshold = 100; // Revela um pouco antes do elemento entrar na tela
+      
+      revealElements.forEach(el => {
+        if (el.classList.contains('revealed')) return;
+        
+        const rect = el.getBoundingClientRect();
+        const isVisible = rect.top < windowHeight - revealThreshold && rect.bottom > 0;
+        
+        if (isVisible) {
+          el.classList.add('revealed');
+          // Remove estilos inline se existirem
+          if (!el.classList.contains('reveal-stagger')) {
+            el.style.opacity = '';
+            el.style.transform = '';
+          }
+        }
+      });
+    }
+    
+    // Executa uma vez ao carregar e no scroll
+    window.addEventListener('load', checkScroll);
+    window.addEventListener('scroll', checkScroll);
+    window.addEventListener('resize', checkScroll);
+    checkScroll(); // Chamada imediata
   })();
   
   // MOBILE GALLERY: Ocultar 6 fotos e adicionar indicador na última visível (sem o primeiro +)
