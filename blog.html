@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#0A0A0A">
   
-  <!-- METATAGS CORRIGIDAS PARA COMPARTILHAMENTO DINÂMICO (via JavaScript atualiza og:image e og:title) -->
+  <!-- METATAGS CORRIGIDAS PARA COMPARTILHAMENTO DINÂMICO -->
   <title>Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo</title>
   <meta name="description" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
   
-  <!-- Open Graph / Facebook - serão sobrescritos dinamicamente ao abrir modal -->
+  <!-- Open Graph / Facebook - serão sobrescritos dinamicamente ao compartilhar -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo">
   <meta property="og:description" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
@@ -79,45 +79,178 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .back-home:hover { background: var(--brand-gold); }
     
+    /* CABEÇALHO MOBILE - ORIGINAL RESTAURADO */
     @media (max-width: 768px) {
-      .header-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; gap: 12px; }
-      .logo-area { display: flex; align-items: center; gap: 12px; flex: 1; }
-      .logo-icon { width: 44px; height: 44px; flex-shrink: 0; }
-      .logo-text { display: flex; flex-direction: column; justify-content: center; }
-      .logo-text h1 { font-size: 1.1rem; line-height: 1.25; }
-      .logo-text span { font-size: 0.58rem; letter-spacing: 0.3px; }
-      .header-actions { display: flex; gap: 10px; flex-shrink: 0; }
-      .share-blog-btn { padding: 7px 14px; font-size: 0.75rem; }
-      .share-blog-btn i { font-size: 0.75rem; }
-      .back-home { padding: 7px 14px; font-size: 0.75rem; }
-      .back-home i { font-size: 0.75rem; }
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        gap: 12px;
+      }
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+      }
+      .logo-icon {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+      }
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .logo-text h1 {
+        font-size: 1.1rem;
+        line-height: 1.25;
+      }
+      .logo-text span {
+        font-size: 0.58rem;
+        letter-spacing: 0.3px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .share-blog-btn {
+        padding: 7px 14px;
+        font-size: 0.75rem;
+      }
+      .share-blog-btn i {
+        font-size: 0.75rem;
+      }
+      .back-home {
+        padding: 7px 14px;
+        font-size: 0.75rem;
+      }
+      .back-home i {
+        font-size: 0.75rem;
+      }
     }
+    
     @media (max-width: 600px) {
-      .header-container { padding: 10px 14px; gap: 10px; }
-      .logo-icon { width: 42px; height: 42px; }
-      .logo-text h1 { font-size: 1rem; }
-      .logo-text span { font-size: 0.55rem; }
-      .share-blog-btn { padding: 6px 12px; font-size: 0.7rem; }
-      .back-home { padding: 6px 12px; font-size: 0.7rem; }
+      .header-container {
+        padding: 10px 14px;
+        gap: 10px;
+      }
+      .logo-icon {
+        width: 42px;
+        height: 42px;
+      }
+      .logo-text h1 {
+        font-size: 1rem;
+      }
+      .logo-text span {
+        font-size: 0.55rem;
+      }
+      .share-blog-btn {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+      }
+      .back-home {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+      }
     }
+    
     @media (max-width: 500px) {
-      .header-container { padding: 8px 12px; gap: 8px; }
-      .logo-icon { width: 40px; height: 40px; }
-      .logo-text h1 { font-size: 0.95rem; }
-      .logo-text span { font-size: 0.52rem; }
-      .share-blog-btn { padding: 5px 10px; font-size: 0.68rem; }
-      .back-home { padding: 5px 10px; font-size: 0.68rem; }
+      .header-container {
+        padding: 8px 12px;
+        gap: 8px;
+      }
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+      }
+      .logo-text h1 {
+        font-size: 0.95rem;
+      }
+      .logo-text span {
+        font-size: 0.52rem;
+      }
+      .share-blog-btn {
+        padding: 5px 10px;
+        font-size: 0.68rem;
+      }
+      .back-home {
+        padding: 5px 10px;
+        font-size: 0.68rem;
+      }
     }
+    
+    @media (max-width: 450px) {
+      .logo-icon {
+        width: 38px;
+        height: 38px;
+      }
+      .logo-text h1 {
+        font-size: 0.88rem;
+      }
+      .logo-text span {
+        font-size: 0.5rem;
+      }
+    }
+    
     @media (max-width: 400px) {
-      .logo-icon { width: 36px; height: 36px; }
-      .logo-text h1 { font-size: 0.82rem; }
-      .share-blog-btn span { display: none; }
-      .share-blog-btn i { margin: 0; }
-      .back-home span { display: none; }
-      .back-home i { margin: 0; }
-      .share-blog-btn { padding: 6px 9px; }
-      .back-home { padding: 6px 9px; }
+      .header-container {
+        padding: 8px 10px;
+      }
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+      }
+      .logo-text h1 {
+        font-size: 0.82rem;
+      }
+      .logo-text span {
+        font-size: 0.47rem;
+      }
+      .share-blog-btn {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
+      .back-home {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
     }
+    
+    @media (max-width: 360px) {
+      .logo-icon {
+        width: 34px;
+        height: 34px;
+      }
+      .logo-text h1 {
+        font-size: 0.78rem;
+      }
+      .logo-text span {
+        font-size: 0.44rem;
+      }
+      .share-blog-btn span {
+        display: none;
+      }
+      .share-blog-btn i {
+        margin: 0;
+      }
+      .back-home span {
+        display: none;
+      }
+      .back-home i {
+        margin: 0;
+      }
+      .share-blog-btn {
+        padding: 6px 9px;
+      }
+      .back-home {
+        padding: 6px 9px;
+      }
+    }
+    
     .hero-section { margin: 32px 0 40px; }
     .featured-card { display: grid; grid-template-columns: 1fr; gap: 24px; background: var(--blog-black); border-radius: 16px; overflow: hidden; }
     @media (min-width: 768px) { .featured-card { grid-template-columns: 1.2fr 0.8fr; } }
@@ -158,18 +291,95 @@
     .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
     .carousel-dot.active { background: var(--brand-gold); }
     .carousel-indicator { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
-    .lightbox-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-    .lightbox-container { width: 90%; max-width: 1200px; max-height: 90vh; position: relative; }
-    .lightbox-image { width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px; cursor: zoom-out; }
-    .lightbox-close { position: absolute; top: -50px; right: 0; background: transparent; border: none; color: white; font-size: 2rem; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; transition: 0.2s; }
+    .lightbox-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .lightbox-container {
+      width: 90%;
+      max-width: 1200px;
+      max-height: 90vh;
+      position: relative;
+    }
+    .lightbox-image {
+      width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: 8px;
+      cursor: zoom-out;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: -50px;
+      right: 0;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
     .lightbox-close:hover { background: var(--brand-gold); color: black; }
-    .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: 0.2s;
+    }
     .lightbox-nav:hover { background: var(--brand-gold); color: black; }
     .lightbox-prev { left: -60px; }
     .lightbox-next { right: -60px; }
-    .lightbox-counter { position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); color: white; background: rgba(0,0,0,0.6); padding: 6px 16px; border-radius: 30px; font-size: 0.9rem; }
-    .lightbox-actions { position: absolute; bottom: -40px; right: 0; display: flex; gap: 12px; }
-    .lightbox-action-btn { background: rgba(0,0,0,0.6); border: none; color: white; padding: 8px 16px; border-radius: 30px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .lightbox-counter {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+    }
+    .lightbox-actions {
+      position: absolute;
+      bottom: -40px;
+      right: 0;
+      display: flex;
+      gap: 12px;
+    }
+    .lightbox-action-btn {
+      background: rgba(0,0,0,0.6);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
     .lightbox-action-btn:hover { background: var(--brand-gold); color: black; }
     @media (max-width: 768px) {
       .lightbox-prev { left: 10px; }
@@ -193,21 +403,83 @@
     .share-btn.twitter { background: #000000; color: white; }
     .share-btn.telegram { background: #0088cc; color: white; }
     .share-btn.copy-link { background: var(--brand-gold); color: #0A0A0A; }
-    .admin-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 580px; height: 100%; background: white; z-index: 3000; box-shadow: -5px 0 30px rgba(0,0,0,0.3); transition: right 0.3s ease; overflow-y: auto; padding: 24px; }
+    .admin-panel {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 580px;
+      height: 100%;
+      background: white;
+      z-index: 3000;
+      box-shadow: -5px 0 30px rgba(0,0,0,0.3);
+      transition: right 0.3s ease;
+      overflow-y: auto;
+      padding: 24px;
+    }
     .admin-panel.open { right: 0; }
-    .admin-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2500; display: none; }
+    .admin-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2500;
+      display: none;
+    }
     .admin-overlay.open { display: block; }
-    .login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4000; display: none; align-items: center; justify-content: center; }
-    .login-container { background: white; padding: 40px; border-radius: 24px; max-width: 400px; width: 90%; text-align: center; }
+    .login-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 4000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 24px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
     .login-container h3 { margin-bottom: 20px; color: var(--blog-black); }
-    .login-container input { width: 100%; padding: 12px; border: 1px solid var(--blog-border); border-radius: 8px; margin-bottom: 20px; font-size: 1rem; }
-    .login-container button { background: var(--brand-gold); border: none; padding: 12px 24px; border-radius: 40px; font-weight: 700; cursor: pointer; width: 100%; }
-    .login-container .error-msg { color: #dc2626; font-size: 0.8rem; margin-top: 10px; display: none; }
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--blog-border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+    .login-container button {
+      background: var(--brand-gold);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+    }
+    .login-container .error-msg {
+      color: #dc2626;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      display: none;
+    }
     .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; border-bottom: 2px solid var(--brand-gold); padding-bottom: 16px; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; }
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--blog-border); border-radius: 8px; }
     .image-upload-group { background: #f8f8f8; padding: 14px; border-radius: 12px; margin-bottom: 16px; }
+    .image-input-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+    .image-input-row input { flex: 1; }
     .btn-add-img { background: var(--brand-gold-soft); border: 1px dashed var(--brand-gold); padding: 6px 12px; border-radius: 30px; cursor: pointer; margin-top: 6px; }
     .btn-admin { background: var(--brand-gold); border: none; padding: 12px 20px; border-radius: 40px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
     .btn-danger { background: #dc2626; color: white; }
@@ -222,19 +494,134 @@
     .checkbox-group label { margin-bottom: 0; cursor: pointer; }
     hr { margin: 16px 0; }
     .clickable-image { cursor: pointer; }
-    .admin-status { position: fixed; bottom: 20px; right: 20px; background: var(--brand-gold); padding: 10px 18px; border-radius: 40px; font-size: 0.8rem; font-weight: 700; cursor: pointer; z-index: 1500; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    .admin-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--brand-gold);
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 1500;
+      display: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
     .admin-status.logged { display: flex; align-items: center; gap: 8px; }
-    .cookie-consent { position: fixed; bottom: 0; left: 0; right: 0; background: var(--blog-black); color: white; padding: 16px 20px; z-index: 9999; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-top: 3px solid var(--brand-gold); transform: translateY(0); transition: transform 0.3s ease; }
-    .cookie-consent.hidden { transform: translateY(100%); pointer-events: none; }
-    .cookie-text { flex: 1; font-size: 0.85rem; }
-    .cookie-text i { color: var(--brand-gold); margin-right: 10px; }
-    .cookie-text a { color: var(--brand-gold); text-decoration: none; }
-    .cookie-buttons { display: flex; gap: 12px; }
-    .cookie-btn { padding: 8px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; border: none; font-size: 0.8rem; }
-    .cookie-btn.accept { background: var(--brand-gold); color: var(--blog-black); }
-    .cookie-btn.decline { background: transparent; border: 1px solid #666; color: white; }
-    .notification-prompt { position: fixed; bottom: 100px; right: 20px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 9998; max-width: 320px; display: none; border-left: 4px solid var(--brand-gold); }
-    .notification-prompt.show { display: block; }
+    @media (max-width: 700px) { .modal-body { padding: 20px; } }
+
+    .cookie-consent {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--blog-black);
+      color: white;
+      padding: 16px 20px;
+      z-index: 9999;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border-top: 3px solid var(--brand-gold);
+      transform: translateY(0);
+      transition: transform 0.3s ease;
+    }
+    .cookie-consent.hidden {
+      transform: translateY(100%);
+      pointer-events: none;
+    }
+    .cookie-text {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+    .cookie-text i {
+      color: var(--brand-gold);
+      margin-right: 10px;
+    }
+    .cookie-text a {
+      color: var(--brand-gold);
+      text-decoration: none;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .cookie-btn {
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 0.8rem;
+    }
+    .cookie-btn.accept {
+      background: var(--brand-gold);
+      color: var(--blog-black);
+    }
+    .cookie-btn.decline {
+      background: transparent;
+      border: 1px solid #666;
+      color: white;
+    }
+    .notification-prompt {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      z-index: 9998;
+      max-width: 320px;
+      display: none;
+      border-left: 4px solid var(--brand-gold);
+    }
+    .notification-prompt.show {
+      display: block;
+    }
+    .notification-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .notification-header i {
+      font-size: 24px;
+      color: var(--brand-gold);
+    }
+    .notification-header strong {
+      display: block;
+      font-size: 1rem;
+    }
+    .notification-header small {
+      color: #666;
+      font-size: 0.75rem;
+    }
+    .notification-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .notif-btn {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .notif-btn.enable {
+      background: var(--brand-gold);
+      color: var(--blog-black);
+    }
+    .notif-btn.later {
+      background: #EAEAEA;
+      color: #333;
+    }
     @media (max-width: 480px) {
       .cookie-text { font-size: 0.7rem; }
       .cookie-btn { padding: 6px 14px; font-size: 0.7rem; }
@@ -271,22 +658,103 @@
 <footer class="footer"><div class="container"><div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px;"><div><strong style="color:var(--brand-gold);">Caminhos do Peruaçu</strong><br>Itacarambi – MG</div><div><i class="fab fa-instagram"></i> @caminhosdoperuacu | <i class="fab fa-whatsapp"></i> (38) 99130-7687</div></div><div style="text-align:center; margin-top:40px; font-size:0.7rem;">© 2025 · Carrossel + Vídeos + Compartilhamento + Notificações Push</div></div></footer>
 
 <div id="newsModal" class="modal-g1"><div class="modal-g1-container"><div class="modal-header"><span><i class="fas fa-play-circle"></i> Conteúdo completo</span><button class="modal-close" id="closeModalBtn">&times;</button></div><div class="modal-body" id="modalBodyContent"></div></div></div>
-<div id="lightboxModal" class="lightbox-modal"><div class="lightbox-container"><button class="lightbox-close" id="lightboxClose">&times;</button><button class="lightbox-nav lightbox-prev" id="lightboxPrev"><i class="fas fa-chevron-left"></i></button><button class="lightbox-nav lightbox-next" id="lightboxNext"><i class="fas fa-chevron-right"></i></button><img id="lightboxImage" class="lightbox-image" alt="Imagem ampliada"><div class="lightbox-counter" id="lightboxCounter"></div><div class="lightbox-actions"><button class="lightbox-action-btn" id="lightboxDownload"><i class="fas fa-download"></i> Baixar</button><button class="lightbox-action-btn" id="lightboxShare"><i class="fas fa-share-alt"></i> Compartilhar</button></div></div></div>
-<div id="loginModal" class="login-modal"><div class="login-container"><h3><i class="fas fa-lock"></i> Acesso Administrativo</h3><input type="email" id="adminEmail" placeholder="Seu email" autocomplete="off"><input type="password" id="adminPassword" placeholder="Sua senha"><button id="loginBtn">Acessar Painel</button><div id="loginError" class="error-msg">Email ou senha incorretos!</div></div></div>
-<div class="admin-status" id="adminStatus"><i class="fas fa-cog"></i> Admin</div>
+
+<div id="lightboxModal" class="lightbox-modal">
+  <div class="lightbox-container">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev"><i class="fas fa-chevron-left"></i></button>
+    <button class="lightbox-nav lightbox-next" id="lightboxNext"><i class="fas fa-chevron-right"></i></button>
+    <img id="lightboxImage" class="lightbox-image" alt="Imagem ampliada">
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+    <div class="lightbox-actions">
+      <button class="lightbox-action-btn" id="lightboxDownload"><i class="fas fa-download"></i> Baixar</button>
+      <button class="lightbox-action-btn" id="lightboxShare"><i class="fas fa-share-alt"></i> Compartilhar</button>
+    </div>
+  </div>
+</div>
+
+<div id="loginModal" class="login-modal">
+  <div class="login-container">
+    <h3><i class="fas fa-lock"></i> Acesso Administrativo</h3>
+    <input type="email" id="adminEmail" placeholder="Seu email" autocomplete="off">
+    <input type="password" id="adminPassword" placeholder="Sua senha">
+    <button id="loginBtn">Acessar Painel</button>
+    <div id="loginError" class="error-msg">Email ou senha incorretos!</div>
+  </div>
+</div>
+
+<div class="admin-status" id="adminStatus">
+  <i class="fas fa-cog"></i> Admin
+</div>
+
 <div class="admin-overlay" id="adminOverlay"></div>
-<div class="admin-panel" id="adminPanel"><div class="admin-header"><h2><i class="fas fa-edit"></i> Admin Pro</h2><button id="closeAdminBtn" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">&times;</button></div><form id="postForm"><input type="hidden" id="editPostId" value=""><div class="form-group"><label>Título *</label><input type="text" id="postTitle" required></div><div class="form-group"><label>Categoria</label><input type="text" id="postCategory" value="ECOTURISMO"></div><div class="form-group"><label>Resumo</label><textarea id="postExcerpt" rows="2"></textarea></div><div class="form-group"><label>Conteúdo (HTML)</label><textarea id="postFull" rows="4"></textarea></div><div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="postImg"></div><div class="form-group"><label>Vídeo (URL YouTube/Vimeo - opcional)</label><input type="text" id="postVideo" placeholder="https://www.youtube.com/embed/..."></div><div class="form-group"><label>Link externo (opcional)</label><input type="text" id="postLink" placeholder="https://..."></div><div class="image-upload-group"><label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label><div id="galleryImagesContainer"></div><button type="button" id="addImageBtn" class="btn-add-img"><i class="fas fa-plus"></i> Adicionar imagem</button><div class="form-group" style="margin-top:12px;"><label>Layout da galeria</label><div id="layoutSelector"><span data-layout="2" class="layout-opt">2 col</span><span data-layout="3" class="layout-opt active-layout">3 col</span><span data-layout="4" class="layout-opt">4 col</span></div><input type="hidden" id="galleryLayout" value="3"></div><div class="checkbox-group"><input type="checkbox" id="postAutoCarousel"> <label for="postAutoCarousel"><i class="fas fa-play-circle"></i> Ativar carrossel automático (se tiver 2+ imagens, elas trocarão sozinhas no início do post)</label></div></div><div class="form-group"><label>Destaque</label><select id="postFeatured"><option value="false">Não</option><option value="true">Sim</option></select></div><button type="submit" class="btn-admin"><i class="fas fa-save"></i> Publicar/Atualizar</button><button type="button" id="cancelEditBtn" class="btn-admin" style="display:none; background:#aaa;">Cancelar</button></form><hr><h3>Posts existentes</h3><div id="adminPostList"></div><button id="clearAllBtn" class="btn-admin btn-danger">Resetar padrão</button><button id="logoutAdminBtn" class="btn-admin" style="background:#666; margin-top:10px;"><i class="fas fa-sign-out-alt"></i> Sair do Admin</button></div>
-<div id="cookieConsent" class="cookie-consent"><div class="cookie-text"><i class="fas fa-cookie-bite"></i> Usamos cookies para melhorar sua experiência e permitir notificações de novos conteúdos. <a href="#" id="cookieMoreLink">Saiba mais</a></div><div class="cookie-buttons"><button id="acceptCookies" class="cookie-btn accept">Aceitar</button><button id="declineCookies" class="cookie-btn decline">Recusar</button></div></div>
-<div id="notificationPrompt" class="notification-prompt"><div class="notification-header"><i class="fas fa-bell"></i><div><strong>Fique por dentro!</strong><small>Receba notificações quando publicarmos novos conteúdos</small></div></div><div class="notification-buttons"><button id="enableNotifications" class="notif-btn enable">Ativar notificações</button><button id="dismissNotifications" class="notif-btn later">Agora não</button></div></div>
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header"><h2><i class="fas fa-edit"></i> Admin Pro</h2><button id="closeAdminBtn" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">&times;</button></div>
+  <form id="postForm"><input type="hidden" id="editPostId" value="">
+    <div class="form-group"><label>Título *</label><input type="text" id="postTitle" required></div>
+    <div class="form-group"><label>Categoria</label><input type="text" id="postCategory" value="ECOTURISMO"></div>
+    <div class="form-group"><label>Resumo</label><textarea id="postExcerpt" rows="2"></textarea></div>
+    <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="postFull" rows="4"></textarea></div>
+    <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="postImg"></div>
+    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo - opcional)</label><input type="text" id="postVideo" placeholder="https://www.youtube.com/embed/..."></div>
+    <div class="form-group"><label>Link externo (opcional)</label><input type="text" id="postLink" placeholder="https://..."></div>
+    <div class="image-upload-group"><label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label><div id="galleryImagesContainer"></div><button type="button" id="addImageBtn" class="btn-add-img"><i class="fas fa-plus"></i> Adicionar imagem</button>
+      <div class="form-group" style="margin-top:12px;"><label>Layout da galeria</label><div id="layoutSelector"><span data-layout="2" class="layout-opt">2 col</span><span data-layout="3" class="layout-opt active-layout">3 col</span><span data-layout="4" class="layout-opt">4 col</span></div><input type="hidden" id="galleryLayout" value="3"></div>
+      <div class="checkbox-group"><input type="checkbox" id="postAutoCarousel"> <label for="postAutoCarousel"><i class="fas fa-play-circle"></i> Ativar carrossel automático (se tiver 2+ imagens, elas trocarão sozinhas no início do post)</label></div>
+    </div>
+    <div class="form-group"><label>Destaque</label><select id="postFeatured"><option value="false">Não</option><option value="true">Sim</option></select></div>
+    <button type="submit" class="btn-admin"><i class="fas fa-save"></i> Publicar/Atualizar</button>
+    <button type="button" id="cancelEditBtn" class="btn-admin" style="display:none; background:#aaa;">Cancelar</button>
+  </form>
+  <hr><h3>Posts existentes</h3><div id="adminPostList"></div>
+  <button id="clearAllBtn" class="btn-admin btn-danger">Resetar padrão</button>
+  <button id="logoutAdminBtn" class="btn-admin" style="background:#666; margin-top:10px;"><i class="fas fa-sign-out-alt"></i> Sair do Admin</button>
+</div>
+
+<div id="cookieConsent" class="cookie-consent">
+  <div class="cookie-text">
+    <i class="fas fa-cookie-bite"></i> Usamos cookies para melhorar sua experiência e permitir notificações de novos conteúdos. 
+    <a href="#" id="cookieMoreLink">Saiba mais</a>
+  </div>
+  <div class="cookie-buttons">
+    <button id="acceptCookies" class="cookie-btn accept">Aceitar</button>
+    <button id="declineCookies" class="cookie-btn decline">Recusar</button>
+  </div>
+</div>
+
+<div id="notificationPrompt" class="notification-prompt">
+  <div class="notification-header">
+    <i class="fas fa-bell"></i>
+    <div>
+      <strong>Fique por dentro!</strong>
+      <small>Receba notificações quando publicarmos novos conteúdos</small>
+    </div>
+  </div>
+  <div class="notification-buttons">
+    <button id="enableNotifications" class="notif-btn enable">Ativar notificações</button>
+    <button id="dismissNotifications" class="notif-btn later">Agora não</button>
+  </div>
+</div>
 
 <script type="module">
   import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
   
-  const db = window.db; const auth = window.auth; const postsCollection = collection(db, "posts");
-  let posts = []; let currentPage = 1; const POSTS_PER_PAGE = 6; let currentUser = null; let tempGallery = []; let selectedLayout = 3;
-  let currentLightboxImages = []; let currentLightboxIndex = 0; let carouselIntervals = [];
+  const db = window.db;
+  const auth = window.auth;
+  const postsCollection = collection(db, "posts");
   
+  let posts = [];
+  let currentPage = 1;
+  const POSTS_PER_PAGE = 6;
+  let currentUser = null;
+  let tempGallery = [];
+  let selectedLayout = 3;
+  
+  let currentLightboxImages = [];
+  let currentLightboxIndex = 0;
+  
+  // ATUALIZA METATAGS DINAMICAMENTE para compartilhamento correto com imagem
   function updateMetaTagsForPost(post) {
     if(!post) return;
     const shareImage = (post.gallery && post.gallery.length) ? post.gallery[0] : (post.img && post.img.trim() ? post.img : "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg");
@@ -298,6 +766,7 @@
     document.querySelector('meta[name="twitter:description"]').setAttribute('content', (post.excerpt || post.title || "").substring(0, 160));
   }
   
+  // Gera URL com parâmetro post para compartilhamento direto
   function generatePostShareUrl(postId) {
     const url = new URL(window.location.href);
     url.searchParams.set('post', postId);
@@ -309,7 +778,11 @@
       const q = query(postsCollection, orderBy("date", "desc"));
       const querySnapshot = await getDocs(q);
       posts = [];
-      querySnapshot.forEach((doc) => { posts.push({ id: doc.id, ...doc.data() }); });
+      querySnapshot.forEach((doc) => {
+        posts.push({ id: doc.id, ...doc.data() });
+      });
+      
+      // Verifica se tem post na URL para abrir direto
       const urlParams = new URLSearchParams(window.location.search);
       const postIdParam = urlParams.get('post');
       if(postIdParam) {
@@ -323,78 +796,235 @@
         const defaultPost = posts.find(p=>p.isFeatured) || posts[0];
         if(defaultPost) updateMetaTagsForPost(defaultPost);
       }
-      renderFeatured(); renderGrid(); renderPagination();
-    } catch (error) { console.error("Erro ao carregar posts:", error); document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">Erro ao carregar publicações.</div>'; }
+      
+      renderFeatured();
+      renderGrid();
+      renderPagination();
+    } catch (error) {
+      console.error("Erro ao carregar posts:", error);
+      document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">Erro ao carregar publicações.</div>';
+    }
   }
   
   async function savePostToFirebase(postData, editId = null) {
     try {
-      if (editId) { const postRef = doc(db, "posts", editId); await updateDoc(postRef, postData); }
-      else { await addDoc(postsCollection, postData); }
-      await loadPostsFromFirebase(); return true;
-    } catch (error) { console.error("Erro ao salvar:", error); alert("Erro ao salvar publicação: " + error.message); return false; }
+      if (editId) {
+        const postRef = doc(db, "posts", editId);
+        await updateDoc(postRef, postData);
+      } else {
+        await addDoc(postsCollection, postData);
+      }
+      await loadPostsFromFirebase();
+      return true;
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar publicação: " + error.message);
+      return false;
+    }
   }
-  async function deletePostFromFirebase(postId) { try { const postRef = doc(db, "posts", postId); await deleteDoc(postRef); await loadPostsFromFirebase(); return true; } catch (error) { console.error("Erro ao deletar:", error); alert("Erro ao deletar publicação"); return false; } }
+  
+  async function deletePostFromFirebase(postId) {
+    try {
+      const postRef = doc(db, "posts", postId);
+      await deleteDoc(postRef);
+      await loadPostsFromFirebase();
+      return true;
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      alert("Erro ao deletar publicação");
+      return false;
+    }
+  }
   
   async function seedInitialPosts() {
-    const q = query(postsCollection, limit(1)); const snapshot = await getDocs(q);
+    const q = query(postsCollection, limit(1));
+    const snapshot = await getDocs(q);
     if (snapshot.empty) {
-      const defaultPosts = [{ title: "Maior estalactite do mundo", category: "ESPELECOLOGIA", excerpt: "28,6 metros na Gruta do Janelão.", full: "<p>Formação impressionante na Gruta do Janelão.</p>", img: "https://placehold.co/1200x800/F5B81B/white?text=Estalactite", video: "", link: "", gallery: ["https://placehold.co/1000x700/F5B81B/white?text=Estalactite1","https://placehold.co/1000x700/D99F0C/white?text=Estalactite2"], galleryLayout: 3, autoCarousel: true, isFeatured: true, date: new Date().toISOString() },
-      { title: "Vídeo: Expedição pelo Peruaçu", category: "AVENTURA", excerpt: "Conheça as cavernas em 4K.", full: "<p>Vídeo exclusivo da expedição.</p>", img: "https://placehold.co/1200x800/2E7D32/white?text=Vídeo+Peruaçu", video: "https://www.youtube.com/embed/dQw4w9WgXcQ", link: "", gallery: [], galleryLayout: 3, autoCarousel: false, isFeatured: false, date: new Date().toISOString() },
-      { title: "Guia completo do Parque", category: "ECOTURISMO", excerpt: "Tudo que você precisa saber.", full: "<p>Informações para sua visita.</p>", img: "https://placehold.co/1200x800/F5B81B/white?text=Guia", video: "", link: "https://www.icmbio.gov.br/parnaperuacu", gallery: ["https://placehold.co/1000x700/3A7B4B/white?text=Trilha","https://placehold.co/1000x700/2B5E3A/white?text=Mirante"], galleryLayout: 2, autoCarousel: true, isFeatured: false, date: new Date().toISOString() }];
-      for (const post of defaultPosts) await addDoc(postsCollection, post);
+      const defaultPosts = [
+        { title: "Maior estalactite do mundo", category: "ESPELECOLOGIA", excerpt: "28,6 metros na Gruta do Janelão.", full: "<p>Formação impressionante na Gruta do Janelão.</p>", img: "https://placehold.co/1200x800/F5B81B/white?text=Estalactite", video: "", link: "", gallery: ["https://placehold.co/1000x700/F5B81B/white?text=Estalactite1","https://placehold.co/1000x700/D99F0C/white?text=Estalactite2"], galleryLayout: 3, autoCarousel: true, isFeatured: true, date: new Date().toISOString() },
+        { title: "Vídeo: Expedição pelo Peruaçu", category: "AVENTURA", excerpt: "Conheça as cavernas em 4K.", full: "<p>Vídeo exclusivo da expedição.</p>", img: "https://placehold.co/1200x800/2E7D32/white?text=Vídeo+Peruaçu", video: "https://www.youtube.com/embed/dQw4w9WgXcQ", link: "", gallery: [], galleryLayout: 3, autoCarousel: false, isFeatured: false, date: new Date().toISOString() },
+        { title: "Guia completo do Parque", category: "ECOTURISMO", excerpt: "Tudo que você precisa saber.", full: "<p>Informações para sua visita.</p>", img: "https://placehold.co/1200x800/F5B81B/white?text=Guia", video: "", link: "https://www.icmbio.gov.br/parnaperuacu", gallery: ["https://placehold.co/1000x700/3A7B4B/white?text=Trilha","https://placehold.co/1000x700/2B5E3A/white?text=Mirante"], galleryLayout: 2, autoCarousel: true, isFeatured: false, date: new Date().toISOString() }
+      ];
+      for (const post of defaultPosts) {
+        await addDoc(postsCollection, post);
+      }
       console.log("Posts iniciais criados!");
     }
   }
   
-  function formatDate(d) { if(!d) return 'Data recente'; return new Date(d).toLocaleDateString('pt-BR'); }
-  function getImageSrc(p) { return p.img && p.img.trim() ? p.img : "https://placehold.co/1200x800/F5B81B/0A0A0A?text=Peruaçu"; }
-  function initCarousel(containerId, images, autoStart = true) { /* mantido original */ if(!document.getElementById(containerId)) return; }
-  function renderCarouselHTML(images, autoCarousel, uniqueId) { if(!images.length) return ''; const id = `carousel-${uniqueId}-${Date.now()}`; return `<div id="${id}" class="carousel-container" style="height:100%; min-height:280px;"><div class="carousel-slides" style="display:flex; height:100%;"></div><button class="carousel-btn carousel-prev"><i class="fas fa-chevron-left"></i></button><button class="carousel-btn carousel-next"><i class="fas fa-chevron-right"></i></button><div class="carousel-dots"></div><div class="carousel-indicator"></div></div>`; }
+  function formatDate(d) { 
+    if(!d) return 'Data recente';
+    return new Date(d).toLocaleDateString('pt-BR'); 
+  }
   
-  function openLightbox(images, startIndex) { /* mantido */ currentLightboxImages = images; currentLightboxIndex = startIndex; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; document.getElementById('lightboxModal').style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-  function closeLightbox() { document.getElementById('lightboxModal').style.display = 'none'; document.body.style.overflow = ''; }
+  function getImageSrc(p) { 
+    return p.img && p.img.trim() ? p.img : "https://placehold.co/1200x800/F5B81B/0A0A0A?text=Peruaçu"; 
+  }
   
-  function renderFeatured() { /* mantido */ let featured = posts.find(p=>p.isFeatured) || posts[0]; if(!featured) return; const heroDiv = document.getElementById('heroDestaque'); heroDiv.innerHTML = `<div class="featured-card"><div class="featured-img" id="heroImgContainer"><img src="${getImageSrc(featured)}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;"></div><div class="featured-content"><div class="featured-badge">DESTAQUE</div><h2>${featured.title}</h2><p>${(featured.excerpt || '').substring(0,120)}</p><button class="read-link" data-featured="true">Ler matéria <i class="fas fa-arrow-right"></i></button></div></div>`; const heroImg = heroDiv.querySelector('.featured-img img'); if(heroImg) heroImg.addEventListener('click', () => { const imgs = featured.gallery?.length ? featured.gallery : [featured.img]; openLightbox(imgs.filter(i=>i && i.trim()), 0); }); document.querySelector('.read-link[data-featured="true"]')?.addEventListener('click',()=>openModal(featured)); }
+  function renderFeatured() {
+    let featured = posts.find(p=>p.isFeatured) || posts[0];
+    if(!featured) return;
+    const heroDiv = document.getElementById('heroDestaque');
+    heroDiv.innerHTML = `<div class="featured-card"><div class="featured-img"><img src="${getImageSrc(featured)}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;"></div><div class="featured-content"><div class="featured-badge">DESTAQUE</div><h2>${featured.title}</h2><p>${(featured.excerpt || '').substring(0,120)}</p><button class="read-link" data-featured="true">Ler matéria <i class="fas fa-arrow-right"></i></button></div></div>`;
+    const heroImg = heroDiv.querySelector('.featured-img img');
+    if(heroImg) {
+      heroImg.addEventListener('click', () => {
+        const imgs = featured.gallery?.length ? featured.gallery : [featured.img];
+        openLightbox(imgs.filter(i=>i && i.trim()), 0);
+      });
+    }
+    document.querySelector('.read-link[data-featured="true"]')?.addEventListener('click',()=>openModal(featured));
+  }
   
-  function renderGrid() { const start = (currentPage-1)*POSTS_PER_PAGE; const pagePosts = posts.slice(start, start+POSTS_PER_PAGE); const grid = document.getElementById('newsGrid'); grid.innerHTML = ''; pagePosts.forEach((post) => { const card = document.createElement('div'); card.className = 'news-card'; card.innerHTML = `<div class="card-img"><img src="${getImageSrc(post)}" loading="lazy" style="cursor:pointer;"></div><div class="card-content"><div class="card-category">${post.category || 'ECOTURISMO'}${post.video ? ' 🎬' : ''}${post.link ? ' 🔗' : ''}</div><div class="card-title">${post.title}</div><div class="card-excerpt">${(post.excerpt || '').substring(0,100)}</div><div class="card-meta"><span><i class="far fa-clock"></i> ${formatDate(post.date)}</span><button class="read-link" data-id="${post.id}">Leia mais →</button></div></div>`; grid.appendChild(card); const cardImg = card.querySelector('.card-img img'); if(cardImg) { cardImg.addEventListener('click', (e) => { e.stopPropagation(); const imgs = post.gallery?.length ? post.gallery : [post.img]; openLightbox(imgs.filter(i=>i && i.trim()), 0); }); } }); document.querySelectorAll('.read-link[data-id]').forEach(btn => { btn.addEventListener('click', (e) => { const id = btn.getAttribute('data-id'); const post = posts.find(p => p.id === id); if(post) openModal(post); }); }); }
+  function renderGrid() {
+    const start = (currentPage-1)*POSTS_PER_PAGE;
+    const pagePosts = posts.slice(start, start+POSTS_PER_PAGE);
+    const grid = document.getElementById('newsGrid');
+    grid.innerHTML = '';
+    pagePosts.forEach((post) => {
+      const card = document.createElement('div'); card.className = 'news-card';
+      card.innerHTML = `<div class="card-img"><img src="${getImageSrc(post)}" loading="lazy" style="cursor:pointer;"></div><div class="card-content"><div class="card-category">${post.category || 'ECOTURISMO'}${post.video ? ' 🎬' : ''}${post.link ? ' 🔗' : ''}</div><div class="card-title">${post.title}</div><div class="card-excerpt">${(post.excerpt || '').substring(0,100)}</div><div class="card-meta"><span><i class="far fa-clock"></i> ${formatDate(post.date)}</span><button class="read-link" data-id="${post.id}">Leia mais →</button></div></div>`;
+      grid.appendChild(card);
+      
+      const cardImg = card.querySelector('.card-img img');
+      if(cardImg) {
+        cardImg.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const imgs = post.gallery?.length ? post.gallery : [post.img];
+          openLightbox(imgs.filter(i=>i && i.trim()), 0);
+        });
+      }
+    });
+    
+    document.querySelectorAll('.read-link[data-id]').forEach(btn => { 
+      btn.addEventListener('click', (e) => { 
+        const id = btn.getAttribute('data-id'); 
+        const post = posts.find(p => p.id === id);
+        if(post) openModal(post);
+      }); 
+    });
+  }
   
   function openModal(post) {
     window.currentModalPost = post;
-    const modalDiv = document.getElementById('newsModal'); const bodyDiv = document.getElementById('modalBodyContent');
+    const modalDiv = document.getElementById('newsModal');
+    const bodyDiv = document.getElementById('modalBodyContent');
     const shareUrl = generatePostShareUrl(post.id);
+    
     const videoHtml = post.video ? `<div class="video-wrapper"><iframe src="${post.video}" frameborder="0" allowfullscreen></iframe></div>` : '';
     const linkHtml = post.link ? `<a href="${post.link}" target="_blank" class="external-link-btn"><i class="fas fa-external-link-alt"></i> Acessar link externo →</a>` : '';
+    
     bodyDiv.innerHTML = `<div><span style="background:var(--brand-gold); padding:4px 14px; border-radius:20px;">${post.category || 'ECOTURISMO'}</span><h2 style="font-size:1.8rem; margin:18px 0 12px;">${post.title}</h2><div><i class="far fa-calendar-alt"></i> ${formatDate(post.date)}</div>${videoHtml}${linkHtml}${post.img ? `<img src="${getImageSrc(post)}" style="width:100%; border-radius:12px; margin:15px 0; cursor:pointer;" class="modal-single-img">` : ''}<div style="margin:20px 0;">${post.full || ''}</div><div class="share-bar"><button class="share-btn whatsapp" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="share-btn facebook" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-facebook-f"></i> Facebook</button><button class="share-btn twitter" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-twitter"></i> Twitter</button><button class="share-btn telegram" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-telegram"></i> Telegram</button><button class="share-btn copy-link" data-share-url="${shareUrl}"><i class="fas fa-link"></i> Copiar link</button></div></div>`;
-    modalDiv.style.display = 'flex'; document.body.style.overflow = 'hidden';
-    const singleImg = bodyDiv.querySelector('.modal-single-img'); if(singleImg) singleImg.addEventListener('click', () => { const imgs = post.gallery?.length ? post.gallery : [post.img]; openLightbox(imgs.filter(i=>i && i.trim()), 0); });
-    bodyDiv.querySelectorAll('.share-btn').forEach(btn => { btn.addEventListener('click', () => { const url = btn.dataset.shareUrl || shareUrl; const title = btn.dataset.title || post.title; if(btn.classList.contains('whatsapp')) window.open(`https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank'); else if(btn.classList.contains('facebook')) window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank'); else if(btn.classList.contains('twitter')) window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank'); else if(btn.classList.contains('telegram')) window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank'); else if(btn.classList.contains('copy-link')) { navigator.clipboard.writeText(url); alert('Link da publicação copiado!'); } }); });
+    
+    modalDiv.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    const singleImg = bodyDiv.querySelector('.modal-single-img');
+    if(singleImg) {
+      singleImg.addEventListener('click', () => {
+        const imgs = post.gallery?.length ? post.gallery : [post.img];
+        openLightbox(imgs.filter(i=>i && i.trim()), 0);
+      });
+    }
+    
+    // Botões de compartilhamento do modal
+    bodyDiv.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.dataset.shareUrl || shareUrl;
+        const title = btn.dataset.title || post.title;
+        if(btn.classList.contains('whatsapp')) window.open(`https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
+        else if(btn.classList.contains('facebook')) window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        else if(btn.classList.contains('twitter')) window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+        else if(btn.classList.contains('telegram')) window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+        else if(btn.classList.contains('copy-link')) { navigator.clipboard.writeText(url); alert('Link da publicação copiado!'); }
+      });
+    });
   }
-  function closeModal() { document.getElementById('newsModal').style.display = 'none'; document.body.style.overflow = ''; window.currentModalPost = null; }
-  function renderPagination() { const total = Math.ceil(posts.length/POSTS_PER_PAGE); const pag = document.getElementById('paginationContainer'); if(total<=1){ pag.innerHTML=''; return; } let html = `<button class="page-btn ${currentPage===1?'disabled':''}" data-page="prev">‹</button>`; for(let i=1;i<=total;i++) html += `<button class="page-btn ${currentPage===i?'active':''}" data-page="${i}">${i}</button>`; html += `<button class="page-btn ${currentPage===total?'disabled':''}" data-page="next">›</button>`; pag.innerHTML = html; pag.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.classList.contains('disabled'))return; let v=btn.dataset.page; if(v==='prev'&&currentPage>1)currentPage--; else if(v==='next'&&currentPage<total)currentPage++; else if(!isNaN(parseInt(v)))currentPage=parseInt(v); renderGrid(); renderPagination(); document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'}); })); }
+  
+  function closeModal() { 
+    document.getElementById('newsModal').style.display = 'none'; 
+    document.body.style.overflow = ''; 
+    window.currentModalPost = null; 
+  }
+  
+  function renderPagination() {
+    const total = Math.ceil(posts.length/POSTS_PER_PAGE);
+    const pag = document.getElementById('paginationContainer');
+    if(total<=1){ pag.innerHTML=''; return; }
+    let html = `<button class="page-btn ${currentPage===1?'disabled':''}" data-page="prev">‹</button>`;
+    for(let i=1;i<=total;i++) html += `<button class="page-btn ${currentPage===i?'active':''}" data-page="${i}">${i}</button>`;
+    html += `<button class="page-btn ${currentPage===total?'disabled':''}" data-page="next">›</button>`;
+    pag.innerHTML = html;
+    pag.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.classList.contains('disabled'))return; let v=btn.dataset.page; if(v==='prev'&&currentPage>1)currentPage--; else if(v==='next'&&currentPage<total)currentPage++; else if(!isNaN(parseInt(v)))currentPage=parseInt(v); renderGrid(); renderPagination(); document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'}); }));
+  }
+  
+  function openLightbox(images, startIndex) {
+    if(!images || images.length === 0) return;
+    currentLightboxImages = images;
+    currentLightboxIndex = startIndex;
+    const img = document.getElementById('lightboxImage');
+    img.src = currentLightboxImages[currentLightboxIndex];
+    document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`;
+    document.getElementById('lightboxModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeLightbox() {
+    document.getElementById('lightboxModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  
+  function shareBlog(platform) { 
+    const url = encodeURIComponent(window.location.href); 
+    const text = encodeURIComponent('🌿 Caminhos do Peruaçu - Natureza, aventura e cultura!'); 
+    if(platform === 'wa') window.open(`https://wa.me/?text=${text}%20${url}`, '_blank'); 
+    if(platform === 'fb') window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank'); 
+    if(platform === 'tw') window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank'); 
+  }
+  
+  // Event Listeners
+  document.getElementById('shareBlogBtn')?.addEventListener('click', () => shareBlog('wa'));
+  document.getElementById('inlineShareWA')?.addEventListener('click', () => shareBlog('wa'));
+  document.getElementById('inlineShareFB')?.addEventListener('click', () => shareBlog('fb'));
+  document.getElementById('inlineShareTW')?.addEventListener('click', () => shareBlog('tw'));
+  document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+  document.getElementById('lightboxClose')?.addEventListener('click', closeLightbox);
+  document.getElementById('lightboxPrev')?.addEventListener('click', () => { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } });
+  document.getElementById('lightboxNext')?.addEventListener('click', () => { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } });
+  document.getElementById('lightboxDownload')?.addEventListener('click', () => { const url = currentLightboxImages[currentLightboxIndex]; fetch(url).then(res => res.blob()).then(blob => { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `imagem_${currentLightboxIndex+1}.jpg`; link.click(); }).catch(() => window.open(url, '_blank')); });
+  document.getElementById('lightboxShare')?.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent('📸 Veja esta imagem do blog Caminhos do Peruaçu!')}%20${encodeURIComponent(currentLightboxImages[currentLightboxIndex])}`, '_blank'); });
+  document.getElementById('lightboxModal')?.addEventListener('click', (e) => { if(e.target === document.getElementById('lightboxModal')) closeLightbox(); });
+  
+  // Admin e outros (mantidos originais)
   function showLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('loginError').style.display = 'none'; }
   async function loginAdmin(email, password) { try { await signInWithEmailAndPassword(auth, email, password); document.getElementById('adminStatus').classList.add('logged'); document.getElementById('loginModal').style.display = 'none'; openAdminPanel(); return true; } catch (error) { document.getElementById('loginError').style.display = 'block'; return false; } }
   async function logoutAdmin() { await signOut(auth); document.getElementById('adminStatus').classList.remove('logged'); closeAdminPanel(); }
   function openAdminPanel() { if(!currentUser) return; document.getElementById('adminPanel').classList.add('open'); document.getElementById('adminOverlay').classList.add('open'); refreshAdminList(); }
   function closeAdminPanel() { document.getElementById('adminPanel').classList.remove('open'); document.getElementById('adminOverlay').classList.remove('open'); }
   function renderGalleryInputs() { const c = document.getElementById('galleryImagesContainer'); c.innerHTML = ''; tempGallery.forEach((url, idx) => { const row = document.createElement('div'); row.className = 'image-input-row'; row.innerHTML = `<input type="text" class="gallery-img-input" data-idx="${idx}" value="${url || ''}" placeholder="URL imagem ${idx+1}"><button type="button" class="btn-add-img remove-img-btn" data-idx="${idx}">Remover</button>`; c.appendChild(row); }); document.querySelectorAll('.gallery-img-input').forEach(inp => inp.addEventListener('change', (e) => { let i = parseInt(inp.dataset.idx); if(!isNaN(i)) tempGallery[i] = inp.value; })); document.querySelectorAll('.remove-img-btn').forEach(btn => btn.addEventListener('click', (e) => { let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { tempGallery.splice(i,1); renderGalleryInputs(); } })); }
-  function refreshAdminList() { if(!currentUser) return; const c = document.getElementById('adminPostList'); c.innerHTML = ''; posts.forEach((post) => { const div = document.createElement('div'); div.className = 'admin-post-item'; div.innerHTML = `<div><strong>${post.title}</strong><br><small>${post.category || 'ECOTURISMO'} | Imgs:${post.gallery?.length||0}</small></div><div><button class="edit-post" data-id="${post.id}">Editar</button><button class="delete-post" data-id="${post.id}">Excluir</button></div>`; c.appendChild(div); }); document.querySelectorAll('.edit-post').forEach(btn => btn.addEventListener('click', async (e) => { const id = btn.dataset.id; const post = posts.find(p => p.id === id); if(post) { document.getElementById('editPostId').value = post.id; document.getElementById('postTitle').value = post.title; document.getElementById('postCategory').value = post.category || 'ECOTURISMO'; document.getElementById('postExcerpt').value = post.excerpt || ''; document.getElementById('postFull').value = post.full || ''; document.getElementById('postImg').value = post.img || ''; document.getElementById('postVideo').value = post.video || ''; document.getElementById('postLink').value = post.link || ''; tempGallery = [...(post.gallery || [])]; renderGalleryInputs(); selectedLayout = post.galleryLayout || 3; document.getElementById('galleryLayout').value = selectedLayout; document.querySelectorAll('.layout-opt').forEach(o => o.classList.remove('active-layout')); document.querySelector(`.layout-opt[data-layout="${selectedLayout}"]`)?.classList.add('active-layout'); document.getElementById('postAutoCarousel').checked = post.autoCarousel || false; document.getElementById('postFeatured').value = post.isFeatured ? 'true' : 'false'; document.getElementById('cancelEditBtn').style.display = 'block'; document.querySelector('#postForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar'; window.scrollTo({top:0, behavior:'smooth'}); } })); document.querySelectorAll('.delete-post').forEach(btn => btn.addEventListener('click', async (e) => { if(confirm('Excluir esta publicação?')) await deletePostFromFirebase(btn.dataset.id); })); }
+  function refreshAdminList() { if(!currentUser) return; const c = document.getElementById('adminPostList'); c.innerHTML = ''; posts.forEach((post) => { const div = document.createElement('div'); div.className = 'admin-post-item'; div.innerHTML = `<div><strong>${post.title}</strong><br><small>${post.category || 'ECOTURISMO'} | Imgs:${post.gallery?.length||0}</small></div><div><button class="edit-post" data-id="${post.id}">Editar</button><button class="delete-post" data-id="${post.id}">Excluir</button></div>`; c.appendChild(div); }); document.querySelectorAll('.edit-post').forEach(btn => btn.addEventListener('click', async (e) => { const id = btn.dataset.id; const post = posts.find(p => p.id === id); if(post) { document.getElementById('editPostId').value = post.id; document.getElementById('postTitle').value = post.title; document.getElementById('postCategory').value = post.category || 'ECOTURISMO'; document.getElementById('postExcerpt').value = post.excerpt || ''; document.getElementById('postFull').value = post.full || ''; document.getElementById('postImg').value = post.img || ''; document.getElementById('postVideo').value = post.video || ''; document.getElementById('postLink').value = post.link || ''; tempGallery = [...(post.gallery || [])]; renderGalleryInputs(); selectedLayout = post.galleryLayout || 3; document.getElementById('galleryLayout').value = selectedLayout; document.querySelectorAll('.layout-opt').forEach(o => o.classList.remove('active-layout')); document.querySelector(`.layout-opt[data-layout="${selectedLayout}"]`)?.classList.add('active-layout'); document.getElementById('postAutoCarousel').checked = post.autoCarousel || false; document.getElementById('postFeatured').value = post.isFeatured ? 'true' : 'false'; document.getElementById('cancelEditBtn').style.display = 'block'; document.querySelector('#postForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar'; window.scrollTo({top:0, behavior:'smooth'}); } })); document.querySelectorAll('.delete-post').forEach(btn => btn.addEventListener('click', async (e) => { if(confirm('Excluir esta publicação?')) { await deletePostFromFirebase(btn.dataset.id); } })); }
   document.getElementById('postForm')?.addEventListener('submit', async (e) => { e.preventDefault(); if(!currentUser) { alert('Faça login primeiro!'); return; } const editId = document.getElementById('editPostId').value; const filteredGallery = tempGallery.filter(u => u && u.trim()); const postData = { title: document.getElementById('postTitle').value, category: document.getElementById('postCategory').value, excerpt: document.getElementById('postExcerpt').value, full: document.getElementById('postFull').value, img: document.getElementById('postImg').value, video: document.getElementById('postVideo').value, link: document.getElementById('postLink').value, gallery: filteredGallery, galleryLayout: selectedLayout, autoCarousel: document.getElementById('postAutoCarousel').checked, isFeatured: document.getElementById('postFeatured').value === 'true', date: new Date().toISOString() }; await savePostToFirebase(postData, editId || null); document.getElementById('editPostId').value = ''; document.getElementById('cancelEditBtn').style.display = 'none'; document.querySelector('#postForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Publicar'; document.getElementById('postForm').reset(); tempGallery = []; renderGalleryInputs(); closeAdminPanel(); });
   document.getElementById('addImageBtn')?.addEventListener('click', () => { if(tempGallery.length < 6) { tempGallery.push(""); renderGalleryInputs(); } else alert("Máx 6 imagens"); });
   document.querySelectorAll('.layout-opt').forEach(opt => opt.addEventListener('click', () => { selectedLayout = parseInt(opt.dataset.layout); document.getElementById('galleryLayout').value = selectedLayout; document.querySelectorAll('.layout-opt').forEach(o => o.classList.remove('active-layout')); opt.classList.add('active-layout'); }));
-  function shareBlog(platform) { const url = encodeURIComponent(location.href); const text = encodeURIComponent('🌿 Caminhos do Peruaçu - Natureza, aventura e cultura!'); if(platform === 'wa') window.open(`https://wa.me/?text=${text}%20${url}`, '_blank'); if(platform === 'fb') window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank'); if(platform === 'tw') window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank'); }
-  document.getElementById('shareBlogBtn')?.addEventListener('click', () => shareBlog('wa')); document.getElementById('inlineShareWA')?.addEventListener('click', () => shareBlog('wa')); document.getElementById('inlineShareFB')?.addEventListener('click', () => shareBlog('fb')); document.getElementById('inlineShareTW')?.addEventListener('click', () => shareBlog('tw'));
   document.getElementById('loginBtn')?.addEventListener('click', () => { const email = document.getElementById('adminEmail').value; const password = document.getElementById('adminPassword').value; loginAdmin(email, password); });
   document.getElementById('adminStatus')?.addEventListener('click', () => { if(currentUser) openAdminPanel(); else showLoginModal(); });
-  document.getElementById('logoutAdminBtn')?.addEventListener('click', () => logoutAdmin()); document.getElementById('closeAdminBtn')?.addEventListener('click', closeAdminPanel); document.getElementById('adminOverlay')?.addEventListener('click', closeAdminPanel); document.getElementById('closeModalBtn')?.addEventListener('click', closeModal); document.getElementById('lightboxClose')?.addEventListener('click', closeLightbox); document.getElementById('lightboxPrev')?.addEventListener('click', () => { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } }); document.getElementById('lightboxNext')?.addEventListener('click', () => { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } }); document.getElementById('lightboxDownload')?.addEventListener('click', () => { const url = currentLightboxImages[currentLightboxIndex]; fetch(url).then(res => res.blob()).then(blob => { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `imagem_${currentLightboxIndex+1}.jpg`; link.click(); }).catch(() => window.open(url, '_blank')); }); document.getElementById('lightboxShare')?.addEventListener('click', () => { window.open(`https://wa.me/?text=${encodeURIComponent('📸 Veja esta imagem do blog Caminhos do Peruaçu!')}%20${encodeURIComponent(currentLightboxImages[currentLightboxIndex])}`, '_blank'); });
-  document.getElementById('lightboxModal')?.addEventListener('click', (e) => { if(e.target === document.getElementById('lightboxModal')) closeLightbox(); });
-  document.getElementById('clearAllBtn')?.addEventListener('click', async () => { if(confirm('Resetar todos os posts? Isso apagará tudo e recriará os padrões.')) { const snapshot = await getDocs(postsCollection); for (const doc of snapshot.docs) await deleteDoc(doc.ref); await seedInitialPosts(); await loadPostsFromFirebase(); } });
-  function initCookieConsent() { const consent = localStorage.getItem('cookiesAccepted'); if(consent === 'true') document.getElementById('cookieConsent').classList.add('hidden'); else document.getElementById('cookieConsent').classList.remove('hidden'); }
+  document.getElementById('logoutAdminBtn')?.addEventListener('click', () => logoutAdmin());
+  document.getElementById('closeAdminBtn')?.addEventListener('click', closeAdminPanel);
+  document.getElementById('adminOverlay')?.addEventListener('click', closeAdminPanel);
+  document.getElementById('clearAllBtn')?.addEventListener('click', async () => { if(confirm('Resetar todos os posts? Isso apagará tudo e recriará os padrões.')) { const snapshot = await getDocs(postsCollection); for (const doc of snapshot.docs) { await deleteDoc(doc.ref); } await seedInitialPosts(); await loadPostsFromFirebase(); } });
+  
+  function initCookieConsent() { const cookiesAccepted = localStorage.getItem('cookiesAccepted'); if(cookiesAccepted === 'true') document.getElementById('cookieConsent').classList.add('hidden'); else document.getElementById('cookieConsent').classList.remove('hidden'); }
   document.getElementById('acceptCookies')?.addEventListener('click', () => { localStorage.setItem('cookiesAccepted', 'true'); document.getElementById('cookieConsent').classList.add('hidden'); });
   document.getElementById('declineCookies')?.addEventListener('click', () => { localStorage.setItem('cookiesAccepted', 'false'); document.getElementById('cookieConsent').classList.add('hidden'); });
-  let keyPressCount = 0, keyPressTimer = null; document.addEventListener('keydown', (e) => { if(e.key === 'c' || e.key === 'C') { keyPressCount++; if(keyPressTimer) clearTimeout(keyPressTimer); keyPressTimer = setTimeout(() => { keyPressCount = 0; }, 800); if(keyPressCount >= 3) { keyPressCount = 0; if(currentUser) openAdminPanel(); else showLoginModal(); } } if(document.getElementById('lightboxModal').style.display === 'flex') { if(e.key === 'Escape') closeLightbox(); if(e.key === 'ArrowLeft') { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } } if(e.key === 'ArrowRight') { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } } } });
+  
+  let keyPressCount = 0, keyPressTimer = null;
+  document.addEventListener('keydown', (e) => { if(e.key === 'c' || e.key === 'C') { keyPressCount++; if(keyPressTimer) clearTimeout(keyPressTimer); keyPressTimer = setTimeout(() => { keyPressCount = 0; }, 800); if(keyPressCount >= 3) { keyPressCount = 0; if(currentUser) openAdminPanel(); else showLoginModal(); } } if(document.getElementById('lightboxModal').style.display === 'flex') { if(e.key === 'Escape') closeLightbox(); if(e.key === 'ArrowLeft') { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } } if(e.key === 'ArrowRight') { if(currentLightboxImages.length) { currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length; document.getElementById('lightboxImage').src = currentLightboxImages[currentLightboxIndex]; document.getElementById('lightboxCounter').innerText = `${currentLightboxIndex+1} / ${currentLightboxImages.length}`; } } } });
+  
   onAuthStateChanged(auth, (user) => { currentUser = user; if(user) document.getElementById('adminStatus').classList.add('logged'); else document.getElementById('adminStatus').classList.remove('logged'); });
-  initCookieConsent(); await seedInitialPosts(); await loadPostsFromFirebase();
+  
+  initCookieConsent();
+  await seedInitialPosts();
+  await loadPostsFromFirebase();
 </script>
 </body>
 </html>
