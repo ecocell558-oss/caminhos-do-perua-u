@@ -856,6 +856,50 @@
     }
   }
   
+  // Função para obter a URL da imagem do post (primeira imagem da galeria ou imagem capa)
+  function getPostImageUrl(post) {
+    if(post.gallery && post.gallery.length > 0 && post.gallery[0].trim()) {
+      return post.gallery[0];
+    }
+    if(post.img && post.img.trim()) {
+      return post.img;
+    }
+    return "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg";
+  }
+  
+  // Função para atualizar as meta tags para compartilhamento correto
+  function updateMetaTagsForPost(post) {
+    if(!post) return;
+    const imageUrl = getPostImageUrl(post);
+    const titleText = `${post.title} · Blog Caminhos do Peruaçu`;
+    const descText = (post.excerpt || post.title || "").substring(0, 160);
+    
+    // Atualiza título da página
+    document.title = titleText;
+    
+    // Atualiza Open Graph
+    document.querySelector('meta[property="og:title"]').setAttribute('content', titleText);
+    document.querySelector('meta[property="og:image"]').setAttribute('content', imageUrl);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', descText);
+    
+    // Atualiza Twitter Card
+    document.querySelector('meta[name="twitter:title"]').setAttribute('content', titleText);
+    document.querySelector('meta[name="twitter:image"]').setAttribute('content', imageUrl);
+    document.querySelector('meta[name="twitter:description"]').setAttribute('content', descText);
+    
+    // Atualiza meta description padrão
+    document.querySelector('meta[name="description"]').setAttribute('content', descText);
+    
+    console.log('✅ Meta tags atualizadas para compartilhamento:', { title: titleText, image: imageUrl });
+  }
+  
+  // Função para gerar URL de compartilhamento com ID do post
+  function generateShareUrl(postId) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('p', postId);
+    return url.toString();
+  }
+  
   async function loadPostsFromFirebase() {
     try {
       const q = query(postsCollection, orderBy("date", "desc"));
@@ -864,6 +908,24 @@
       querySnapshot.forEach((doc) => {
         posts.push({ id: doc.id, ...doc.data() });
       });
+      
+      // Verificar se tem parâmetro de post na URL para abrir direto
+      const urlParams = new URLSearchParams(window.location.search);
+      const postIdParam = urlParams.get('p');
+      if(postIdParam) {
+        const targetPost = posts.find(p => p.id === postIdParam);
+        if(targetPost) {
+          updateMetaTagsForPost(targetPost);
+          setTimeout(() => openModal(targetPost), 200);
+          // Limpa a URL para não ficar o parâmetro visível
+          history.replaceState({}, document.title, window.location.pathname);
+        }
+      } else {
+        // Atualiza meta tags com o post em destaque ou primeiro post
+        const defaultPost = posts.find(p=>p.isFeatured) || posts[0];
+        if(defaultPost) updateMetaTagsForPost(defaultPost);
+      }
+      
       renderFeatured();
       renderGrid();
       renderPagination();
@@ -1104,7 +1166,11 @@
     const hasCarousel = (post.autoCarousel && galleryImgs.length >= 2);
     const videoHtml = post.video ? `<div class="video-wrapper"><iframe src="${post.video}" frameborder="0" allowfullscreen></iframe></div>` : '';
     const linkHtml = post.link ? `<a href="${post.link}" target="_blank" class="external-link-btn"><i class="fas fa-external-link-alt"></i> Acessar link externo →</a>` : '';
-    bodyDiv.innerHTML = `<div><span style="background:var(--brand-gold); padding:4px 14px; border-radius:20px;">${post.category || 'ECOTURISMO'}</span><h2 style="font-size:1.8rem; margin:18px 0 12px;">${post.title}</h2><div><i class="far fa-calendar-alt"></i> ${formatDate(post.date)}</div>${videoHtml}${linkHtml}<div id="modalCarouselArea">${hasCarousel ? renderCarouselHTML(galleryImgs, true, 'modal') : (post.img ? `<img src="${getImageSrc(post)}" style="width:100%; border-radius:12px; margin:15px 0; cursor:pointer;" class="modal-single-img">` : '')}</div><div style="margin:20px 0;">${post.full || ''}</div><div class="share-bar"><button class="share-btn whatsapp" id="modalShareWA"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="share-btn facebook" id="modalShareFB"><i class="fab fa-facebook-f"></i> Facebook</button><button class="share-btn twitter" id="modalShareTW"><i class="fab fa-twitter"></i> Twitter</button><button class="share-btn telegram" id="modalShareTG"><i class="fab fa-telegram"></i> Telegram</button><button class="share-btn copy-link" id="modalShareCopy"><i class="fas fa-link"></i> Copiar link</button></div></div>`;
+    
+    // Gera URL de compartilhamento com o ID do post
+    const shareUrl = generateShareUrl(post.id);
+    
+    bodyDiv.innerHTML = `<div><span style="background:var(--brand-gold); padding:4px 14px; border-radius:20px;">${post.category || 'ECOTURISMO'}</span><h2 style="font-size:1.8rem; margin:18px 0 12px;">${post.title}</h2><div><i class="far fa-calendar-alt"></i> ${formatDate(post.date)}</div>${videoHtml}${linkHtml}<div id="modalCarouselArea">${hasCarousel ? renderCarouselHTML(galleryImgs, true, 'modal') : (post.img ? `<img src="${getImageSrc(post)}" style="width:100%; border-radius:12px; margin:15px 0; cursor:pointer;" class="modal-single-img">` : '')}</div><div style="margin:20px 0;">${post.full || ''}</div><div class="share-bar"><button class="share-btn whatsapp" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="share-btn facebook" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-facebook-f"></i> Facebook</button><button class="share-btn twitter" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-twitter"></i> Twitter</button><button class="share-btn telegram" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-telegram"></i> Telegram</button><button class="share-btn copy-link" data-share-url="${shareUrl}"><i class="fas fa-link"></i> Copiar link</button></div></div>`;
     modalDiv.style.display = 'flex'; document.body.style.overflow = 'hidden';
     
     const singleImg = bodyDiv.querySelector('.modal-single-img');
@@ -1125,12 +1191,25 @@
       }, 100);
     }
     
-    const shareUrl = location.href;
-    document.getElementById('modalShareWA')?.addEventListener('click',()=>window.open(`https://wa.me/?text=${encodeURIComponent(post.title)} ${shareUrl}`,'_blank'));
-    document.getElementById('modalShareFB')?.addEventListener('click',()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,'_blank'));
-    document.getElementById('modalShareTW')?.addEventListener('click',()=>window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)} ${shareUrl}`,'_blank'));
-    document.getElementById('modalShareTG')?.addEventListener('click',()=>window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`,'_blank'));
-    document.getElementById('modalShareCopy')?.addEventListener('click',()=>{ navigator.clipboard.writeText(shareUrl); alert('Link copiado!'); });
+    // Botões de compartilhamento do modal usando a URL com ID
+    document.querySelectorAll('#modalBodyContent .share-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-share-url') || shareUrl;
+        const title = btn.getAttribute('data-title') || post.title;
+        if(btn.classList.contains('whatsapp')) {
+          window.open(`https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
+        } else if(btn.classList.contains('facebook')) {
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        } else if(btn.classList.contains('twitter')) {
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+        } else if(btn.classList.contains('telegram')) {
+          window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+        } else if(btn.classList.contains('copy-link')) {
+          navigator.clipboard.writeText(url);
+          alert('Link da publicação copiado!');
+        }
+      });
+    });
   }
   
   function closeModal() { 
