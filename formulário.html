@@ -34,7 +34,7 @@
     .section-subtitle { font-size: 1.125rem; color: var(--gray-600); margin-bottom: 2rem; max-width: 720px; }
     @media (min-width: 768px) { .section-title { font-size: 2.5rem; } }
 
-    /* Header idêntico ao site original */
+    /* Header com texto abaixo da logo */
     .header {
       position: sticky;
       top: 0;
@@ -56,6 +56,7 @@
       align-items: center;
       gap: 14px;
       text-decoration: none;
+      flex-shrink: 0;
     }
     .logo-icon {
       width: 52px;
@@ -73,6 +74,11 @@
       object-fit: cover;
       display: block;
     }
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
     .logo-text .brand-main {
       font-size: 1.35rem;
       font-weight: 800;
@@ -85,12 +91,13 @@
       color: var(--brand-primary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-top: 2px;
+      margin-top: 4px;
     }
     @media (max-width: 768px) {
       .header-content { height: 70px; }
       .logo-icon { width: 44px; height: 44px; }
       .logo-text .brand-main { font-size: 1rem; }
+      .logo-text .brand-sub { font-size: 0.6rem; margin-top: 2px; }
     }
 
     /* Formulário principal - estilo premium */
@@ -272,7 +279,6 @@
       .edital-title { font-size: 2rem; }
       .info-cards { grid-template-columns: 1fr; }
     }
-    hr { margin: 16px 0; border-color: var(--gray-200); }
     .badge-list {
       display: flex;
       flex-wrap: wrap;
@@ -286,6 +292,16 @@
       font-size: 0.8rem;
       font-weight: 500;
     }
+    .space-holder {
+      width: 44px;
+      height: 44px;
+      visibility: hidden;
+    }
+    @media (max-width: 768px) {
+      .space-holder {
+        width: 36px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -294,9 +310,12 @@
       <div class="header-content">
         <a href="#" class="logo">
           <div class="logo-icon"><img src="logo2.png" alt="Logo Caminhos do Peruaçu" onerror="this.src='https://placehold.co/52x52/F5B81B/white?text=CP'"></div>
-          <div class="logo-text"><span class="brand-main">Caminhos do Peruaçu</span><span class="brand-sub">Guia Credenciado · ICMBio</span></div>
+          <div class="logo-text">
+            <span class="brand-main">Caminhos do Peruaçu</span>
+            <span class="brand-sub">Guia Credenciado · ICMBio</span>
+          </div>
         </a>
-        <div style="width:44px;"></div>
+        <div class="space-holder"></div>
       </div>
     </div>
   </header>
@@ -336,7 +355,6 @@
         </div>
         <div class="form-body">
           <form id="voluntarioForm" action="https://formsubmit.co/guia.caminhosdoperuacu@gmail.com" method="POST">
-            <!-- Configuração formsubmit.co -->
             <input type="hidden" name="_subject" value="Nova inscrição - Voluntário Caminhos do Peruaçu">
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_template" value="table">
