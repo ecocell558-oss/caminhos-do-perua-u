@@ -256,6 +256,11 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 18px rgba(245,184,27,0.3);
     }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
     .success-message {
       background: #e9f7ef;
       border-left: 5px solid #2e7d32;
@@ -265,6 +270,22 @@
       color: #1e4620;
       font-weight: 500;
       display: none;
+    }
+    .error-message {
+      background: #ffebee;
+      border-left: 5px solid #c62828;
+      padding: 20px;
+      border-radius: 20px;
+      margin-top: 24px;
+      color: #c62828;
+      font-weight: 500;
+      display: none;
+    }
+    .field-error {
+      color: #c62828;
+      font-size: 0.75rem;
+      margin-top: 4px;
+      display: block;
     }
     .footer {
       background: var(--gray-900);
@@ -347,39 +368,44 @@
         </div>
       </div>
 
-      <!-- Formulário de Inscrição com email corrigido -->
+      <!-- Formulário de Inscrição com Formspree AJAX -->
       <div class="form-voluntarios" id="formInscricao">
         <div class="form-header">
           <h2>✍️ Formulário de Inscrição</h2>
           <p>Preencha os dados abaixo para se candidatar ao time de colaboradores voluntários. Sua energia e vontade de fazer a diferença são o que mais importam.</p>
         </div>
         <div class="form-body">
-          <form id="voluntarioForm" action="https://formsubmit.co/guia.caminhosdoperuacu@gmail.com" method="POST">
+          <!-- Mensagens de sucesso e erro -->
+          <div data-fs-success class="success-message"></div>
+          <div data-fs-error class="error-message"></div>
+
+          <form id="voluntarioForm">
             <input type="hidden" name="_subject" value="Nova inscrição - Voluntário Caminhos do Peruaçu">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_template" value="table">
-            <input type="hidden" name="_blacklist" value="spam mail">
             
             <div class="form-grid">
               <div class="form-group">
                 <label>Nome completo <span class="required">*</span></label>
-                <input type="text" name="Nome" id="nomeVol" placeholder="Seu nome completo" required>
+                <input type="text" name="Nome" id="nomeVol" placeholder="Seu nome completo" data-fs-field required>
+                <span data-fs-error="Nome" class="field-error"></span>
               </div>
               <div class="form-group">
                 <label>E-mail <span class="required">*</span></label>
-                <input type="email" name="E-mail" id="emailVol" placeholder="seuemail@exemplo.com" required>
+                <input type="email" name="E-mail" id="emailVol" placeholder="seuemail@exemplo.com" data-fs-field required>
+                <span data-fs-error="E-mail" class="field-error"></span>
               </div>
               <div class="form-group">
                 <label>WhatsApp / Telefone <span class="required">*</span></label>
-                <input type="tel" name="Telefone" id="telefoneVol" placeholder="(XX) 9XXXX-XXXX" required>
+                <input type="tel" name="Telefone" id="telefoneVol" placeholder="(XX) 9XXXX-XXXX" data-fs-field required>
+                <span data-fs-error="Telefone" class="field-error"></span>
               </div>
               <div class="form-group">
                 <label>Cidade / Estado</label>
-                <input type="text" name="Cidade_Estado" placeholder="Ex: Itacarambi - MG">
+                <input type="text" name="Cidade_Estado" placeholder="Ex: Itacarambi - MG" data-fs-field>
+                <span data-fs-error="Cidade_Estado" class="field-error"></span>
               </div>
               <div class="form-group full-width">
                 <label>Área(s) de interesse principal <span class="required">*</span></label>
-                <select name="Area_Interesse" id="areaInteresse" required>
+                <select name="Area_Interesse" id="areaInteresse" data-fs-field required>
                   <option value="">Selecione uma área principal</option>
                   <option>Marketing Digital</option>
                   <option>Redes Sociais</option>
@@ -391,15 +417,17 @@
                   <option>Design / Criação visual</option>
                   <option>Comunicação e Assessoria</option>
                 </select>
+                <span data-fs-error="Area_Interesse" class="field-error"></span>
                 <small style="color:#777; margin-top:4px;">Você pode mencionar outras habilidades no campo "sobre você".</small>
               </div>
               <div class="form-group full-width">
                 <label>Conte-nos sobre sua experiência e motivação <span class="required">*</span></label>
-                <textarea rows="4" name="Motivacao_Experiencia" id="motivacaoVol" placeholder="Por que você quer ser voluntário no Caminhos do Peruaçu? Quais habilidades pode contribuir? (ex: criação de posts, roteiros, parcerias, tecnologia, etc.)" required></textarea>
+                <textarea rows="4" name="Motivacao_Experiencia" id="motivacaoVol" placeholder="Por que você quer ser voluntário no Caminhos do Peruaçu? Quais habilidades pode contribuir? (ex: criação de posts, roteiros, parcerias, tecnologia, etc.)" data-fs-field required></textarea>
+                <span data-fs-error="Motivacao_Experiencia" class="field-error"></span>
               </div>
               <div class="form-group full-width">
                 <label>Disponibilidade (horas por semana) <span class="required">*</span></label>
-                <select name="Disponibilidade" id="disponibilidadeVol" required>
+                <select name="Disponibilidade" id="disponibilidadeVol" data-fs-field required>
                   <option value="">Selecione</option>
                   <option>Até 5 horas/semana</option>
                   <option>5 a 10 horas/semana</option>
@@ -407,15 +435,15 @@
                   <option>Mais de 15 horas/semana</option>
                   <option>Flexível</option>
                 </select>
+                <span data-fs-error="Disponibilidade" class="field-error"></span>
               </div>
               <div class="form-group full-width checkbox-group">
-                <input type="checkbox" name="Termos" id="termosVol" required>
+                <input type="checkbox" name="Termos" id="termosVol" data-fs-field required>
                 <label for="termosVol">Declaro que li e concordo em participar como colaborador voluntário, ciente de que se trata de uma iniciativa sem vínculo empregatício, com foco em aprendizado, certificação e fortalecimento do turismo local. <span class="required">*</span></label>
+                <span data-fs-error="Termos" class="field-error"></span>
               </div>
             </div>
-            <button type="submit" class="btn-submit" id="btnEnviar">📩 Enviar Inscrição →</button>
-            <div id="formSuccessMessage" class="success-message"></div>
-            <div id="formErrorMessage" style="color:#c62828; margin-top:16px; display:none;"></div>
+            <button type="submit" class="btn-submit" data-fs-submit-btn>📩 Enviar Inscrição →</button>
           </form>
           <p style="font-size:0.75rem; text-align:center; margin-top:24px; color:#777;">🔒 Suas informações serão usadas exclusivamente para contato sobre o programa de voluntariado. Após o envio, responderemos em até 5 dias úteis.</p>
         </div>
@@ -451,75 +479,29 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    const form = document.getElementById('voluntarioForm');
-    const successDiv = document.getElementById('formSuccessMessage');
-    const errorDiv = document.getElementById('formErrorMessage');
-    const btnEnviar = document.getElementById('btnEnviar');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const nome = document.getElementById('nomeVol').value.trim();
-      const email = document.getElementById('emailVol').value.trim();
-      const telefone = document.getElementById('telefoneVol').value.trim();
-      const area = document.getElementById('areaInteresse').value;
-      const motivacao = document.getElementById('motivacaoVol').value.trim();
-      const disponibilidade = document.getElementById('disponibilidadeVol').value;
-      const termos = document.getElementById('termosVol').checked;
-      
-      if(!nome || !email || !telefone || !area || !motivacao || !disponibilidade || !termos) {
-        errorDiv.style.display = 'block';
-        errorDiv.innerText = '❌ Por favor, preencha todos os campos obrigatórios (*) e aceite os termos.';
-        successDiv.style.display = 'none';
-        setTimeout(() => { errorDiv.style.display = 'none'; }, 4000);
-        return;
-      }
-      
-      if(!email.includes('@') || !email.includes('.')) {
-        errorDiv.style.display = 'block';
-        errorDiv.innerText = '❌ Informe um e-mail válido.';
-        setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
-        return;
-      }
-      
-      btnEnviar.disabled = true;
-      btnEnviar.textContent = 'Enviando...';
-      errorDiv.style.display = 'none';
-      successDiv.style.display = 'none';
-      
-      const formData = new FormData(form);
-      const submitUrl = form.action;
-      
-      try {
-        const response = await fetch(submitUrl, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (response.ok) {
-          successDiv.style.display = 'block';
-          successDiv.innerHTML = '✅ Inscrição enviada com sucesso! Em breve entraremos em contato pelo WhatsApp ou e-mail. Obrigado por querer construir o turismo do Peruaçu conosco. 🌿🏞️';
-          form.reset();
-          successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          btnEnviar.disabled = false;
-          btnEnviar.textContent = '📩 Enviar Inscrição →';
-          setTimeout(() => {
-            if(successDiv) successDiv.style.display = 'none';
-          }, 8000);
-        } else {
-          throw new Error('Erro na comunicação');
+    // Inicialização do Formspree AJAX
+    window.formspree = window.formspree || function () { 
+      (formspree.q = formspree.q || []).push(arguments); 
+    };
+    
+    // Inicializa o formulário quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', function() {
+      formspree('initForm', { 
+        formElement: '#voluntarioForm', 
+        formId: 'mvznavnv',
+        onSuccess: function() {
+          // Limpa o formulário após sucesso
+          document.getElementById('voluntarioForm').reset();
+          // Scroll suave até a mensagem de sucesso
+          const successDiv = document.querySelector('[data-fs-success]');
+          if(successDiv) {
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
-      } catch (err) {
-        console.error(err);
-        errorDiv.style.display = 'block';
-        errorDiv.innerHTML = '⚠️ Não foi possível enviar agora. Por favor, tente novamente.';
-        btnEnviar.disabled = false;
-        btnEnviar.textContent = '📩 Enviar Inscrição →';
-        setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
-      }
+      });
     });
     
+    // Formatação do telefone
     const telefoneInput = document.getElementById('telefoneVol');
     if(telefoneInput) {
       telefoneInput.addEventListener('input', (e) => {
@@ -534,5 +516,6 @@
       });
     }
   </script>
+  <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 </body>
 </html>
