@@ -52,7 +52,7 @@
     .section-subtitle { font-size: 1.125rem; color: var(--gray-600); margin-bottom: 2rem; max-width: 720px; }
     @media (min-width: 768px) { .section-title { font-size: 2.5rem; } }
 
-    /* ========== SCROLL REVEAL ANIMATIONS - TEMPO PROFISSIONAL (mais lento e suave) ========== */
+    /* ========== SCROLL REVEAL ANIMATIONS ========== */
     .reveal-on-scroll {
       opacity: 0;
       transform: translateY(35px);
@@ -62,7 +62,6 @@
       opacity: 1;
       transform: translateY(0);
     }
-    /* Stagger delays para elementos filhos - com timing mais profissional */
     .reveal-stagger > * {
       opacity: 0;
       transform: translateY(35px);
@@ -138,7 +137,6 @@
       margin-top: 2px;
     }
 
-    /* Menu Hamburguer + Mobile */
     .menu-toggle {
       display: flex;
       background: transparent;
@@ -265,7 +263,6 @@
     }
     .slide.active .slide-content { transform: translateY(0); opacity: 1; transition-delay: 0.25s; }
     
-    /* ====== BADGE ESTILO PC - PALITINHOS SEMPRE AO LADO ====== */
     .hero-badge {
       display: flex;
       align-items: center;
@@ -319,69 +316,25 @@
       white-space: nowrap;
     }
     
-    /* Responsivo: mantém os palitinhos ao lado mesmo em telas pequenas */
     @media (max-width: 640px) {
-      .hero-badge {
-        gap: 8px;
-        margin-bottom: 18px;
-        flex-wrap: nowrap;
-      }
-      .hero-badge-line {
-        width: 28px;
-        height: 2px;
-        flex-shrink: 0;
-      }
-      .hero-badge-primary {
-        font-size: 0.65rem;
-        letter-spacing: 2px;
-        white-space: nowrap;
-      }
-      .hero-badge-highlight {
-        font-size: 0.65rem;
-        letter-spacing: 1.5px;
-        white-space: nowrap;
-      }
-      .hero-badge-text-group {
-        gap: 6px;
-        white-space: nowrap;
-      }
+      .hero-badge { gap: 8px; margin-bottom: 18px; flex-wrap: nowrap; }
+      .hero-badge-line { width: 28px; height: 2px; flex-shrink: 0; }
+      .hero-badge-primary { font-size: 0.65rem; letter-spacing: 2px; white-space: nowrap; }
+      .hero-badge-highlight { font-size: 0.65rem; letter-spacing: 1.5px; white-space: nowrap; }
+      .hero-badge-text-group { gap: 6px; white-space: nowrap; }
     }
-    
     @media (max-width: 480px) {
-      .hero-badge {
-        gap: 6px;
-      }
-      .hero-badge-line {
-        width: 22px;
-      }
-      .hero-badge-primary {
-        font-size: 0.6rem;
-        letter-spacing: 1.5px;
-      }
-      .hero-badge-highlight {
-        font-size: 0.6rem;
-        letter-spacing: 1px;
-      }
-      .hero-badge-text-group {
-        gap: 4px;
-      }
+      .hero-badge { gap: 6px; }
+      .hero-badge-line { width: 22px; }
+      .hero-badge-primary { font-size: 0.6rem; letter-spacing: 1.5px; }
+      .hero-badge-highlight { font-size: 0.6rem; letter-spacing: 1px; }
+      .hero-badge-text-group { gap: 4px; }
     }
-    
     @media (max-width: 400px) {
-      .hero-badge-line {
-        width: 18px;
-      }
-      .hero-badge-primary {
-        font-size: 0.55rem;
-        letter-spacing: 1.2px;
-      }
-      .hero-badge-highlight {
-        font-size: 0.55rem;
-        letter-spacing: 0.8px;
-      }
-      .hero-badge-text-group {
-        gap: 3px;
-      }
+      .hero-badge-line { width: 18px; }
+      .hero-badge-primary { font-size: 0.55rem; letter-spacing: 1.2px; }
+      .hero-badge-highlight { font-size: 0.55rem; letter-spacing: 0.8px; }
+      .hero-badge-text-group { gap: 3px; }
     }
     
     .slide-title { font-size: clamp(1.6rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
@@ -405,7 +358,6 @@
     .slider-dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; transition: 0.2s; }
     .slider-dot.active { background: var(--brand-primary); width: 28px; border-radius: 20px; }
     
-    /* Grids e cards */
     .grid-2 { display: grid; grid-template-columns: 1fr; gap: 24px; }
     .grid-3 { display: grid; grid-template-columns: 1fr; gap: 24px; }
     @media (min-width: 640px) { .grid-2 { grid-template-columns: repeat(2,1fr); } .grid-3 { grid-template-columns: repeat(2,1fr); } }
@@ -422,7 +374,6 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; pointer-events: none; }
     .gallery-item:hover img { transform: scale(1.03); }
     
-    /* Indicador de mais fotos (mobile) - sem o primeiro sinal de + */
     .more-photos-indicator {
       position: absolute;
       bottom: 12px;
@@ -451,12 +402,10 @@
       stroke-width: 2;
     }
     @media (min-width: 641px) {
-      .more-photos-indicator {
-        display: none;
-      }
+      .more-photos-indicator { display: none; }
     }
 
-    /* LIGHTBOX - BOTÕES EM UMA ÚNICA LINHA HORIZONTAL PARA TODOS OS CELULARES */
+    /* LIGHTBOX */
     .lightbox {
       position: fixed;
       top: 0;
@@ -477,7 +426,6 @@
     .lightbox-content { position: relative; max-width: 94vw; max-height: 88vh; display: flex; align-items: center; justify-content: center; touch-action: pan-y pinch-zoom; }
     .lightbox-img { max-width: 94vw; max-height: 85vh; width: auto; height: auto; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
     
-    /* ACTIONS: Layout em linha única horizontal com rolagem suave se necessário */
     .lightbox-actions {
       position: absolute;
       bottom: 20px;
@@ -504,17 +452,9 @@
       border: 1px solid rgba(255,255,255,0.2);
       box-sizing: border-box;
     }
-    .lightbox-actions::-webkit-scrollbar {
-      height: 3px;
-    }
-    .lightbox-actions::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-    }
-    .lightbox-actions::-webkit-scrollbar-thumb {
-      background: var(--brand-primary);
-      border-radius: 10px;
-    }
+    .lightbox-actions::-webkit-scrollbar { height: 3px; }
+    .lightbox-actions::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .lightbox-actions::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 10px; }
     
     .lightbox-action-btn {
       background: transparent;
@@ -541,57 +481,22 @@
       stroke-width: 1.8;
       flex-shrink: 0;
     }
-    .lightbox-action-btn:hover {
-      background: rgba(255,255,255,0.2);
-      transform: translateY(-1px);
-    }
+    .lightbox-action-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
     
     @media (max-width: 640px) {
-      .lightbox-actions {
-        gap: 8px;
-        padding: 8px 14px;
-        bottom: 16px;
-      }
-      .lightbox-action-btn {
-        padding: 5px 10px;
-        font-size: 0.72rem;
-        gap: 4px;
-      }
-      .lightbox-action-btn svg {
-        width: 16px;
-        height: 16px;
-      }
+      .lightbox-actions { gap: 8px; padding: 8px 14px; bottom: 16px; }
+      .lightbox-action-btn { padding: 5px 10px; font-size: 0.72rem; gap: 4px; }
+      .lightbox-action-btn svg { width: 16px; height: 16px; }
     }
     @media (max-width: 480px) {
-      .lightbox-actions {
-        gap: 6px;
-        padding: 6px 12px;
-        bottom: 12px;
-        max-width: 96vw;
-      }
-      .lightbox-action-btn {
-        padding: 4px 8px;
-        font-size: 0.65rem;
-        gap: 3px;
-      }
-      .lightbox-action-btn svg {
-        width: 14px;
-        height: 14px;
-      }
+      .lightbox-actions { gap: 6px; padding: 6px 12px; bottom: 12px; max-width: 96vw; }
+      .lightbox-action-btn { padding: 4px 8px; font-size: 0.65rem; gap: 3px; }
+      .lightbox-action-btn svg { width: 14px; height: 14px; }
     }
     @media (max-width: 400px) {
-      .lightbox-action-btn {
-        padding: 4px 6px;
-        font-size: 0.6rem;
-      }
-      .lightbox-action-btn svg {
-        width: 13px;
-        height: 13px;
-      }
-      .lightbox-actions {
-        gap: 4px;
-        padding: 5px 10px;
-      }
+      .lightbox-action-btn { padding: 4px 6px; font-size: 0.6rem; }
+      .lightbox-action-btn svg { width: 13px; height: 13px; }
+      .lightbox-actions { gap: 4px; padding: 5px 10px; }
     }
     
     .close-lightbox {
@@ -670,24 +575,30 @@
     summary::-webkit-details-marker { display: none; }
     .faq-answer { padding: 0 24px 24px 24px; color: var(--gray-600); }
     
-    /* MAPA ESTILO */
+    /* MAPA ESTILO - AGORA COM LINK DIRETO DO GOOGLE MAPS */
     .map-container {
       margin-top: 32px;
       border-radius: var(--radius-md);
       overflow: hidden;
       box-shadow: var(--shadow-md);
       border: 1px solid var(--gray-200);
+      position: relative;
+      width: 100%;
+      height: 500px;
     }
     .map-container iframe {
-      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: 400px;
+      height: 100%;
       border: 0;
     }
     @media (max-width: 768px) {
-      .map-container iframe {
-        height: 300px;
-      }
+      .map-container { height: 400px; }
+    }
+    @media (max-width: 480px) {
+      .map-container { height: 350px; }
     }
     
     /* Splash Screen */
@@ -777,14 +688,14 @@
   
   <section id="contato" style="padding:64px 0; background: var(--gray-50);" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Fale comigo e agende</h2><div class="contact-grid reveal-stagger"><div class="contact-info"><h3>📞 Contato direto</h3><div style="margin:20px 0"><p><strong>Telefone:</strong> (38) 99130-7687</p><p><strong>WhatsApp:</strong> <a href="https://wa.me/5538991307687" style="color:#1a1a1a; font-weight:bold">Clique e fale agora</a></p></div><p style="background:rgba(0,0,0,0.1); border-radius:20px; padding:16px;"> Resposta rápida em até 30 minutos.</p></div><div class="form-card"><h3>Pré-agendamento rápido</h3><form id="quickForm"><div class="form-group"><input type="text" id="nome" placeholder="Seu nome completo *" required></div><div class="form-group"><select id="pessoas" required><option value="">Quantas pessoas? *</option><option>1 pessoa</option><option>2 pessoas</option><option>3-4 pessoas</option><option>5+ pessoas</option></select></div><div class="form-group"><select id="dias" required><option value="">Roteiro desejado *</option><option>Meio dia (4-5h)</option><option>1 dia completo</option><option>2 dias</option><option>3-4 dias</option></select></div><div class="form-group"><input type="text" id="data" placeholder="Data prevista (ex: maio/junho)"></div><div class="form-group"><textarea id="msg" rows="3" placeholder="Mensagem adicional"></textarea></div><button type="submit" class="btn-form">Enviar pelo WhatsApp →</button></form></div></div>
     
-    <!-- MAPA DO PARQUE NACIONAL CAVERNAS DO PERUAÇU - ADICIONADO AQUI -->
+    <!-- MAPA DO PARQUE NACIONAL CAVERNAS DO PERUAÇU - COM MARCADOR VERMELHO E INFORMAÇÕES COMPLETAS -->
     <div class="map-container reveal-on-scroll">
       <iframe 
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15600.845335034504!2d-44.233333!3d-15.083333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x75a4b8b5b5b5b5b%3A0x5b5b5b5b5b5b5b5b!2sParque%20Nacional%20Cavernas%20do%20Perua%C3%A7u!5e0!3m2!1spt-BR!2sbr!4v1614782000000!5m2!1spt-BR!2sbr" 
+        src="https://www.google.com/maps?q=Parque+Nacional+Cavernas+do+Peruaçu,+BR-135,+s/n+-+Fabião+I,+Januária+-+MG,+39480-000&output=embed&z=14"
         allowfullscreen="" 
         loading="lazy" 
         referrerpolicy="no-referrer-when-downgrade"
-        title="Mapa do Parque Nacional Cavernas do Peruaçu">
+        title="Parque Nacional Cavernas do Peruaçu - 155, BR-135, s/n - Fabião I, Januária - MG, 39480-000 - 4,9 ★ (1.193 avaliações)">
       </iframe>
     </div>
     </div></section>
@@ -822,17 +733,12 @@
     });
   })();
   
-  // ========== SCROLL REVEAL FUNCTION - TEMPO PROFISSIONAL MAIS LENTO ==========
+  // SCROLL REVEAL
   (function initScrollReveal() {
     const revealElements = document.querySelectorAll('.reveal-on-scroll, .reveal-stagger');
-    
-    // Adiciona classe base para opacidade 0
     revealElements.forEach(el => {
       if (!el.classList.contains('revealed')) {
-        if (el.classList.contains('reveal-stagger')) {
-          // Já está com opacity:0 nos filhos via CSS
-        } else {
-          // Garantir que o próprio elemento comece invisível
+        if (!el.classList.contains('reveal-stagger')) {
           el.style.opacity = '0';
           el.style.transform = 'translateY(35px)';
           el.style.transition = 'opacity 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
@@ -842,17 +748,13 @@
     
     function checkScroll() {
       const windowHeight = window.innerHeight;
-      const revealThreshold = 120; // Revela um pouco antes do elemento entrar na tela (profissional)
-      
+      const revealThreshold = 120;
       revealElements.forEach(el => {
         if (el.classList.contains('revealed')) return;
-        
         const rect = el.getBoundingClientRect();
         const isVisible = rect.top < windowHeight - revealThreshold && rect.bottom > 0;
-        
         if (isVisible) {
           el.classList.add('revealed');
-          // Remove estilos inline se existirem
           if (!el.classList.contains('reveal-stagger')) {
             el.style.opacity = '';
             el.style.transform = '';
@@ -861,47 +763,34 @@
       });
     }
     
-    // Executa uma vez ao carregar e no scroll com throttle para performance
     let ticking = false;
     function onScrollHandler() {
       if (!ticking) {
-        requestAnimationFrame(() => {
-          checkScroll();
-          ticking = false;
-        });
+        requestAnimationFrame(() => { checkScroll(); ticking = false; });
         ticking = true;
       }
     }
-    
     window.addEventListener('load', checkScroll);
     window.addEventListener('scroll', onScrollHandler);
     window.addEventListener('resize', checkScroll);
-    checkScroll(); // Chamada imediata
+    checkScroll();
   })();
   
-  // MOBILE GALLERY: Ocultar 6 fotos e adicionar indicador na última visível (sem o primeiro +)
+  // MOBILE GALLERY
   function setupMobileGallery() {
     const galleryContainer = document.getElementById('galleryContainer');
     if(!galleryContainer) return;
     const allItems = Array.from(galleryContainer.querySelectorAll('.gallery-item'));
     if(allItems.length === 0) return;
-    
     const isMobile = window.innerWidth < 641;
-    
-    // Reset antes de aplicar
     allItems.forEach(item => {
       item.style.display = '';
       const existingIndicator = item.querySelector('.more-photos-indicator');
       if(existingIndicator) existingIndicator.remove();
     });
-    
     if(isMobile) {
-      // Ocultar as últimas 6 fotos
       const visibleCount = Math.max(1, allItems.length - 6);
-      for(let i = visibleCount; i < allItems.length; i++) {
-        allItems[i].style.display = 'none';
-      }
-      // Adicionar indicador na última foto visível (sem o sinal de + no início)
+      for(let i = visibleCount; i < allItems.length; i++) { allItems[i].style.display = 'none'; }
       const lastVisibleIndex = visibleCount - 1;
       if(lastVisibleIndex >= 0 && allItems[lastVisibleIndex]) {
         const lastVisible = allItems[lastVisibleIndex];
@@ -914,15 +803,10 @@
     }
   }
   
-  // Executar no carregamento e redimensionamento
-  window.addEventListener('load', () => {
-    setupMobileGallery();
-  });
-  window.addEventListener('resize', () => {
-    setupMobileGallery();
-  });
+  window.addEventListener('load', () => { setupMobileGallery(); });
+  window.addEventListener('resize', () => { setupMobileGallery(); });
   
-  // mobile menu
+  // MOBILE MENU
   const menuBtn = document.getElementById('menuToggleBtn'), menuOverlay = document.getElementById('mobileMenuOverlay'), menuPanel = document.getElementById('mobileMenuPanel'), menuLinks = document.querySelectorAll('[data-menu-link]');
   function closeMenu() { menuBtn.classList.remove('active'); menuOverlay.classList.remove('active'); menuPanel.classList.remove('active'); document.body.style.overflow = ''; }
   function openMenu() { menuBtn.classList.add('active'); menuOverlay.classList.add('active'); menuPanel.classList.add('active'); document.body.style.overflow = 'hidden'; }
@@ -931,7 +815,7 @@
   menuOverlay.addEventListener('click', closeMenu);
   menuLinks.forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); const targetId = link.getAttribute('href'); if(targetId && targetId !== '#') { if(targetId === 'blog.html') { closeMenu(); window.location.href = 'blog.html'; return; } const targetElement = document.querySelector(targetId); if(targetElement) { closeMenu(); setTimeout(() => { targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300); } } else if(link.classList.contains('mobile-menu-whatsapp')) { closeMenu(); } else { closeMenu(); } }); });
   
-  // hero slider
+  // HERO SLIDER
   const galleryImgs = Array.from(document.querySelectorAll('#galleryContainer img')).map(img => ({ src: img.src, alt: img.alt }));
   const unique = [], seen = new Set();
   for(let img of galleryImgs) if(!seen.has(img.src)) { seen.add(img.src); unique.push(img); }
