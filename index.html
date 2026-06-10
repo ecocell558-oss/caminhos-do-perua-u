@@ -234,14 +234,23 @@
       .logo-text .brand-sub { font-size: 0.6rem; }
     }
 
-    /* Hero Slider */
+    /* Hero Slider - IMAGENS SEM FOSCO, CORES ORIGINAIS */
     .hero-full { position: relative; width: 100%; height: 100vh; min-height: 580px; max-height: 900px; overflow: hidden; background: #0a0a0a; }
     .hero-slider-modern { position: relative; width: 100%; height: 100%; }
     .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s cubic-bezier(0.25, 0.1, 0.2, 1); z-index: 1; }
     .slide.active { opacity: 1; z-index: 2; }
-    .slide-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75) contrast(1.08); transform: scale(1); transition: transform 6s ease-out; }
+    .slide-bg { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; 
+      filter: none; /* FOSCO / ESCURECIMENTO REMOVIDO - CORES ORIGINAIS */
+      transform: scale(1); transition: transform 6s ease-out; 
+    }
     .slide.active .slide-bg { transform: scale(1.05); }
-    .slide-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.3) 100%); z-index: 3; }
+    /* OVERLAY: removido o escurecimento, mas mantido gradiente sutil para legibilidade do texto */
+    .slide-overlay { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.15) 100%); /* escurecimento reduzido drasticamente para preservar cores */
+      z-index: 3; 
+    }
     .slide-content { 
       position: absolute; 
       bottom: 12%; 
