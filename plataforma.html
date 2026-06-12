@@ -587,27 +587,19 @@ window.approvePartner=function(id,ok, colaboradorEmail){
   let targetUser = null;
   let targetPartner = null;
   
-  if(colaboradorEmail){
-    targetUser = db.users[userKey(colaboradorEmail)];
-    if(targetUser && targetUser.partners){
-      targetPartner = targetUser.partners.find(p => p.id === id);
-    }
-  } else {
-    targetPartner = u().partners.find(p => p.id === id);
-  }
-  
-  if(!targetPartner){
-    const allPartners = getAllPartners();
-    targetPartner = allPartners.find(p => p.id === id);
-    if(targetPartner && targetPartner.colaboradorEmail){
-      targetUser = db.users[userKey(targetPartner.colaboradorEmail)];
-      if(targetUser && targetUser.partners){
-        targetPartner = targetUser.partners.find(p => p.id === id);
+  // Buscar o parceiro em todos os colaboradores
+  for (const [email, user] of Object.entries(db.users)) {
+    if (user.partners) {
+      const found = user.partners.find(p => p.id === id);
+      if (found) {
+        targetUser = user;
+        targetPartner = found;
+        break;
       }
     }
   }
   
-  if(!targetPartner) return toast('Parceiro não encontrado');
+  if (!targetPartner) return toast('Parceiro não encontrado');
   
   targetPartner.status = ok ? 'Aprovado' : 'Rejeitado';
   if(ok && !targetPartner.awarded){
@@ -618,8 +610,11 @@ window.approvePartner=function(id,ok, colaboradorEmail){
       targetUser.points = (targetUser.points || 0) + 100;
     }
     toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${comissao.toFixed(2)}`);
+    confetti();
+  } else if(ok) {
+    toast(`✅ Parceiro aprovado!`);
   } else {
-    toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.');
+    toast(`❌ Parceiro rejeitado.`);
   }
   saveDB();
   renderAll();
@@ -640,7 +635,7 @@ window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nom
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
-// ADMIN FUNCTIONS
+// ADMIN FUNCTIONS - CORRIGIDAS
 window.createCollaboratorAccount = async function() {
   const email = document.getElementById('newCollabEmail')?.value.trim();
   const nome = document.getElementById('newCollabNome')?.value.trim();
@@ -677,6 +672,7 @@ window.createCollaboratorAccount = async function() {
     
     renderAdmin();
     renderCommunity();
+    renderRanking();
   } catch (error) {
     if(error.code === 'auth/email-already-in-use') {
       toast('❌ Este e-mail já está em uso no Firebase.');
@@ -742,6 +738,7 @@ window.deleteCollaborator = function(email) {
   toast(`Colaborador ${email} removido!`);
   renderAdmin();
   renderCommunity();
+  renderRanking();
   closeProfile();
 };
 
@@ -761,33 +758,19 @@ window.approveContent = async function(contentId, ok, colaboradorEmail) {
   let targetUser = null;
   let targetContent = null;
   
-  if(colaboradorEmail){
-    targetUser = db.users[userKey(colaboradorEmail)];
-    if(targetUser && targetUser.contents){
-      targetContent = targetUser.contents.find(c => c.id === contentId);
-    }
-  }
-  
-  if(!targetContent){
-    const allContents = getAllContents();
-    const found = allContents.find(c => c.id === contentId);
-    if(found && found.colaboradorEmail){
-      targetUser = db.users[userKey(found.colaboradorEmail)];
-      if(targetUser && targetUser.contents){
-        targetContent = targetUser.contents.find(c => c.id === contentId);
+  // Buscar o conteúdo em todos os colaboradores
+  for (const [email, user] of Object.entries(db.users)) {
+    if (user.contents) {
+      const found = user.contents.find(c => c.id === contentId);
+      if (found) {
+        targetUser = user;
+        targetContent = found;
+        break;
       }
     }
   }
   
-  if(!targetContent){
-    const userContents = u().contents.find(c => c.id === contentId);
-    if(userContents){
-      targetContent = userContents;
-      targetUser = u();
-    }
-  }
-  
-  if(!targetContent) return toast('Conteúdo não encontrado');
+  if (!targetContent) return toast('Conteúdo não encontrado');
   
   targetContent.status = ok ? 'Aprovado' : 'Rejeitado';
   
@@ -814,6 +797,7 @@ window.approveContent = async function(contentId, ok, colaboradorEmail) {
         targetContent.awarded = true;
         if(targetUser) targetUser.points = (targetUser.points || 0) + 50;
         toast(`✅ Conteúdo aprovado e publicado! +50 pontos para o colaborador.`);
+        confetti();
       } else {
         toast(`✅ Conteúdo aprovado e publicado!`);
       }
@@ -839,23 +823,23 @@ window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) 
     } catch(e){}
   }
   
-  if(colaboradorEmail){
-    const targetUser = db.users[userKey(colaboradorEmail)];
-    if(targetUser && targetUser.contents){
-      const index = targetUser.contents.findIndex(c => c.id === contentId);
-      if(index !== -1){
-        targetUser.contents.splice(index, 1);
-        saveDB();
-        toast('Conteúdo excluído!');
+  let found = false;
+  for (const [email, user] of Object.entries(db.users)) {
+    if (user.contents) {
+      const index = user.contents.findIndex(c => c.id === contentId);
+      if (index !== -1) {
+        user.contents.splice(index, 1);
+        found = true;
+        break;
       }
     }
+  }
+  
+  if(found) {
+    saveDB();
+    toast('Conteúdo excluído!');
   } else {
-    const index = u().contents.findIndex(c => c.id === contentId);
-    if(index !== -1){
-      u().contents.splice(index, 1);
-      saveDB();
-      toast('Conteúdo excluído!');
-    }
+    toast('Conteúdo não encontrado');
   }
   renderAll();
 };
@@ -926,10 +910,10 @@ function renderAdmin(){
     </div>
     
     <div class="grid" style="margin-top:20px">
-      <div class="card stat"><span>📝 Pendentes</span><b>${pendingContents.length}</b></div>
-      <div class="card stat"><span>✅ Aprovados</span><b>${approvedContents.length}</b></div>
+      <div class="card stat"><span>📝 Conteúdos Pendentes</span><b>${pendingContents.length}</b></div>
+      <div class="card stat"><span>✅ Conteúdos Aprovados</span><b>${approvedContents.length}</b></div>
       <div class="card stat"><span>📰 Publicados</span><b>${publishedContents.length}</b></div>
-      <div class="card stat"><span>🤝 Parceiros</span><b>${pendingPartners.length}</b></div>
+      <div class="card stat"><span>🤝 Parceiros Pendentes</span><b>${pendingPartners.length}</b></div>
     </div>
     
     <div class="split">
