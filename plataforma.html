@@ -10,7 +10,7 @@
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, getDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
@@ -57,6 +57,11 @@
         };
         const ref = await addDoc(postsCollection, normalized);
         return { id: ref.id, ...normalized };
+      },
+      async deletePost(postId) {
+        const postRef = doc(firestore, 'posts', postId);
+        await deleteDoc(postRef);
+        return true;
       },
       async loadPosts() {
         const postsCollection = collection(firestore, 'posts');
@@ -118,12 +123,6 @@
 // ============================================================
 const ADMIN_UID = "JrfKdbpG0VNPN63wGOPqtYpfIMT2";
 
-// ============================================================
-// CREDENCIAIS DE ACESSO ADMIN:
-// Email: adm@caminhosdoperuacu.com.br
-// Senha: @Adm2025!
-// ============================================================
-
 const LEVELS=[['Visitante',0],['Explorador',100],['Colaborador',300],['Representante',600],['Embaixador',1000],['Líder Regional',1500]];
 const CERTS=[['Iniciante',1500],['Explorador',3000],['Colaborador',4500],['Embaixador',6000],['Especialista',7500]];
 const navItems=[['dashboard','⌂','Dashboard'],['treinamento','▣','Treinamento'],['materiais','⇩','Materiais'],['conteudos','✎','Meus Conteúdos'],['tarefas','✓','Tarefas'],['parceiros','◎','Parceiros'],['ranking','★','Ranking'],['certificados','▤','Certificados'],['comunidade','☏','Comunidade'],['perfil','◉','Perfil'],['blog','↗','Blog'],['admin','♛','Admin']];
@@ -139,11 +138,7 @@ const defaultTasks=[
 ];
 const seedRanking=[];
 const materials=[['Portfólio Caminhos do Peruaçu','PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.'],['Cartão de Visita Caminhos do Peruaçu','Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.'],['Material de Serviço','PDF visual de apoio comercial e apresentação dos serviços.'],['Mapa Peruaçu Trilhas','Imagem de referência para orientar rotas, trilhas e atrativos.'],['Panfleto Caminhos do Peruaçu','Material promocional para captação de parceiros e visitantes.']];
-const posts=[['Conheça a Gruta do Janelão','História, visitação responsável e curiosidades.'],['Turismo sustentável no Vale do Peruaçu','Como gerar renda protegendo o patrimônio local.'],['Parceiros locais fortalecem a experiência','Benefícios para pousadas, guias e restaurantes.']];
 
-// ============================================================
-// MÓDULOS COM EXATAMENTE 10 QUESTÕES CADA
-// ============================================================
 function makeQuestions(){
  const modulesBase=[
   {title:'Conhecendo o Projeto',themes:['missão do projeto','Vale do Peruaçu/MG','Cerrado','Parque Nacional Cavernas do Peruaçu','turismo sustentável','comunidades locais','condutores credenciados','patrimônio natural','arte rupestre','experiência do visitante'],correct:['valorizar conservação, educação e renda local','apresentar o destino com responsabilidade ambiental','respeitar regras do parque e comunidades','conectar visitantes a serviços locais qualificados','promover turismo sustentável no Vale do Peruaçu','guias credenciados garantem segurança','preservar pinturas rupestres','evitar contato direto com espeleotemas','respeitar limite de visitação','valorizar cultura local'],wrong:['prometer acesso sem regras ambientais','ignorar guias e comunidades locais','tratar o parque apenas como cenário de fotos','estimular visita sem planejamento','deixar lixo na trilha','tocar formações rochosas','usar flash dentro de cavernas','ignorar horário de funcionamento','entrar sem autorização','divulgar localizações exatas sem critério']},
@@ -153,7 +148,6 @@ function makeQuestions(){
   {title:'Gruta do Janelão',themes:['altura da gruta','Perna da Bailarina','confusão comum','comunicação ao visitante','espeleotemas','patrimônio geológico','visitação responsável','interpretação ambiental','registro fotográfico','importância turística'],correct:['a Gruta do Janelão tem 28,6 m de altura e abriga a Perna da Bailarina de 28 m','a estalactite Perna da Bailarina mede 28 m','não se deve confundir a altura da gruta com a estalactite','o dado correto fortalece a credibilidade do guia','a visita deve respeitar conservação e orientação local','espeleotemas são formações milenares','evitar toque nas rochas','uso de flash é proibido','capacidade de carga deve ser respeitada','gruta é um dos maiores atrativos do parque'],wrong:['a gruta mede 28 m porque esse é o tamanho da estalactite','a Perna da Bailarina fica fora do parque','a estalactite tem 28,6 m e a gruta 28 m','dados de altura podem ser inventados durante a visita','pode tocar as formações','fotos sem restrição são permitidas','qualquer um pode guiar sem credenciamento','não há limite de visitantes','gruta não tem importância científica','pode-se fazer trilha sem autorização']}
  ];
  
- // Criar exatamente 10 questões por módulo
  return modulesBase.map((m,mi) => {
    const questions = [];
    for(let i = 0; i < 10; i++) {
@@ -264,7 +258,6 @@ function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.va
 function editMaterial(id){const m=db.materials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
 function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}function blogPostFromContent(c){return{title:c.titulo,category:c.categoria,excerpt:c.resumo||'',full:c.texto||'',img:c.img||'',video:c.video||'',link:c.link||'',gallery:c.gallery||[],galleryLayout:c.galleryLayout||3,autoCarousel:!!c.autoCarousel,isFeatured:!!c.isFeatured,author:u().profile.nome}}
 
-// Funções para converter arquivos para Base64
 function fileToBase64(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -389,29 +382,8 @@ function renderContents(){
         </div>
         
         <h2>Minhas solicitações de postagem</h2>
-        <div class="list">
-          ${u().contents.length ? u().contents.map(c=>`
-            <div class="item">
-              <div class="item-head">
-                <div>
-                  <b>${c.titulo}</b>
-                  <p class="hint">${c.categoria} · ${c.resumo||'Sem resumo'}</p>
-                </div>
-                <span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">
-                  ${c.blogStatus==='Publicado'?'Publicado no blog':c.status}
-                </span>
-              </div>
-              <p class="hint">
-                ${c.blogStatus==='Publicado'?'Post publicado no Firebase do blog e disponível no blog.html.':
-                  c.blogStatus==='Erro'?'Aprovado, mas houve erro ao publicar no blog. Reaprove pelo admin após verificar internet/Firebase.':
-                  'Aguardando análise do administrador.'}
-              </p>
-              <div class="actions">
-                ${c.blogId?`<button class="ghost" onclick="window.open('blog.html?p=${c.blogId}','_blank')">Ver no blog</button>`:''}
-                <button class="ghost" onclick="window.previewContent(${c.id})">Prévia</button>
-              </div>
-            </div>
-          `).join('') : '<div class="empty">Nenhum conteúdo enviado ainda.</div>'}
+        <div class="list" id="myContentsList">
+          ${renderMyContentsList()}
         </div>
       </div>
     </div>
@@ -419,6 +391,47 @@ function renderContents(){
   setTimeout(window.updatePostPreview, 50);
   window.updateGalleryPreview();
 }
+
+function renderMyContentsList(){
+  if(!u().contents.length) return '<div class="empty">Nenhum conteúdo enviado ainda.</div>';
+  
+  return u().contents.map(c=>`
+    <div class="item">
+      <div class="item-head">
+        <div>
+          <b>${c.titulo}</b>
+          <p class="hint">${c.categoria} · ${c.resumo||'Sem resumo'}</p>
+        </div>
+        <span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">
+          ${c.blogStatus==='Publicado'?'Publicado no blog':c.status}
+        </span>
+      </div>
+      <p class="hint">
+        ${c.blogStatus==='Publicado'?'✅ Post publicado no blog! Disponível em blog.html.':
+          c.blogStatus==='Erro'?'⚠️ Aprovado, mas erro na publicação. O admin pode tentar novamente.':
+          c.status==='Aprovado'?'✅ Aprovado! O post será publicado em breve.':
+          c.status==='Rejeitado'?'❌ Rejeitado pelo administrador. Você pode excluir esta solicitação.':
+          '⏳ Aguardando análise do administrador.'}
+      </p>
+      <div class="actions">
+        ${c.blogId ? `<button class="ghost" onclick="window.open('blog.html?p=${c.blogId}','_blank')">📖 Ver no blog</button>` : ''}
+        <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
+        ${c.status === 'Rejeitado' ? `<button class="danger" onclick="window.deleteMyContent(${c.id})">🗑️ Excluir</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.deleteMyContent = function(id){
+  if(!confirm('Tem certeza que deseja excluir este conteúdo rejeitado?')) return;
+  const index = u().contents.findIndex(c => c.id === id);
+  if(index !== -1){
+    u().contents.splice(index, 1);
+    saveDB();
+    toast('Conteúdo rejeitado removido com sucesso!');
+    renderContents();
+  }
+};
 
 window.updatePostPreview = function(){
   const box = document.getElementById('postLivePreview');
@@ -429,7 +442,6 @@ window.updatePostPreview = function(){
   const text = document.getElementById('ctexto')?.value || '<p>O conteúdo completo do post será exibido nesta área.</p>';
   const img = document.getElementById('cimg')?.value || '';
   
-  // Coletar imagens da galeria dos campos base64
   const galleryUrls = [];
   for(let i = 1; i <= 6; i++){
     const base64 = document.getElementById(`galleryBase64${i}`)?.value.trim();
@@ -495,10 +507,30 @@ window.addContent = async function(e){
     status: 'Pendente',
     blogStatus: 'Aguardando aprovação',
     blogId: '',
-    awarded: false
+    awarded: false,
+    createdAt: new Date().toISOString()
   });
   saveDB();
-  toast('Postagem enviada para aprovação.');
+  toast('📝 Postagem enviada para aprovação do administrador!');
+  
+  // Limpar formulário
+  document.getElementById('ctitulo').value = '';
+  document.getElementById('ccat').value = 'COLABORADOR';
+  document.getElementById('cresumo').value = '';
+  document.getElementById('ctexto').value = '';
+  document.getElementById('cimg').value = '';
+  document.getElementById('cimgPreview').style.display = 'none';
+  document.getElementById('cimgFile').value = '';
+  document.getElementById('cvideo').value = '';
+  document.getElementById('clink').value = '';
+  for(let i = 1; i <= 6; i++){
+    document.getElementById(`galleryBase64${i}`).value = '';
+    document.getElementById(`galleryPreview${i}`).style.display = 'none';
+    document.getElementById(`galleryFile${i}`).value = '';
+  }
+  document.getElementById('ccarousel').checked = false;
+  document.getElementById('cfeatured').checked = false;
+  
   renderAll();
 };
 
@@ -533,16 +565,16 @@ function helpPartners(){return `<button style="position:fixed;right:22px;bottom:
 window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• Plano Comum (R$ 69,90) → Você recebe R$ 20,97 (30%)\n• Plano Premium (R$ 149,90) → Você recebe R$ 44,97 (30%)\n\n✅ Você recebe a comissão APENAS UMA VEZ por plano fechado (não é recorrente mensal).\n\n📋 Fluxo do parceiro:\n1. Você capta o cliente para o app Peruaçu\n2. Cliente assina ordem de serviço e paga o plano\n3. Você envia os comprovantes\n4. Admin aprova e você recebe sua comissão + 100 pontos')}
 function readFileData(input){return new Promise(resolve=>{const f=input?.files?.[0];if(!f)return resolve('');const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>resolve('');r.readAsDataURL(f)})}
 window.deletePartner=function(partnerId){if(!confirm('Excluir este parceiro?'))return;const index=u().partners.findIndex(p=>p.id===partnerId);if(index!==-1){u().partners.splice(index,1);saveDB();toast('Parceiro removido');renderAll()}};
-function renderPartners(){document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'Aprovado. O admin adicionará o serviço manualmente no app Peruaçu.':p.status==='Rejeitado'?'Cadastro rejeitado. Verifique as orientações do admin.':'Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deletePartner(${p.id})">Excluir</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
-window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('Parceiro enviado para aprovação do admin.');renderAll()};
+function renderPartners(){document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado. Verifique as orientações do admin.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deletePartner(${p.id})">Excluir</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
+window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('🤝 Parceiro enviado para aprovação do admin!');renderAll()};
 window.openAttachment=function(id,field){const p=u().partners.find(x=>x.id===id);if(!p||!p[field])return toast('Anexo não encontrado.');const w=window.open('','_blank');if(p[field].startsWith('data:application/pdf'))w.document.write(`<iframe src="${p[field]}" style="width:100%;height:100vh;border:0"></iframe>`);else w.document.write(`<img src="${p[field]}" style="max-width:100%;height:auto">`);w.document.close()};
-window.approvePartner=function(id,ok){const p=u().partners.find(x=>x.id===id);if(!p)return;p.status=ok?'Aprovado':'Rejeitado';if(ok&&!p.awarded){p.awarded=true;const comissao = p.valor * 0.3;p.comissaoPaga=true;u().points+=100;toast(`Parceiro aprovado! +100 pontos. Sua comissão de R$ ${comissao.toFixed(2)} será paga em breve!`);window.checkSpecialTasks();}else toast(ok?'Parceiro aprovado.':'Parceiro rejeitado.');saveDB();renderAll()};
+window.approvePartner=function(id,ok){const p=u().partners.find(x=>x.id===id);if(!p)return;p.status=ok?'Aprovado':'Rejeitado';if(ok&&!p.awarded){p.awarded=true;const comissao = p.valor * 0.3;p.comissaoPaga=true;u().points+=100;toast(`✅ Parceiro aprovado! +100 pontos. Sua comissão de R$ ${comissao.toFixed(2)} será paga em breve!`);window.checkSpecialTasks();}else toast(ok?'Parceiro aprovado.':'Parceiro rejeitado.');saveDB();renderAll()};
 function renderRanking(){const rows=[...seedRanking,{nome:u().profile.nome,cidade:u().profile.cidade,pontos:u().points,me:true}].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr>${rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</table>`}
 function renderCerts(){
   const userCerts = db.certs.filter(c => c.user === currentUser?.email);
   const availableCerts = CERTS.filter(cert => u().points >= cert[1] && !userCerts.some(uc => uc.nome === cert[0] && uc.status === 'Aprovado'));
   document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}${c.status==='Rejeitado' && c.motivo?`<p class="hint bad">Motivo: ${c.motivo}</p>`:''}</div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
-window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('Certificado solicitado para análise.');renderAll()};
+window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('📜 Certificado solicitado para análise.');renderAll()};
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const online=onlineUsers(),people=allPeople();el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db.settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db.settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${db.chat.length}</b><p class="hint">Chat salvo no navegador via localStorage. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${db.chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db.settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db.settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
 window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;const p=currentProfile(),msg={id:Date.now(),user:p.nome,city:p.cidade,text,time:new Date().toISOString()};db.chat.push(msg);saveDB();try{if(window.cpBlogApi?.sendChatMessage)await window.cpBlogApi.sendChatMessage(msg)}catch(err){console.warn('Chat Firebase indisponível, mantendo localStorage.',err)}toast('Mensagem enviada no chat.');renderCommunity()};
@@ -553,10 +585,7 @@ window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nom
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando. Clique em Atualizar blog em alguns segundos.</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Não foi possível carregar os posts recentes: '+error.message+'</div>'}}
 
-// ============================================================
-// FUNÇÕES DE GERENCIAMENTO DE COLABORADORES
-// ============================================================
-
+// ADMIN FUNCTIONS
 window.createCollaboratorAccount = async function() {
   const email = document.getElementById('newCollabEmail')?.value.trim();
   const nome = document.getElementById('newCollabNome')?.value.trim();
@@ -584,7 +613,7 @@ window.createCollaboratorAccount = async function() {
     };
     saveDB();
     
-    toast(`✅ Colaborador "${nome}" criado com sucesso! O colaborador já pode fazer login.`);
+    toast(`✅ Colaborador "${nome}" criado com sucesso!`);
     
     document.getElementById('newCollabEmail').value = '';
     document.getElementById('newCollabNome').value = '';
@@ -594,9 +623,8 @@ window.createCollaboratorAccount = async function() {
     renderAdmin();
     renderCommunity();
   } catch (error) {
-    console.error('Erro ao criar colaborador:', error);
     if(error.code === 'auth/email-already-in-use') {
-      toast('❌ Este e-mail já está em uso no Firebase. Use outro e-mail.');
+      toast('❌ Este e-mail já está em uso no Firebase.');
     } else {
       toast('❌ Erro ao criar colaborador: ' + error.message);
     }
@@ -661,14 +689,14 @@ window.showCollaboratorDetails = function(email) {
 };
 
 window.deleteCollaborator = function(email) {
-  if(!confirm(`⚠️ ATENÇÃO: Tem certeza que deseja remover o colaborador "${email}"?\n\nTodas as suas informações serão perdidas.`)) return;
+  if(!confirm(`⚠️ ATENÇÃO: Tem certeza que deseja remover o colaborador "${email}"?`)) return;
   
   const emailKey = userKey(email);
   delete db.users[emailKey];
   delete db.creds[emailKey];
   saveDB();
   
-  toast(`Colaborador ${email} removido com sucesso!`);
+  toast(`Colaborador ${email} removido!`);
   renderAdmin();
   renderCommunity();
   closeProfile();
@@ -692,15 +720,74 @@ window.resetCollaboratorPassword = function(email) {
   }
 };
 
+window.approveContent = async function(id, ok) {
+  let c = u().contents.find(x => x.id === id);
+  if(!c) return;
+  
+  c.status = ok ? 'Aprovado' : 'Rejeitado';
+  
+  if(ok){
+    try{
+      if(!window.cpBlogApi) throw new Error('Conexão com Firebase não disponível.');
+      const published = await window.cpBlogApi.publishPost(blogPostFromContent(c));
+      c.blogStatus = 'Publicado';
+      c.blogId = published.id;
+      if(!c.awarded){
+        c.awarded = true;
+        u().points += 50;
+        toast('✅ Conteúdo aprovado e publicado! +50 pontos');
+        window.checkSpecialTasks();
+      } else {
+        toast('✅ Conteúdo aprovado e publicado!');
+      }
+    } catch(error){
+      console.error(error);
+      c.blogStatus = 'Erro';
+      toast('⚠️ Conteúdo aprovado, mas erro na publicação: ' + error.message);
+    }
+  } else {
+    c.blogStatus = 'Rejeitado';
+    toast('❌ Conteúdo rejeitado. O colaborador pode excluí-lo.');
+  }
+  saveDB();
+  renderAll();
+};
+
+window.deleteAdminContent = async function(id, blogId) {
+  if(!confirm('Tem certeza que deseja excluir este conteúdo permanentemente?')) return;
+  
+  if(blogId && window.cpBlogApi){
+    try{
+      await window.cpBlogApi.deletePost(blogId);
+      toast('Post removido do blog com sucesso!');
+    } catch(e){
+      toast('Erro ao remover do blog: ' + e.message);
+    }
+  }
+  
+  const index = u().contents.findIndex(c => c.id === id);
+  if(index !== -1){
+    u().contents.splice(index, 1);
+    saveDB();
+    toast('Conteúdo excluído permanentemente!');
+    renderAdmin();
+    renderContents();
+  }
+};
+
 function renderAdmin(){
   if(currentUser?.uid !== ADMIN_UID){
     document.getElementById('admin').innerHTML='<div class="card">Acesso restrito ao administrador.</div>';
     return;
   }
   
-  let pendingC = u().contents.filter(c=>c.status==='Pendente'||c.blogStatus==='Erro');
-  let pendingCerts = db.certs.filter(c=>c.status==='Pendente');
-  let pendingP = u().partners.filter(p=>(p.status||'Pendente')==='Pendente');
+  let pendingC = u().contents.filter(c => c.status === 'Pendente');
+  let approvedC = u().contents.filter(c => c.status === 'Aprovado' && c.blogStatus !== 'Publicado');
+  let rejectedC = u().contents.filter(c => c.status === 'Rejeitado');
+  let pendingCerts = db.certs.filter(c => c.status === 'Pendente');
+  let pendingP = u().partners.filter(p => p.status === 'Pendente');
+  let approvedPartners = u().partners.filter(p => p.status === 'Aprovado');
+  let rejectedPartners = u().partners.filter(p => p.status === 'Rejeitado');
   
   const collaboratorsList = Object.entries(db.users).map(([email, user]) => ({
     email: email,
@@ -711,7 +798,7 @@ function renderAdmin(){
     dataCriacao: db.creds[email]?.createdAt || 'N/A'
   }));
   
-  document.getElementById('admin').innerHTML=`
+  document.getElementById('admin').innerHTML = `
     <h2>👥 Gerenciar Colaboradores</h2>
     <div class="card" style="margin-bottom:20px">
       <h3>➕ Criar Novo Colaborador</h3>
@@ -730,22 +817,20 @@ function renderAdmin(){
         </div>
       </div>
       <button class="secondary" style="margin-top:12px" onclick="window.createCollaboratorAccount()">➕ Criar Conta no Firebase</button>
-      <p class="hint" style="margin-top:8px">O colaborador será criado no Firebase Authentication e poderá fazer login imediatamente.</p>
     </div>
     
     <div class="card">
       <h3>📋 Lista de Colaboradores (${collaboratorsList.length})</h3>
-      <div class="list" style="max-height:500px;overflow-y:auto">
+      <div class="list" style="max-height:400px;overflow-y:auto">
         ${collaboratorsList.length ? collaboratorsList.map(c => `
           <div class="item">
             <div class="item-head">
               <div>
                 <b>${c.nome}</b>
                 <p class="hint">📧 ${c.email} · 🏆 ${c.nivel} · ⭐ ${c.pontos} pts</p>
-                <p class="hint">📅 Criado em: ${new Date(c.dataCriacao).toLocaleDateString('pt-BR')}</p>
               </div>
               <div class="actions">
-                <button class="ghost" onclick="window.showCollaboratorDetails('${c.email}')">📊 Ver Detalhes</button>
+                <button class="ghost" onclick="window.showCollaboratorDetails('${c.email}')">📊 Ver</button>
                 <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Reset Senha</button>
                 <button class="danger" onclick="window.deleteCollaborator('${c.email}')">🗑️ Remover</button>
               </div>
@@ -756,46 +841,115 @@ function renderAdmin(){
     </div>
     
     <div class="grid" style="margin-top:20px;margin-bottom:20px">
-      <div class="card stat"><span>Posts pendentes</span><b>${pendingC.length}</b></div>
-      <div class="card stat"><span>Parceiros pendentes</span><b>${pendingP.length}</b></div>
-      <div class="card stat"><span>Certificados pendentes</span><b>${pendingCerts.length}</b></div>
-      <div class="card stat"><span>Materiais</span><b>${db.materials.length}</b></div>
+      <div class="card stat"><span>📝 Pendentes</span><b>${pendingC.length}</b></div>
+      <div class="card stat"><span>✅ Aprovados</span><b>${approvedC.length}</b></div>
+      <div class="card stat"><span>🤝 Parceiros Pendentes</span><b>${pendingP.length}</b></div>
+      <div class="card stat"><span>📜 Certificados</span><b>${pendingCerts.length}</b></div>
     </div>
     
     <div class="split">
       <div>
-        <h2>📝 Conteúdos pendentes</h2>
-        <div class="list">${pendingC.map(c=>`<div class="item"><b>${c.titulo}</b><p class="hint">${c.categoria} · ${c.resumo||c.texto}</p><div class="actions"><button class="ghost" onclick="window.previewContent(${c.id})">Prévia</button><button class="ok" onclick="window.approveContent(${c.id},true)">Aprovar e publicar</button><button class="danger" onclick="window.approveContent(${c.id},false)">Rejeitar</button></div></div>`).join('')||'<div class="empty">Sem conteúdos pendentes.</div>'}</div>
-        <h2 style="margin-top:18px">🤝 Parceiros pendentes</h2>
-        <div class="list">${pendingP.map(p=>`<div class="item"><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">Plano ${p.plano||'-'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2)):'valor não informado'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="ok" onclick="window.approvePartner(${p.id},true)">Aprovar</button><button class="danger" onclick="window.approvePartner(${p.id},false)">Rejeitar</button></div></div>`).join('')||'<div class="empty">Sem parceiros pendentes.</div>'}</div>
+        <h2>📝 Conteúdos Pendentes (${pendingC.length})</h2>
+        <div class="list">${pendingC.map(c => `
+          <div class="item">
+            <b>${c.titulo}</b>
+            <p class="hint">Por: ${currentUser.email} · ${c.categoria}</p>
+            <div class="actions">
+              <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
+              <button class="ok" onclick="window.approveContent(${c.id}, true)">✅ Aprovar e Publicar</button>
+              <button class="danger" onclick="window.approveContent(${c.id}, false)">❌ Rejeitar</button>
+            </div>
+          </div>
+        `).join('') || '<div class="empty">Nenhum conteúdo pendente.</div>'}</div>
+        
+        <h2 style="margin-top:18px">✅ Conteúdos Aprovados (${approvedC.length})</h2>
+        <div class="list">${approvedC.map(c => `
+          <div class="item">
+            <b>${c.titulo}</b>
+            <p class="hint">Status: Aguardando publicação automática</p>
+            <div class="actions">
+              <button class="ok" onclick="window.approveContent(${c.id}, true)">📤 Publicar Agora</button>
+            </div>
+          </div>
+        `).join('') || '<div class="empty">Nenhum conteúdo aguardando publicação.</div>'}</div>
+        
+        <h2 style="margin-top:18px">❌ Conteúdos Rejeitados (${rejectedC.length})</h2>
+        <div class="list">${rejectedC.map(c => `
+          <div class="item">
+            <b>${c.titulo}</b>
+            <p class="hint">Rejeitado - O colaborador pode excluir</p>
+            <div class="actions">
+              <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}')">🗑️ Excluir Permanentemente</button>
+            </div>
+          </div>
+        `).join('') || '<div class="empty">Nenhum conteúdo rejeitado.</div>'}</div>
+        
+        <h2 style="margin-top:18px">🤝 Parceiros Pendentes (${pendingP.length})</h2>
+        <div class="list">${pendingP.map(p => `
+          <div class="item">
+            <b>${p.nome}</b>
+            <p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p>
+            <p class="hint">Plano ${p.plano} · R$ ${Number(p.valor).toFixed(2)}</p>
+            <div class="actions">
+              ${p.osData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'osData')">📄 Ordem</button>` : ''}
+              ${p.pixData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'pixData')">💰 Pix</button>` : ''}
+              <button class="ok" onclick="window.approvePartner(${p.id}, true)">✅ Aprovar (+100pts)</button>
+              <button class="danger" onclick="window.approvePartner(${p.id}, false)">❌ Rejeitar</button>
+            </div>
+          </div>
+        `).join('') || '<div class="empty">Sem parceiros pendentes.</div>'}</div>
       </div>
+      
       <div>
-        <h2>📜 Gerenciar Certificados</h2>
-        <div class="list">${pendingCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado por: ${c.usuario} · Requer ${c.pts} pontos</p><p class="hint">Data: ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div></div><div class="actions"><button class="ok" onclick="window.openApproveCertModal(${c.id})">✅ Aprovar com Certificado</button><button class="danger" onclick="window.rejectCert(${c.id},'Solicitação não atende aos critérios exigidos.')">❌ Rejeitar</button></div></div>`).join('')||'<div class="empty">Nenhum certificado pendente.</div>'}</div>
-        <h2 style="margin-top:18px">📁 Certificados Processados</h2>
-        <div class="list">${db.certs.filter(c=>c.status!=='Pendente').slice(0,10).map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">${c.usuario} · ${c.status}</p></div></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Ver Certificado</button></div>`:''}</div>`).join('')||'<div class="empty">Nenhum certificado processado.</div>'}</div>
+        <h2>📜 Certificados Pendentes (${pendingCerts.length})</h2>
+        <div class="list">${pendingCerts.map(c => `
+          <div class="item">
+            <b>${c.nome}</b>
+            <p class="hint">Solicitado por: ${c.usuario} · Requer ${c.pts} pontos</p>
+            <div class="actions">
+              <button class="ok" onclick="window.openApproveCertModal(${c.id})">✅ Aprovar</button>
+              <button class="danger" onclick="window.rejectCert(${c.id}, 'Solicitação não atende aos critérios.')">❌ Rejeitar</button>
+            </div>
+          </div>
+        `).join('') || '<div class="empty">Nenhum certificado pendente.</div>'}</div>
+        
+        <h2 style="margin-top:18px">✅ Parceiros Aprovados (${approvedPartners.length})</h2>
+        <div class="list">${approvedPartners.slice(0,5).map(p => `
+          <div class="item">
+            <b>${p.nome}</b>
+            <p class="hint">${p.categoria} · Comissão: R$ ${(p.valor * 0.3).toFixed(2)}</p>
+          </div>
+        `).join('') || '<div class="empty">Nenhum parceiro aprovado.</div>'}</div>
         
         <form class="card" style="margin-top:18px" onsubmit="window.saveMaterial(event)">
-          <h2>📚 Materiais</h2>
+          <h2>📚 Gerenciar Materiais</h2>
           <input type="hidden" id="matId">
           <label>Título</label><input id="matTitulo" required>
           <label>Descrição</label><textarea id="matDesc" required></textarea>
-          <label>Link</label><input id="matLink" placeholder="URL">
+          <label>Link (URL para download)</label><input id="matLink" placeholder="https://...">
           <label><input id="matAtivo" type="checkbox" checked> Ativo</label>
-          <button class="secondary">Salvar</button>
+          <button class="secondary">Salvar Material</button>
         </form>
-        <div class="list" style="margin-top:12px">${db.materials.map(m=>`<div class="item"><b>${m.titulo}</b><p class="hint">${m.descricao}</p><span class="pill ${m.ativo!==false?'ok':'bad'}">${m.ativo!==false?'Ativo':'Oculto'}</span><div class="actions"><button class="ghost" onclick="window.editMaterial(${m.id})">Editar</button><button class="danger" onclick="window.deleteMaterial(${m.id})">Remover</button></div></div>`).join('')}</div>
+        <div class="list" style="margin-top:12px">${db.materials.map(m => `
+          <div class="item">
+            <b>${m.titulo}</b>
+            <p class="hint">${m.descricao}</p>
+            <div class="actions">
+              <button class="ghost" onclick="window.editMaterial(${m.id})">✏️ Editar</button>
+              <button class="danger" onclick="window.deleteMaterial(${m.id})">🗑️ Remover</button>
+            </div>
+          </div>
+        `).join('')}</div>
       </div>
     </div>
     <div class="modal-back" id="certModal" onclick="if(event.target.id==='certModal')closeCertModal()"><div class="modal-card" id="certModalBody"></div></div>
   `;
 }
 
-window.openApproveCertModal=function(certId){const cert=db.certs.find(c=>c.id===certId);if(!cert)return;document.getElementById('certModalBody').innerHTML=`<h2>Aprovar Certificado: ${cert.nome}</h2><p class="hint">Solicitante: ${cert.usuario}</p><label>Enviar certificado em PDF</label><input type="file" id="certFile" accept=".pdf"><br><br><div class="actions"><button class="ok" onclick="window.approveCertWithFile(${cert.id})">Aprovar e anexar certificado</button><button class="danger" onclick="closeCertModal()">Cancelar</button></div>`;document.getElementById('certModal').style.display='flex'};
+window.openApproveCertModal=function(certId){const cert=db.certs.find(c=>c.id===certId);if(!cert)return;document.getElementById('certModalBody').innerHTML=`<h2>Aprovar Certificado: ${cert.nome}</h2><p class="hint">Solicitante: ${cert.usuario}</p><label>Enviar certificado em PDF</label><input type="file" id="certFile" accept=".pdf"><br><br><div class="actions"><button class="ok" onclick="window.approveCertWithFile(${cert.id})">✅ Aprovar</button><button class="danger" onclick="closeCertModal()">Cancelar</button></div>`;document.getElementById('certModal').style.display='flex'};
 window.closeCertModal=function(){document.getElementById('certModal').style.display='none'};
-window.approveCertWithFile=async function(certId){const fileInput=document.getElementById('certFile');const file=fileInput?.files?.[0];if(!file){toast('Selecione um arquivo PDF para anexar ao certificado.');return;}if(file.type!=='application/pdf'){toast('Apenas arquivos PDF são aceitos.');return;}const reader=new FileReader();reader.onload=function(e){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Aprovado';cert.certificadoUrl=e.target.result;cert.updatedAt=new Date().toISOString();saveDB();toast(`Certificado ${cert.nome} aprovado e enviado para ${cert.usuario}!`);renderAll();closeCertModal();}};reader.onerror=function(){toast('Erro ao ler o arquivo.');};reader.readAsDataURL(file);};
-window.rejectCert=function(certId,motivo){if(confirm('Rejeitar esta solicitação de certificado?')){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Rejeitado';cert.motivo=motivo||'Solicitação não atende aos critérios exigidos.';cert.updatedAt=new Date().toISOString();saveDB();toast(`Certificado ${cert.nome} rejeitado.`);renderAll();}}};
-window.approveContent=async function(id,ok){let c=u().contents.find(x=>x.id===id);if(!c)return;c.status=ok?'Aprovado':'Rejeitado';if(ok){try{if(!window.cpBlogApi)throw new Error('Conexão com Firebase do blog ainda não carregou.');const published=await window.cpBlogApi.publishPost(blogPostFromContent(c));c.blogStatus='Publicado';c.blogId=published.id;if(!c.awarded){c.awarded=true;u().points+=50;toast('Conteúdo aprovado! +50 pontos');window.checkSpecialTasks();}else toast('Conteúdo aprovado!');}catch(error){console.error(error);c.blogStatus='Erro';toast('Conteúdo aprovado, mas erro na publicação: '+error.message)}}else{c.blogStatus='Rejeitado';toast('Conteúdo rejeitado.')}saveDB();renderAll()};
+window.approveCertWithFile=async function(certId){const fileInput=document.getElementById('certFile');const file=fileInput?.files?.[0];if(!file){toast('Selecione um arquivo PDF.');return;}const reader=new FileReader();reader.onload=function(e){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Aprovado';cert.certificadoUrl=e.target.result;saveDB();toast(`✅ Certificado ${cert.nome} aprovado!`);renderAll();closeCertModal();}};reader.onerror=function(){toast('Erro ao ler o arquivo.');};reader.readAsDataURL(file);};
+window.rejectCert=function(certId,motivo){if(confirm('Rejeitar esta solicitação?')){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Rejeitado';cert.motivo=motivo;saveDB();toast(`Certificado ${cert.nome} rejeitado.`);renderAll();}}};
 window.checkSpecialTasks=checkSpecialTasks;
 window.saveMaterial=saveMaterial;
 window.editMaterial=editMaterial;
