@@ -10,8 +10,8 @@
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, setDoc, getDoc, updateDoc, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
       apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
@@ -36,6 +36,9 @@
       async createFirebaseUser(email, password, displayName) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
+      },
+      async resetPassword(email) {
+        await sendPasswordResetEmail(auth, email);
       },
       async publishPost(postData) {
         const postsCollection = collection(firestore, 'posts');
@@ -88,7 +91,7 @@
       <label>E-mail</label><input id="email" type="email" required>
       <label>Senha</label><input id="senha" type="password" required>
       <button class="secondary" style="width:100%;margin-top:16px">Entrar</button>
-      <p class="hint">Entre com suas credenciais de colaborador. Administrador tem acesso especial.</p>
+      <p class="hint" style="text-align:center;margin-top:12px"><a href="#" onclick="window.resetPassword()" style="color:var(--primary)">Esqueceu a senha?</a></p>
     </form>
   </div>
   <div id="app" class="app">
@@ -159,7 +162,7 @@ function makeQuestions(){
 }
 const modules=makeQuestions();
 const MODULE_POINTS=[40,60,80,100,120],RETAKE_MS=48*60*60*1000;
-let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,onlineSeconds=0,onlineInterval=null;
+let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,onlineInterval=null;
 
 // Firebase Database Collections
 const USERS_COLLECTION = 'central_users';
@@ -172,144 +175,175 @@ const PRESENCE_COLLECTION = 'central_presence';
 // Helper functions for Firebase operations
 async function loadUserData(email) {
   if(!email) return null;
-  const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
-  const docSnap = await getDoc(userRef);
-  if(docSnap.exists()){
-    return docSnap.data();
-  }
+  try {
+    const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
+    const docSnap = await getDoc(userRef);
+    if(docSnap.exists()){
+      return docSnap.data();
+    }
+  } catch(e) { console.error("Error loading user:", e); }
   return null;
 }
 
 async function saveUserData(email, data) {
-  const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
-  await setDoc(userRef, data, { merge: true });
+  try {
+    const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
+    await setDoc(userRef, data, { merge: true });
+    return true;
+  } catch(e) { console.error("Error saving user:", e); toast("Erro ao salvar dados"); return false; }
 }
 
 async function loadAllUsers() {
-  const usersCollection = collection(firestore, USERS_COLLECTION);
-  const snapshot = await getDocs(usersCollection);
-  const users = {};
-  snapshot.forEach(doc => {
-    users[doc.id] = doc.data();
-  });
-  return users;
+  try {
+    const usersCollection = collection(firestore, USERS_COLLECTION);
+    const snapshot = await getDocs(usersCollection);
+    const users = {};
+    snapshot.forEach(doc => {
+      users[doc.id] = doc.data();
+    });
+    return users;
+  } catch(e) { console.error("Error loading users:", e); return {}; }
 }
 
 async function loadSettings() {
-  const settingsRef = doc(firestore, SETTINGS_DOC, 'main');
-  const docSnap = await getDoc(settingsRef);
-  if(docSnap.exists()){
-    return docSnap.data();
-  }
+  try {
+    const settingsRef = doc(firestore, SETTINGS_DOC, 'main');
+    const docSnap = await getDoc(settingsRef);
+    if(docSnap.exists()){
+      return docSnap.data();
+    }
+  } catch(e) { console.error("Error loading settings:", e); }
   return { whatsappConteudos: '', whatsappForum: '', materials: materialsList };
 }
 
 async function saveSettings(settings) {
-  const settingsRef = doc(firestore, SETTINGS_DOC, 'main');
-  await setDoc(settingsRef, settings, { merge: true });
+  try {
+    const settingsRef = doc(firestore, SETTINGS_DOC, 'main');
+    await setDoc(settingsRef, settings, { merge: true });
+    return true;
+  } catch(e) { console.error("Error saving settings:", e); return false; }
 }
 
 async function loadChat() {
-  const chatCollection = collection(firestore, CHAT_COLLECTION);
-  const q = query(chatCollection, orderBy('time', 'desc'));
-  const snapshot = await getDocs(q);
-  const messages = [];
-  snapshot.forEach(doc => {
-    messages.push({ id: doc.id, ...doc.data() });
-  });
-  return messages.reverse();
+  try {
+    const chatCollection = collection(firestore, CHAT_COLLECTION);
+    const q = query(chatCollection, orderBy('time', 'desc'));
+    const snapshot = await getDocs(q);
+    const messages = [];
+    snapshot.forEach(doc => {
+      messages.push({ id: doc.id, ...doc.data() });
+    });
+    return messages.reverse();
+  } catch(e) { console.error("Error loading chat:", e); return []; }
 }
 
 async function saveChatMessage(msg) {
-  const chatCollection = collection(firestore, CHAT_COLLECTION);
-  await addDoc(chatCollection, msg);
+  try {
+    const chatCollection = collection(firestore, CHAT_COLLECTION);
+    await addDoc(chatCollection, msg);
+  } catch(e) { console.error("Error saving chat:", e); }
 }
 
 async function clearOldChat() {
-  const chatCollection = collection(firestore, CHAT_COLLECTION);
-  const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-  const q = query(chatCollection, orderBy('time', 'desc'));
-  const snapshot = await getDocs(q);
-  snapshot.forEach(async (doc) => {
-    const data = doc.data();
-    if(data.time && data.time < oneDayAgo){
+  try {
+    const chatCollection = collection(firestore, CHAT_COLLECTION);
+    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+    const q = query(chatCollection, where('time', '<', oneDayAgo));
+    const snapshot = await getDocs(q);
+    for(const doc of snapshot.docs) {
       await deleteDoc(doc.ref);
     }
-  });
+  } catch(e) { console.error("Error clearing chat:", e); }
 }
 
 async function loadCertificates() {
-  const certsCollection = collection(firestore, CERTS_COLLECTION);
-  const snapshot = await getDocs(certsCollection);
-  const certs = [];
-  snapshot.forEach(doc => {
-    certs.push({ id: doc.id, ...doc.data() });
-  });
-  return certs;
+  try {
+    const certsCollection = collection(firestore, CERTS_COLLECTION);
+    const snapshot = await getDocs(certsCollection);
+    const certs = [];
+    snapshot.forEach(doc => {
+      certs.push({ id: doc.id, ...doc.data() });
+    });
+    return certs;
+  } catch(e) { console.error("Error loading certificates:", e); return []; }
 }
 
 async function saveCertificate(cert) {
-  const certsCollection = collection(firestore, CERTS_COLLECTION);
-  const newCert = { ...cert, id: cert.id || Date.now() };
-  if(cert.id){
-    const certRef = doc(firestore, CERTS_COLLECTION, String(cert.id));
-    await setDoc(certRef, newCert);
-  } else {
-    const docRef = await addDoc(certsCollection, newCert);
-    newCert.id = docRef.id;
-  }
-  return newCert;
+  try {
+    const certsCollection = collection(firestore, CERTS_COLLECTION);
+    if(cert.id){
+      const certRef = doc(firestore, CERTS_COLLECTION, String(cert.id));
+      await setDoc(certRef, cert);
+    } else {
+      const newCert = { ...cert, id: Date.now().toString() };
+      await addDoc(certsCollection, newCert);
+      return newCert;
+    }
+    return cert;
+  } catch(e) { console.error("Error saving certificate:", e); return null; }
 }
 
 async function deleteCertificate(certId) {
-  const certRef = doc(firestore, CERTS_COLLECTION, String(certId));
-  await deleteDoc(certRef);
+  try {
+    const certRef = doc(firestore, CERTS_COLLECTION, String(certId));
+    await deleteDoc(certRef);
+  } catch(e) { console.error("Error deleting certificate:", e); }
 }
 
 async function loadMaterials() {
-  const settings = await loadSettings();
-  return settings.materials || materialsList;
+  try {
+    const settings = await loadSettings();
+    return settings.materials || materialsList;
+  } catch(e) { console.error("Error loading materials:", e); return materialsList; }
 }
 
 async function saveMaterial(material) {
-  const settings = await loadSettings();
-  const materials = settings.materials || materialsList;
-  const existingIndex = materials.findIndex(m => m.id === material.id);
-  if(existingIndex !== -1){
-    materials[existingIndex] = material;
-  } else {
-    materials.push(material);
-  }
-  await saveSettings({ ...settings, materials });
+  try {
+    const settings = await loadSettings();
+    const materials = settings.materials || materialsList;
+    const existingIndex = materials.findIndex(m => m.id === material.id);
+    if(existingIndex !== -1){
+      materials[existingIndex] = material;
+    } else {
+      materials.push(material);
+    }
+    await saveSettings({ ...settings, materials });
+  } catch(e) { console.error("Error saving material:", e); }
 }
 
 async function deleteMaterial(materialId) {
-  const settings = await loadSettings();
-  const materials = (settings.materials || materialsList).filter(m => m.id !== materialId);
-  await saveSettings({ ...settings, materials });
+  try {
+    const settings = await loadSettings();
+    const materials = (settings.materials || materialsList).filter(m => m.id !== materialId);
+    await saveSettings({ ...settings, materials });
+  } catch(e) { console.error("Error deleting material:", e); }
 }
 
 async function updatePresence(userId, userData) {
-  const presenceRef = doc(firestore, PRESENCE_COLLECTION, userId);
-  await setDoc(presenceRef, {
-    ...userData,
-    lastSeen: Date.now(),
-    id: userId
-  }, { merge: true });
+  try {
+    const presenceRef = doc(firestore, PRESENCE_COLLECTION, userId);
+    await setDoc(presenceRef, {
+      ...userData,
+      lastSeen: Date.now(),
+      id: userId
+    }, { merge: true });
+  } catch(e) { console.error("Error updating presence:", e); }
 }
 
 async function loadOnlineUsers() {
-  const presenceCollection = collection(firestore, PRESENCE_COLLECTION);
-  const snapshot = await getDocs(presenceCollection);
-  const now = Date.now();
-  const online = [];
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if(now - (data.lastSeen || 0) < 45000){
-      online.push(data);
-    }
-  });
-  return online;
+  try {
+    const presenceCollection = collection(firestore, PRESENCE_COLLECTION);
+    const snapshot = await getDocs(presenceCollection);
+    const now = Date.now();
+    const online = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if(now - (data.lastSeen || 0) < 45000){
+        online.push(data);
+      }
+    });
+    return online;
+  } catch(e) { console.error("Error loading online users:", e); return []; }
 }
 
 async function loadAllPeople() {
@@ -349,8 +383,8 @@ function level(points){
   return LEVELS[0][0];
 }
 
-function nextLevel(){
-  return LEVELS.find(x => (currentUser && currentUser.role === 'colaborator' ? (currentUser.points || 0) : 0) < x[1]) || LEVELS[LEVELS.length-1];
+function nextLevel(points){
+  return LEVELS.find(x => points < x[1]) || LEVELS[LEVELS.length-1];
 }
 
 async function addPoints(n, why){
@@ -364,7 +398,7 @@ async function addPoints(n, why){
   await renderAll();
 }
 
-async function toast(msg){
+function toast(msg){
   const t=document.createElement('div');t.className='toast';t.textContent=msg;
   document.getElementById('toastbox').appendChild(t);
   setTimeout(()=>t.remove(),3300);
@@ -392,7 +426,8 @@ async function renderNav(){
 window.showTab=function(id){
   currentTab=id;
   document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));
-  document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];
+  const navItem = navItems.find(x=>x[0]===id);
+  if(navItem) document.getElementById('pageTitle').textContent = navItem[2];
   document.getElementById('sidebar').classList.remove('open');
   renderNav();
   renderAll();
@@ -412,30 +447,29 @@ async function renderAll(){
   document.getElementById('sideLevel').textContent = currentUser.role==='admin'?'Painel administrativo':level(userData?.points || 0);
   document.getElementById('sidePoints').textContent = currentUser.role==='admin'?'Admin':(userData?.points || 0)+' pontos';
   
-  await renderDashboard();
-  await renderTraining();
+  await renderDashboard(userData);
+  await renderTraining(userData);
   await renderMaterials();
-  await renderContents();
-  await renderTasks();
-  await renderPartners();
+  await renderContents(userData);
+  await renderTasks(userData);
+  await renderPartners(userData);
   await renderRanking();
   await renderCerts();
   await renderCommunity();
-  await renderProfile();
+  await renderProfile(userData);
   await renderBlog();
   await renderAdmin();
 }
 
-async function renderDashboard(){
+async function renderDashboard(userData){
   if(currentUser?.role !== 'colaborador'){
     document.getElementById('dashboard').innerHTML=`<div class="card">Bem-vindo, Administrador! Acesse as abas para gerenciar a plataforma.</div>`;
     return;
   }
-  const userData = await loadUserData(currentUser.email);
   const doneTasks = userData?.tasks?.filter(t=>t.done).length || 0;
   const closed = userData?.partners?.filter(p=>p.status==='Aprovado').length || 0;
   const ans = Object.keys(userData?.training?.answered || {}).length;
-  const nl = nextLevel();
+  const nl = nextLevel(userData?.points || 0);
   const pct = nl[1]===0?100:Math.min(100,Math.round((userData?.points||0)/nl[1]*100));
   document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${userData?.points||0}</b></div><div class="card stat"><span>Nível</span><b>${level(userData?.points||0)}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${defaultTasks.length} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
 }
@@ -445,12 +479,12 @@ function canRetakeModule(userData, id){
   return t && Date.now() - new Date(t).getTime() >= RETAKE_MS;
 }
 
-async function renderTraining(){
+async function renderTraining(userData){
   if(currentUser?.role !== 'colaborador'){
     document.getElementById('treinamento').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
     return;
   }
-  const userData = await loadUserData(currentUser.email);
+  if(!userData) userData = await loadUserData(currentUser.email);
   const m = modules.find(x=>x.id===currentModule);
   const prog = m.questions.filter((_,i)=>userData?.training?.answered[currentModule+'-'+i]?.correct).length;
   const start = currentPage*10;
@@ -518,12 +552,12 @@ async function renderMaterials(){
   document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(materials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`;
 }
 
-async function renderContents(){
+async function renderContents(userData){
   if(currentUser?.role !== 'colaborador'){
     document.getElementById('conteudos').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
     return;
   }
-  const userData = await loadUserData(currentUser.email);
+  if(!userData) userData = await loadUserData(currentUser.email);
   const galleryInputsHtml = [];
   for(let i = 1; i <= 6; i++){
     galleryInputsHtml.push(`
@@ -646,7 +680,7 @@ window.deleteMyContent = async function(id){
     userData.contents.splice(index, 1);
     await saveUserData(currentUser.email, userData);
     toast('Solicitação de conteúdo removida com sucesso!');
-    await renderContents();
+    await renderContents(userData);
     if(currentUser?.uid === ADMIN_UID) await renderAdmin();
   }
 };
@@ -659,7 +693,7 @@ window.deleteMyPartner = async function(id){
     userData.partners.splice(index, 1);
     await saveUserData(currentUser.email, userData);
     toast('Solicitação de parceiro removida com sucesso!');
-    await renderPartners();
+    await renderPartners(userData);
     if(currentUser?.uid === ADMIN_UID) await renderAdmin();
   }
 };
@@ -750,7 +784,6 @@ window.addContent = async function(e){
   toast('📝 Postagem enviada para aprovação do administrador!');
   toast('🔔 O administrador verá esta solicitação na aba Admin > Conteúdos Pendentes');
   
-  // Clear form
   document.getElementById('ctitulo').value = '';
   document.getElementById('ccat').value = 'COLABORADOR';
   document.getElementById('cresumo').value = '';
@@ -782,12 +815,12 @@ window.previewContent = function(id){
   });
 };
 
-async function renderTasks(){
+async function renderTasks(userData){
   if(currentUser?.role !== 'colaborador'){
     document.getElementById('tarefas').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
     return;
   }
-  const userData = await loadUserData(currentUser.email);
+  if(!userData) userData = await loadUserData(currentUser.email);
   document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(userData.tasks || []).map(t=>{
     let progresso = '';
     if(t.id === 6 && !t.done){
@@ -855,12 +888,12 @@ function readFileData(input){
   });
 }
 
-async function renderPartners(){
+async function renderPartners(userData){
   if(currentUser?.role !== 'colaborador'){
     document.getElementById('parceiros').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
     return;
   }
-  const userData = await loadUserData(currentUser.email);
+  if(!userData) userData = await loadUserData(currentUser.email);
   document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${(userData.partners || []).length ? (userData.partners).map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deleteMyPartner(${p.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`;
 }
 
@@ -925,7 +958,8 @@ async function renderRanking(){
 async function renderCerts(){
   const certs = await loadCertificates();
   const userCerts = certs.filter(c => c.user === currentUser?.email);
-  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${(currentUser?.role === 'colaborador' ? (await loadUserData(currentUser.email))?.points||0 : 0) < c[1] ?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}<div class="actions"><button class="danger" onclick="window.deleteMyCertificate(${c.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`;
+  const userPoints = currentUser?.role === 'colaborador' ? (await loadUserData(currentUser.email))?.points || 0 : 0;
+  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${userPoints < c[1] ?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}<div class="actions"><button class="danger" onclick="window.deleteMyCertificate(${c.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`;
 }
 
 window.askCert = async function(nome, pts){
@@ -934,7 +968,7 @@ window.askCert = async function(nome, pts){
   if(certs.some(c => c.user === currentUser?.email && c.nome === nome && c.status !== 'Rejeitado')) return toast('Você já solicitou este certificado.');
   const userData = await loadUserData(currentUser.email);
   const newCert = {
-    id: Date.now(),
+    id: Date.now().toString(),
     user: currentUser?.email,
     usuario: userData.profile?.nome || currentUser.email,
     nome,
@@ -973,7 +1007,8 @@ async function renderCommunity(){
   const people = await loadAllPeople();
   const settings = await loadSettings();
   const chat = await loadChat();
-  el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${chat.length}</b><p class="hint">Chat salvo no Firebase. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;
+  const currentProfileData = await currentProfile();
+  el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${chat.length}</b><p class="hint">Chat salvo no Firebase. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfileData.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;
   setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50);
 }
 
@@ -991,7 +1026,6 @@ window.sendChat = async function(e){
   if(!text) return;
   const p = await currentProfile();
   const msg = {
-    id: Date.now(),
     user: p.nome,
     city: p.cidade,
     text,
@@ -1029,12 +1063,12 @@ window.saveGroups = async function(e){
   await renderCommunity();
 };
 
-async function renderProfile(){
+async function renderProfile(userData){
   if(currentUser?.role !== 'colaborador'){
     document.getElementById('perfil').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
     return;
   }
-  const userData = await loadUserData(currentUser.email);
+  if(!userData) userData = await loadUserData(currentUser.email);
   document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${userData.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${userData.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${userData.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${userData.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`;
 }
 
@@ -1123,6 +1157,20 @@ async function getAllPartners(){
   return allPartners;
 }
 
+window.resetPassword = async function(){
+  const email = document.getElementById('email')?.value;
+  if(!email){
+    toast('Digite seu e-mail primeiro');
+    return;
+  }
+  try{
+    await window.cpBlogApi.resetPassword(email);
+    toast('📧 Email de redefinição de senha enviado! Verifique sua caixa de entrada.');
+  } catch(error){
+    toast('Erro: ' + error.message);
+  }
+};
+
 window.createCollaboratorAccount = async function(){
   const email = document.getElementById('newCollabEmail')?.value.trim();
   const nome = document.getElementById('newCollabNome')?.value.trim();
@@ -1143,7 +1191,7 @@ window.createCollaboratorAccount = async function(){
     await saveUserData(email, newUserData);
     
     toast(`✅ Colaborador "${nome}" criado com sucesso!`);
-    toast(`🔑 Email: ${email} | Senha: ${senha}`);
+    toast(`🔑 Email: ${email} | Senha: ${senha} (anote esta senha)`);
     
     document.getElementById('newCollabEmail').value = '';
     document.getElementById('newCollabNome').value = '';
@@ -1214,12 +1262,18 @@ window.deleteCollaborator = async function(email){
 };
 
 window.resetCollaboratorPassword = async function(email){
-  toast('Para redefinir senha, use a funcionalidade "Esqueci minha senha" na tela de login ou contate o suporte Firebase.');
+  try{
+    await window.cpBlogApi.resetPassword(email);
+    toast(`📧 Email de redefinição enviado para ${email}. O colaborador poderá criar uma nova senha.`);
+  } catch(error){
+    toast('Erro: ' + error.message);
+  }
 };
 
 window.approveContent = async function(contentId, approved, colaboradorEmail){
   let targetUser = null;
   let targetContent = null;
+  let targetUserEmail = null;
   
   const users = await loadAllUsers();
   for(const [email, user] of Object.entries(users)){
@@ -1228,7 +1282,7 @@ window.approveContent = async function(contentId, approved, colaboradorEmail){
       if(found){
         targetUser = user;
         targetContent = found;
-        targetUser.email = email;
+        targetUserEmail = email;
         break;
       }
     }
@@ -1264,11 +1318,11 @@ window.approveContent = async function(contentId, approved, colaboradorEmail){
       if(!targetContent.awarded){
         targetContent.awarded = true;
         if(targetUser) targetUser.points = (targetUser.points || 0) + 50;
-        await saveUserData(targetUser.email, targetUser);
-        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para ${targetUser.profile?.nome || targetUser.email}.`);
+        await saveUserData(targetUserEmail, targetUser);
+        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para ${targetUser.profile?.nome || targetUserEmail}.`);
         confetti();
       } else {
-        await saveUserData(targetUser.email, targetUser);
+        await saveUserData(targetUserEmail, targetUser);
         toast(`✅ Conteúdo aprovado e publicado!`);
       }
     } catch(error){
@@ -1277,7 +1331,7 @@ window.approveContent = async function(contentId, approved, colaboradorEmail){
     }
   } else if(!approved) {
     targetContent.blogStatus = 'Rejeitado';
-    await saveUserData(targetUser.email, targetUser);
+    await saveUserData(targetUserEmail, targetUser);
     toast(`❌ Conteúdo rejeitado.`);
   }
   await renderAll();
@@ -1318,6 +1372,7 @@ window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail){
 window.approvePartner = async function(partnerId, approved, colaboradorEmail){
   let targetUser = null;
   let targetPartner = null;
+  let targetUserEmail = null;
   
   const users = await loadAllUsers();
   for(const [email, user] of Object.entries(users)){
@@ -1326,7 +1381,7 @@ window.approvePartner = async function(partnerId, approved, colaboradorEmail){
       if(found){
         targetUser = user;
         targetPartner = found;
-        targetUser.email = email;
+        targetUserEmail = email;
         break;
       }
     }
@@ -1346,16 +1401,16 @@ window.approvePartner = async function(partnerId, approved, colaboradorEmail){
       targetPartner.comissaoPaga = true;
       if(targetUser){
         targetUser.points = (targetUser.points || 0) + 100;
-        await saveUserData(targetUser.email, targetUser);
+        await saveUserData(targetUserEmail, targetUser);
       }
-      toast(`✅ Parceiro aprovado! +100 pontos para ${targetUser.profile?.nome || targetUser.email}. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`);
+      toast(`✅ Parceiro aprovado! +100 pontos para ${targetUser.profile?.nome || targetUserEmail}. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`);
       confetti();
     } else {
-      await saveUserData(targetUser.email, targetUser);
+      await saveUserData(targetUserEmail, targetUser);
       toast(`✅ Parceiro aprovado!`);
     }
   } else if(!approved) {
-    await saveUserData(targetUser.email, targetUser);
+    await saveUserData(targetUserEmail, targetUser);
     toast(`❌ Parceiro rejeitado.`);
   }
   await renderAll();
@@ -1409,7 +1464,8 @@ window.approveCertWithFile = async function(certId){
   if(!file) return toast('Selecione um PDF');
   const reader = new FileReader();
   reader.onload = async function(e){
-    const cert = (await loadCertificates()).find(c => c.id === certId);
+    const certs = await loadCertificates();
+    const cert = certs.find(c => c.id === certId);
     if(cert){
       cert.status = 'Aprovado';
       cert.certificadoUrl = e.target.result;
@@ -1424,7 +1480,8 @@ window.approveCertWithFile = async function(certId){
 
 window.rejectCert = async function(certId, motivo){
   if(confirm('Rejeitar?')){
-    const cert = (await loadCertificates()).find(c => c.id === certId);
+    const certs = await loadCertificates();
+    const cert = certs.find(c => c.id === certId);
     if(cert){
       cert.status = 'Rejeitado';
       cert.motivo = motivo;
@@ -1544,7 +1601,7 @@ Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pending
               <div><b>${c.nome}</b><p class="hint">${c.email} · ${c.nivel} · ${c.pontos} pts</p></div>
               <div class="actions">
                 <button class="ghost" onclick="window.showCollaboratorDetails('${c.email}')">📊 Ver</button>
-                <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Senha</button>
+                <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Redefinir Senha</button>
                 <button class="danger" onclick="window.deleteCollaborator('${c.email}')">🗑️</button>
               </div>
             </div>
@@ -1715,7 +1772,7 @@ function startOnlineTracking(){
             await saveUserData(currentUser.email, userData);
             toast(`🎉 Tarefa "${task.titulo}" concluída! +${task.pontos} pontos!`);
             confetti();
-            if(currentTab === 'tarefas') await renderTasks();
+            if(currentTab === 'tarefas') await renderTasks(userData);
           } else {
             await saveUserData(currentUser.email, userData);
           }
@@ -1739,7 +1796,7 @@ async function checkSpecialTasks(){
       needsUpdate = true;
       toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
       confetti();
-      if(currentTab === 'tarefas') await renderTasks();
+      if(currentTab === 'tarefas') await renderTasks(userData);
     }
   }
   
@@ -1752,7 +1809,7 @@ async function checkSpecialTasks(){
       needsUpdate = true;
       toast(`🎉 Tarefa "${task7.titulo}" concluída! +${task7.pontos} pontos!`);
       confetti();
-      if(currentTab === 'tarefas') await renderTasks();
+      if(currentTab === 'tarefas') await renderTasks(userData);
     }
   }
   
@@ -1803,6 +1860,8 @@ document.getElementById('loginForm').onsubmit = async (e) => {
       isAdmin: isAdminUser
     };
     
+    localStorage.setItem('cpSession', JSON.stringify({ email: firebaseUser.email }));
+    
     if(role === 'colaborador'){
       let userData = await loadUserData(firebaseUser.email);
       if(!userData){
@@ -1821,7 +1880,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     checkSpecialTasks();
     if(currentUser.role !== 'admin') startOnlineTracking();
     
-    // Initial presence update
     const profile = await currentProfile();
     await updatePresence(firebaseUser.uid || firebaseUser.email, {
       id: firebaseUser.uid || firebaseUser.email,
@@ -1831,12 +1889,13 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     });
     
   } catch(error){
-    toast('Login inválido: '+error.message);
+    toast('Login inválido: ' + error.message);
   }
 };
 
 window.logout = function(){
   if(onlineInterval) clearInterval(onlineInterval);
+  localStorage.removeItem('cpSession');
   location.reload();
 };
 
@@ -1846,7 +1905,8 @@ if(session){
   try{
     const sessionData = JSON.parse(session);
     if(sessionData && sessionData.email){
-      window.cpBlogApi.signIn(sessionData.email, sessionData.password || '').catch(() => {});
+      const emailInput = document.getElementById('email');
+      if(emailInput) emailInput.value = sessionData.email;
     }
   } catch(e){}
 }
