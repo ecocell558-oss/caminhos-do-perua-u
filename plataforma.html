@@ -6,7 +6,7 @@
   <title>Central do Colaborador | Caminhos do Peruaçu</title>
   <link rel="icon" type="image/png" href="logo2.png">
   <style>
-    :root{--primary:#F5B81B;--secondary:#1E3A2F;--bg:#F9F9F9;--card:#fff;--ink:#243029;--muted:#66736c;--line:#e7ebe8;--ok:#198754;--bad:#c0392b;--info:#1769aa;--warn:#b77900;--shadow:0 12px 30px rgba(30,58,47,.1);--r:16px}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--secondary);color:#fff}button:hover{filter:brightness(1.05)}button.secondary{background:var(--primary);color:var(--secondary)}button.ghost{background:#edf1ee;color:var(--secondary)}button.danger{background:var(--bad)}button.ok{background:var(--ok)}button:disabled{opacity:.5;cursor:not-allowed}.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top left,rgba(245,184,27,.28),transparent 35%),linear-gradient(135deg,#f9f9f9,#eef5f0)}.login-card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.mark{width:56px;height:56px;border-radius:18px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000;font-size:26px}.brand h1{font-size:24px;margin:0;color:var(--secondary)}.brand p{margin:2px 0 0;color:var(--muted)}label{display:block;font-weight:800;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--ink)}textarea{min-height:120px;resize:vertical}.hint{font-size:13px;color:var(--muted);line-height:1.45}.app{display:none;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:286px;background:var(--secondary);color:#fff;z-index:5;overflow:auto;transition:.25s;box-shadow:8px 0 24px rgba(0,0,0,.16)}.side-head{padding:22px;border-bottom:1px solid rgba(255,255,255,.12)}.side-head h2{margin:0;font-size:21px}.side-head small{color:var(--primary);font-weight:800}.userbox{margin:16px;padding:14px;border-radius:16px;background:rgba(255,255,255,.09)}.userbox b{display:block}.nav{padding:8px}.nav button{width:100%;margin:4px 0;text-align:left;background:transparent;color:#e8f1ec;display:flex;gap:10px;align-items:center}.nav button.active,.nav button:hover{background:var(--primary);color:var(--secondary)}.logout{margin:16px;width:calc(100% - 32px);background:rgba(255,255,255,.12)}.main{margin-left:286px;padding:26px 30px 60px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.topbar h1{margin:0;color:var(--secondary);font-size:28px}.hamb{display:none}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 4px 18px rgba(0,0,0,.035);padding:18px}.stat b{display:block;color:var(--secondary);font-size:28px;margin-top:4px}.stat span{color:var(--muted);font-weight:800;font-size:13px}.bar{height:12px;border-radius:99px;background:#e9eee9;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),#ffd76b);width:0}.section{display:none}.section.active{display:block}.section h2{margin:4px 0 14px;color:var(--secondary)}.split{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.list{display:grid;gap:12px}.item{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px}.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.pill{display:inline-flex;align-items:center;border-radius:99px;padding:4px 9px;font-size:12px;font-weight:900;background:#eef4ef;color:var(--secondary)}.pill.gold{background:#fff1c6}.pill.ok{background:#e7f7ee;color:var(--ok)}.pill.bad{background:#feeceb;color:var(--bad)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.module-btn{background:#fff;color:var(--secondary);border:1px solid var(--line);padding:12px;text-align:left}.module-btn.active{background:var(--secondary);color:#fff}.quiz-tools{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;margin:12px 0}.q-card{margin-bottom:12px}.alts{display:grid;gap:8px;margin-top:10px}.alt{display:block;text-align:left;background:#f5f7f5;color:var(--ink);border:1px solid var(--line);font-weight:700}.alt.correct{background:#dff4e8;border-color:#6bc58f}.alt.wrong{background:#fde7e5;border-color:#ec8f86}.explain{margin-top:8px;color:var(--muted);font-size:14px}.table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;background:#fff}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left}.table th{background:#eef4ef;color:var(--secondary)}.me{background:#fff8df!important;font-weight:900}.toastbox{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:50}.toast{background:var(--secondary);color:#fff;padding:12px 14px;border-radius:14px;box-shadow:var(--shadow);max-width:360px}.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}.confetti span{position:absolute;top:-20px;width:10px;height:16px;background:var(--primary);animation:fall 1.9s linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}.blog-hero{background:linear-gradient(135deg,var(--secondary),#284f41);color:#fff;border-radius:18px;padding:22px}.blog-hero a{color:var(--primary);font-weight:1000}.empty{color:var(--muted);padding:12px}.admin-only{display:none!important}.is-admin .admin-only{display:flex!important}.gallery-preview{display:grid;gap:10px;margin-top:10px}.gallery-preview img{width:100%;height:120px;object-fit:cover;border-radius:8px}.gallery-preview.cols-2{grid-template-columns:repeat(2,1fr)}.gallery-preview.cols-3{grid-template-columns:repeat(3,1fr)}.gallery-preview.cols-4{grid-template-columns:repeat(4,1fr)}.gallery-url-input{margin-bottom:8px;display:flex;gap:8px;align-items:center}.gallery-url-input input{flex:1}.gallery-url-input button{padding:8px 12px;width:auto}.comission-badge{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:800;display:inline-block;margin-bottom:12px}.brand-logo{width:64px;height:64px;border-radius:18px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:6px}.side-logo{width:74px;height:74px;border-radius:22px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:7px;margin-bottom:10px}.training-hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,var(--secondary),#2f604e);color:#fff;border-radius:22px;padding:22px;margin-bottom:16px;overflow:hidden;position:relative}.training-hero:after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(245,184,27,.22)}.professor{width:98px;height:98px;border-radius:28px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-size:58px;box-shadow:0 14px 30px rgba(0,0,0,.18)}.lesson-path{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}.lesson-node{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--secondary);position:relative}.lesson-node.active{background:var(--primary)}.lesson-node.done:before{content:"✓";position:absolute;right:10px;top:8px;font-weight:1000}.quiz-question{font-size:1.03rem;font-weight:900;color:var(--secondary)}.chat-shell{display:grid;grid-template-columns:320px 1fr;gap:16px}.chat-box{height:430px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}.msg{max-width:78%;padding:10px 12px;border-radius:14px;background:#eef4ef}.msg.me{align-self:flex-end;background:#fff1c6}.msg b{display:block;font-size:12px;color:var(--secondary);margin-bottom:3px}.online-dot{width:10px;height:10px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px}.profile-card{display:flex;gap:12px;align-items:center}.avatar{width:48px;height:48px;border-radius:16px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000}.group-card{background:linear-gradient(135deg,#fff,#f4faf6);border:1px solid var(--line);border-radius:18px;padding:18px}.group-card h3{margin:0 0 8px;color:var(--secondary)}.mini-logo{height:28px;width:28px;object-fit:contain;border-radius:8px;background:#fff}.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;z-index:70;padding:18px}.modal-card{background:#fff;border-radius:20px;max-width:720px;width:100%;max-height:80vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow)}.collab-card{background:#f8f9fa;border-radius:12px;padding:12px;margin-bottom:12px}.collab-card h4{margin:0 0 5px;color:var(--secondary)}.progress-bar-small{height:6px;border-radius:3px;background:#e9ecef;margin:8px 0}.progress-bar-small .fill{height:100%;border-radius:3px;background:var(--primary);width:0%}.password-reveal{display:flex;gap:8px;align-items:center}.password-reveal input{flex:1;font-family:monospace}.password-reveal button{padding:8px 12px;width:auto}.image-upload-preview{max-width:100%;max-height:150px;object-fit:contain;margin-top:8px;border-radius:8px;border:1px solid var(--line)}@media(max-width:900px){.chat-shell{grid-template-columns:1fr}.lesson-path{grid-template-columns:1fr}.training-hero{grid-template-columns:1fr}.professor{width:76px;height:76px;font-size:42px}}@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.module-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:760px){.hamb{display:inline-flex}.sidebar{transform:translateX(-105%)}.sidebar.open{transform:none}.main{margin-left:0;padding:18px}.grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar h1{font-size:22px}.module-grid{grid-template-columns:1fr}.item-head{display:block}.table{font-size:14px}}
+    :root{--primary:#F5B81B;--secondary:#1E3A2F;--bg:#F9F9F9;--card:#fff;--ink:#243029;--muted:#66736c;--line:#e7ebe8;--ok:#198754;--bad:#c0392b;--info:#1769aa;--warn:#b77900;--shadow:0 12px 30px rgba(30,58,47,.1);--r:16px}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--secondary);color:#fff}button:hover{filter:brightness(1.05)}button.secondary{background:var(--primary);color:var(--secondary)}button.ghost{background:#edf1ee;color:var(--secondary)}button.danger{background:var(--bad)}button.ok{background:var(--ok)}button:disabled{opacity:.5;cursor:not-allowed}.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top left,rgba(245,184,27,.28),transparent 35%),linear-gradient(135deg,#f9f9f9,#eef5f0)}.login-card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.mark{width:56px;height:56px;border-radius:18px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000;font-size:26px}.brand h1{font-size:24px;margin:0;color:var(--secondary)}.brand p{margin:2px 0 0;color:var(--muted)}label{display:block;font-weight:800;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--ink)}textarea{min-height:120px;resize:vertical}.hint{font-size:13px;color:var(--muted);line-height:1.45}.app{display:none;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:286px;background:var(--secondary);color:#fff;z-index:5;overflow:auto;transition:.25s;box-shadow:8px 0 24px rgba(0,0,0,.16)}.side-head{padding:22px;border-bottom:1px solid rgba(255,255,255,.12)}.side-head h2{margin:0;font-size:21px}.side-head small{color:var(--primary);font-weight:800}.userbox{margin:16px;padding:14px;border-radius:16px;background:rgba(255,255,255,.09)}.userbox b{display:block}.nav{padding:8px}.nav button{width:100%;margin:4px 0;text-align:left;background:transparent;color:#e8f1ec;display:flex;gap:10px;align-items:center}.nav button.active,.nav button:hover{background:var(--primary);color:var(--secondary)}.logout{margin:16px;width:calc(100% - 32px);background:rgba(255,255,255,.12)}.main{margin-left:286px;padding:26px 30px 60px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.topbar h1{margin:0;color:var(--secondary);font-size:28px}.hamb{display:none}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 4px 18px rgba(0,0,0,.035);padding:18px}.stat b{display:block;color:var(--secondary);font-size:28px;margin-top:4px}.stat span{color:var(--muted);font-weight:800;font-size:13px}.bar{height:12px;border-radius:99px;background:#e9eee9;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),#ffd76b);width:0}.section{display:none}.section.active{display:block}.section h2{margin:4px 0 14px;color:var(--secondary)}.split{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.list{display:grid;gap:12px}.item{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px}.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.pill{display:inline-flex;align-items:center;border-radius:99px;padding:4px 9px;font-size:12px;font-weight:900;background:#eef4ef;color:var(--secondary)}.pill.gold{background:#fff1c6}.pill.ok{background:#e7f7ee;color:var(--ok)}.pill.bad{background:#feeceb;color:var(--bad)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.module-btn{background:#fff;color:var(--secondary);border:1px solid var(--line);padding:12px;text-align:left}.module-btn.active{background:var(--secondary);color:#fff}.quiz-tools{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;margin:12px 0}.q-card{margin-bottom:12px}.alts{display:grid;gap:8px;margin-top:10px}.alt{display:block;text-align:left;background:#f5f7f5;color:var(--ink);border:1px solid var(--line);font-weight:700}.alt.correct{background:#dff4e8;border-color:#6bc58f}.alt.wrong{background:#fde7e5;border-color:#ec8f86}.explain{margin-top:8px;color:var(--muted);font-size:14px}.table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;background:#fff}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left}.table th{background:#eef4ef;color:var(--secondary)}.me{background:#fff8df!important;font-weight:900}.toastbox{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:50}.toast{background:var(--secondary);color:#fff;padding:12px 14px;border-radius:14px;box-shadow:var(--shadow);max-width:360px}.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}.confetti span{position:absolute;top:-20px;width:10px;height:16px;background:var(--primary);animation:fall 1.9s linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}.blog-hero{background:linear-gradient(135deg,var(--secondary),#284f41);color:#fff;border-radius:18px;padding:22px}.blog-hero a{color:var(--primary);font-weight:1000}.empty{color:var(--muted);padding:12px}.admin-only{display:none!important}.is-admin .admin-only{display:flex!important}.gallery-preview{display:grid;gap:10px;margin-top:10px}.gallery-preview img{width:100%;height:120px;object-fit:cover;border-radius:8px}.gallery-preview.cols-2{grid-template-columns:repeat(2,1fr)}.gallery-preview.cols-3{grid-template-columns:repeat(3,1fr)}.gallery-preview.cols-4{grid-template-columns:repeat(4,1fr)}.gallery-url-input{margin-bottom:8px;display:flex;gap:8px;align-items:center}.gallery-url-input input{flex:1}.gallery-url-input button{padding:8px 12px;width:auto}.comission-badge{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:800;display:inline-block;margin-bottom:12px}.brand-logo{width:64px;height:64px;border-radius:18px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:6px}.side-logo{width:74px;height:74px;border-radius:22px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:7px;margin-bottom:10px}.training-hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,var(--secondary),#2f604e);color:#fff;border-radius:22px;padding:22px;margin-bottom:16px;overflow:hidden;position:relative}.training-hero:after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(245,184,27,.22)}.professor{width:98px;height:98px;border-radius:28px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-size:58px;box-shadow:0 14px 30px rgba(0,0,0,.18)}.lesson-path{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}.lesson-node{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--secondary);position:relative}.lesson-node.active{background:var(--primary)}.lesson-node.done:before{content:"✓";position:absolute;right:10px;top:8px;font-weight:1000}.quiz-question{font-size:1.03rem;font-weight:900;color:var(--secondary)}.chat-shell{display:grid;grid-template-columns:320px 1fr;gap:16px}.chat-box{height:430px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}.msg{max-width:78%;padding:10px 12px;border-radius:14px;background:#eef4ef}.msg.me{align-self:flex-end;background:#fff1c6}.msg b{display:block;font-size:12px;color:var(--secondary);margin-bottom:3px}.online-dot{width:10px;height:10px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px}.profile-card{display:flex;gap:12px;align-items:center}.avatar{width:48px;height:48px;border-radius:16px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000}.group-card{background:linear-gradient(135deg,#fff,#f4faf6);border:1px solid var(--line);border-radius:18px;padding:18px}.group-card h3{margin:0 0 8px;color:var(--secondary)}.mini-logo{height:28px;width:28px;object-fit:contain;border-radius:8px;background:#fff}.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;z-index:70;padding:18px}.modal-card{background:#fff;border-radius:20px;max-width:720px;width:100%;max-height:80vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow)}.collab-card{background:#f8f9fa;border-radius:12px;padding:12px;margin-bottom:12px}.collab-card h4{margin:0 0 5px;color:var(--secondary)}.progress-bar-small{height:6px;border-radius:3px;background:#e9ecef;margin:8px 0}.progress-bar-small .fill{height:100%;border-radius:3px;background:var(--primary);width:0%}.password-reveal{display:flex;gap:8px;align-items:center}.password-reveal input{flex:1;font-family:monospace}.password-reveal button{padding:8px 12px;width:auto}.image-upload-preview{max-width:100%;max-height:150px;object-fit:contain;margin-top:8px;border-radius:8px;border:1px solid var(--line)}.diagnostic-box{background:#f0f4ff;border-left:4px solid var(--primary);padding:12px;margin-bottom:16px;font-size:13px;font-family:monospace}.diagnostic-box pre{background:#fff;padding:8px;border-radius:8px;overflow-x:auto;margin:8px 0 0}@media(max-width:900px){.chat-shell{grid-template-columns:1fr}.lesson-path{grid-template-columns:1fr}.training-hero{grid-template-columns:1fr}.professor{width:76px;height:76px;font-size:42px}}@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.module-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:760px){.hamb{display:inline-flex}.sidebar{transform:translateX(-105%)}.sidebar.open{transform:none}.main{margin-left:0;padding:18px}.grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar h1{font-size:22px}.module-grid{grid-template-columns:1fr}.item-head{display:block}.table{font-size:14px}}
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
@@ -159,47 +159,69 @@ let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,online
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}function userKey(email){return String(email||'').trim().toLowerCase()}function emptyUser(nome='',email='',cidade=''){return{points:0,profile:{nome,email,cidade,telefone:'',bio:'Colaborador do projeto Caminhos do Peruaçu.'},training:{answered:{},bonus:[],completedAt:{}},tasks:JSON.parse(JSON.stringify(defaultTasks)),partners:[],contents:[],onlineTime:0}}let db=load('cpCentralDB',{users:{},creds:{},certs:[],settings:{whatsappConteudos:'',whatsappForum:''},materials:materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true})),chat:[],lastChatCleanup:Date.now()});db.users=db.users||{};db.creds=db.creds||{};db.chat=(db.chat||[]).filter(m=>!['Mariana Lopes','Carlos Pereira','Bianca Souza','Rafael Mendes','Joana Alves'].includes(m.user));db.settings=db.settings||{whatsappConteudos:'',whatsappForum:''};db.materials=db.materials||materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true}));db.certs=db.certs||[];db.lastChatCleanup=db.lastChatCleanup||Date.now();
 Object.values(db.users).forEach(x=>{x.training=x.training||{answered:{},bonus:[],completedAt:{}};x.training.answered=x.training.answered||{};x.training.completedAt=x.training.completedAt||{};x.tasks=x.tasks||JSON.parse(JSON.stringify(defaultTasks));x.partners=x.partners||[];x.contents=x.contents||[];if(x.onlineTime===undefined)x.onlineTime=0});saveDB();
 
-// FUNÇÕES CORRIGIDAS PARA BUSCAR TODOS OS DADOS
+// ========== FUNÇÕES DE DIAGNÓSTICO E BUSCA CORRIGIDAS ==========
+function diagnosticLog(){
+  console.log('=== DIAGNÓSTICO DA CENTRAL ===');
+  console.log('Usuários cadastrados:', Object.keys(db.users).length);
+  Object.entries(db.users).forEach(([email, user]) => {
+    console.log(`  - ${email}: ${user.profile.nome}`);
+    console.log(`    Conteúdos: ${user.contents?.length || 0}`);
+    console.log(`    Parceiros: ${user.partners?.length || 0}`);
+    user.contents?.forEach(c => console.log(`      * ${c.titulo} - status: ${c.status}`));
+    user.partners?.forEach(p => console.log(`      * ${p.nome} - status: ${p.status}`));
+  });
+  console.log('Certificados:', db.certs.length);
+  console.log('============================');
+}
+
 function getAllContents(){
   const allContents = [];
-  Object.entries(db.users).forEach(([email, user]) => {
-    if(user.contents && user.contents.length){
-      user.contents.forEach(content => {
+  for (const [email, user] of Object.entries(db.users)) {
+    if(user.contents && Array.isArray(user.contents) && user.contents.length > 0){
+      for (const content of user.contents) {
         allContents.push({
           ...content,
           colaboradorEmail: email,
           colaboradorNome: user.profile?.nome || email
         });
-      });
+      }
     }
-  });
-  return allContents.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+  }
+  const sorted = allContents.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+  console.log(`getAllContents retornou ${sorted.length} conteúdos`);
+  return sorted;
 }
 
 function getAllPartners(){
   const allPartners = [];
-  Object.entries(db.users).forEach(([email, user]) => {
-    if(user.partners && user.partners.length){
-      user.partners.forEach(partner => {
+  for (const [email, user] of Object.entries(db.users)) {
+    if(user.partners && Array.isArray(user.partners) && user.partners.length > 0){
+      for (const partner of user.partners) {
         allPartners.push({
           ...partner,
           colaboradorEmail: email,
           colaboradorNome: user.profile?.nome || email
         });
-      });
+      }
     }
-  });
+  }
+  console.log(`getAllPartners retornou ${allPartners.length} parceiros`);
   return allPartners;
 }
 
 function getAllCertificates(){
+  console.log(`getAllCertificates retornou ${db.certs?.length || 0} certificados`);
   return db.certs || [];
 }
 
 function getContentAuthor(content){
   if(content.colaboradorNome) return content.colaboradorNome;
-  const user = Object.values(db.users).find(u => u.contents?.some(c => c.id === content.id));
-  return user?.profile?.nome || 'Desconhecido';
+  for (const [email, user] of Object.entries(db.users)) {
+    if(user.contents?.some(c => c.id === content.id)){
+      return user.profile?.nome || email;
+    }
+  }
+  return 'Desconhecido';
 }
 
 function cleanupOldChatMessages(){
@@ -265,7 +287,7 @@ function checkSpecialTasks(){
   }
 }
 
-function u(){if(currentUser?.role==='colaborador'){const key=userKey(currentUser.email);db.users[key]=db.users[key]||emptyUser(currentUser.nome,currentUser.email,currentUser.cidade);return db.users[key]}const first=Object.keys(db.users)[0];return first?db.users[first]:emptyUser('Colaborador','','')}function userEntries(){return Object.entries(db.users||{})}function totalAnswered(){return Object.keys(u().training.answered||{}).length}function level(points=u().points){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}function nextLevel(){return LEVELS.find(x=>u().points<x[1])||LEVELS[LEVELS.length-1]}function addPoints(n,why){u().points+=n;saveDB();toast('+'+n+' pontos: '+why);renderAll()}function saveDB(){save('cpCentralDB',db)}
+function u(){if(currentUser?.role==='colaborador'){const key=userKey(currentUser.email);db.users[key]=db.users[key]||emptyUser(currentUser.nome,currentUser.email,currentUser.cidade);return db.users[key]}const first=Object.keys(db.users)[0];return first?db.users[first]:emptyUser('Colaborador','','')}function userEntries(){return Object.entries(db.users||{})}function totalAnswered(){return Object.keys(u().training.answered||{}).length}function level(points=u().points){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}function nextLevel(){return LEVELS.find(x=>u().points<x[1])||LEVELS[LEVELS.length-1]}function addPoints(n,why){u().points+=n;saveDB();toast('+'+n+' pontos: '+why);renderAll()}function saveDB(){save('cpCentralDB',db);diagnosticLog();}
 document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();const email=document.getElementById('email').value.trim();const senha=document.getElementById('senha').value;try{const userCredential=await window.cpBlogApi.signIn(email,senha);const firebaseUser=userCredential.user;let role='colaborador';let isAdminUser=false;if(firebaseUser.uid===ADMIN_UID){role='admin';isAdminUser=true;}currentUser={email:firebaseUser.email,role:role,nome:role==='admin'?'Administrador':'Colaborador',cidade:'Itacarambi',uid:firebaseUser.uid,isAdmin:isAdminUser};if(role==='colaborador'){const key=userKey(firebaseUser.email);if(!db.users[key]){db.users[key]=emptyUser(currentUser.nome,firebaseUser.email,currentUser.cidade);saveDB();}}localStorage.setItem('cpSession',JSON.stringify(currentUser));startApp();}catch(error){toast('Login inválido: '+error.message);}};
 function meId(){return currentUser?.role==='admin'?'admin':userKey(currentUser?.email)}
 function currentProfile(){return currentUser?.role==='admin'?{nome:'Administrador',cidade:'Itacarambi',bio:'Gestão da Central do Colaborador.',email:currentUser.email}:u().profile}
@@ -442,12 +464,10 @@ function renderContents(){
   window.updateGalleryPreview();
 }
 
-// FUNÇÃO PARA COLABORADOR EXCLUIR PRÓPRIO CONTEÚDO
 window.deleteMyContent = function(id){
   if(!confirm('Tem certeza que deseja excluir esta solicitação de conteúdo?')) return;
   const index = u().contents.findIndex(c => c.id === id);
   if(index !== -1){
-    // Se já foi publicado no blog, também remover do Firebase
     const content = u().contents[index];
     if(content.blogId && window.cpBlogApi){
       window.cpBlogApi.deletePost(content.blogId).catch(e => console.log('Erro ao remover do blog:', e));
@@ -456,11 +476,10 @@ window.deleteMyContent = function(id){
     saveDB();
     toast('Solicitação de conteúdo removida com sucesso!');
     renderContents();
-    renderAdmin();
+    if(currentUser?.uid === ADMIN_UID) renderAdmin();
   }
 };
 
-// FUNÇÃO PARA COLABORADOR EXCLUIR PRÓPRIO PARCEIRO
 window.deleteMyPartner = function(id){
   if(!confirm('Tem certeza que deseja excluir esta solicitação de parceiro?')) return;
   const index = u().partners.findIndex(p => p.id === id);
@@ -469,11 +488,10 @@ window.deleteMyPartner = function(id){
     saveDB();
     toast('Solicitação de parceiro removida com sucesso!');
     renderPartners();
-    renderAdmin();
+    if(currentUser?.uid === ADMIN_UID) renderAdmin();
   }
 };
 
-// FUNÇÃO PARA COLABORADOR EXCLUIR PRÓPRIO CERTIFICADO
 window.deleteMyCertificate = function(id){
   if(!confirm('Tem certeza que deseja excluir esta solicitação de certificado?')) return;
   const index = db.certs.findIndex(c => c.id === id && c.user === currentUser?.email);
@@ -482,7 +500,7 @@ window.deleteMyCertificate = function(id){
     saveDB();
     toast('Solicitação de certificado removida com sucesso!');
     renderCerts();
-    renderAdmin();
+    if(currentUser?.uid === ADMIN_UID) renderAdmin();
   }
 };
 
@@ -567,6 +585,7 @@ window.addContent = async function(e){
   u().contents.push(newContent);
   saveDB();
   toast('📝 Postagem enviada para aprovação do administrador!');
+  toast('🔔 O administrador verá esta solicitação na aba Admin > Conteúdos Pendentes');
   
   // Limpar formulário
   document.getElementById('ctitulo').value = '';
@@ -621,15 +640,13 @@ window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• P
 function readFileData(input){return new Promise(resolve=>{const f=input?.files?.[0];if(!f)return resolve('');const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>resolve('');r.readAsDataURL(f)})}
 function renderPartners(){
   document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deleteMyPartner(${p.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
-window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('🤝 Parceiro enviado para aprovação do admin!');renderAll()};
+window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('🤝 Parceiro enviado para aprovação do admin!');toast('🔔 O administrador verá esta solicitação na aba Admin > Parceiros Pendentes');renderAll()};
 window.openAttachment=function(id,field){const p=u().partners.find(x=>x.id===id);if(!p||!p[field])return toast('Anexo não encontrado.');const w=window.open('','_blank');if(p[field].startsWith('data:application/pdf'))w.document.write(`<iframe src="${p[field]}" style="width:100%;height:100vh;border:0"></iframe>`);else w.document.write(`<img src="${p[field]}" style="max-width:100%;height:auto">`);w.document.close()};
 
-// FUNÇÃO DE APROVAÇÃO DE PARCEIRO CORRIGIDA
 window.approvePartner = function(partnerId, approved, colaboradorEmail){
   let targetUser = null;
   let targetPartner = null;
   
-  // Buscar o parceiro em TODOS os colaboradores
   for (const [email, user] of Object.entries(db.users)) {
     if (user.partners) {
       const found = user.partners.find(p => p.id === partnerId);
@@ -672,7 +689,7 @@ function renderRanking(){const rows=[...seedRanking,{nome:u().profile.nome,cidad
 function renderCerts(){
   const userCerts = db.certs.filter(c => c.user === currentUser?.email);
   document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}<div class="actions"><button class="danger" onclick="window.deleteMyCertificate(${c.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
-window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('📜 Certificado solicitado para análise.');renderAll()};
+window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('📜 Certificado solicitado para análise.');toast('🔔 O administrador verá esta solicitação na aba Admin > Certificados Pendentes');renderAll()};
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const online=onlineUsers(),people=allPeople();el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db.settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db.settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${db.chat.length}</b><p class="hint">Chat salvo no navegador via localStorage. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${db.chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db.settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db.settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
 window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;const p=currentProfile(),msg={id:Date.now(),user:p.nome,city:p.cidade,text,time:new Date().toISOString()};db.chat.push(msg);saveDB();toast('Mensagem enviada no chat.');renderCommunity()};
@@ -683,7 +700,14 @@ window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nom
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
-// ADMIN FUNCTIONS CORRIGIDAS
+// ADMIN FUNCTIONS
+window.forceRefreshAdmin = function(){
+  toast('🔄 Forçando atualização do painel admin...');
+  diagnosticLog();
+  renderAdmin();
+  toast(`✅ Admin atualizado! Conteúdos: ${getAllContents().length}, Parceiros: ${getAllPartners().length}, Certificados: ${getAllCertificates().length}`);
+};
+
 window.createCollaboratorAccount = async function() {
   const email = document.getElementById('newCollabEmail')?.value.trim();
   const nome = document.getElementById('newCollabNome')?.value.trim();
@@ -802,12 +826,10 @@ window.resetCollaboratorPassword = function(email) {
   }
 };
 
-// FUNÇÃO DE APROVAÇÃO DE CONTEÚDO CORRIGIDA
 window.approveContent = async function(contentId, approved, colaboradorEmail) {
   let targetUser = null;
   let targetContent = null;
   
-  // Buscar o conteúdo em TODOS os colaboradores
   for (const [email, user] of Object.entries(db.users)) {
     if (user.contents) {
       const found = user.contents.find(c => c.id === contentId);
@@ -866,7 +888,6 @@ window.approveContent = async function(contentId, approved, colaboradorEmail) {
   renderAll();
 };
 
-// FUNÇÃO PARA ADMIN EXCLUIR CONTEÚDO
 window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) {
   if(!confirm('Excluir este conteúdo permanentemente? Isso também removerá do blog se já publicado.')) return;
   
@@ -898,7 +919,6 @@ window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) 
   renderAll();
 };
 
-// FUNÇÃO PARA ADMIN EXCLUIR PARCEIRO
 window.deleteAdminPartner = function(partnerId, colaboradorEmail) {
   if(!confirm('Excluir esta solicitação de parceiro permanentemente?')) return;
   
@@ -923,7 +943,6 @@ window.deleteAdminPartner = function(partnerId, colaboradorEmail) {
   renderAll();
 };
 
-// FUNÇÃO PARA ADMIN EXCLUIR CERTIFICADO
 window.deleteAdminCertificate = function(certId) {
   if(!confirm('Excluir esta solicitação de certificado permanentemente?')) return;
   
@@ -966,6 +985,13 @@ function renderAdmin(){
   }));
   
   document.getElementById('admin').innerHTML = `
+    <div class="diagnostic-box">
+      <strong>🔍 Diagnóstico do Sistema</strong>
+      <pre>Colaboradores: ${collaboratorsList.length} | Conteúdos: ${allContents.length} | Parceiros: ${allPartners.length} | Certificados: ${allCertificates.length}
+Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pendingPartners.length} | Certificados Pendentes: ${pendingCerts.length}</pre>
+      <button class="secondary" onclick="window.forceRefreshAdmin()">🔄 FORÇAR ATUALIZAÇÃO</button>
+    </div>
+    
     <h2>👥 Gerenciar Colaboradores</h2>
     <div class="card" style="margin-bottom:20px">
       <h3>➕ Criar Novo Colaborador</h3>
@@ -1014,7 +1040,7 @@ function renderAdmin(){
     <div class="split">
       <div>
         <h2>📝 Conteúdos Pendentes (${pendingContents.length})</h2>
-        <div class="list">${pendingContents.map(c => `
+        <div class="list">${pendingContents.length > 0 ? pendingContents.map(c => `
           <div class="item">
             <b>${c.titulo}</b>
             <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)} · ${c.categoria}</p>
@@ -1025,10 +1051,10 @@ function renderAdmin(){
               <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}', '${c.colaboradorEmail || ''}')">🗑️ Excluir</button>
             </div>
           </div>
-        `).join('') || '<div class="empty">Nenhum conteúdo pendente.</div>'}</div>
+        `).join('') : '<div class="empty">✨ Nenhum conteúdo pendente no momento.</div>'}</div>
         
         <h2 style="margin-top:18px">✅ Conteúdos Aprovados (${approvedContents.length})</h2>
-        <div class="list">${approvedContents.map(c => `
+        <div class="list">${approvedContents.length > 0 ? approvedContents.map(c => `
           <div class="item">
             <b>${c.titulo}</b>
             <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)}</p>
@@ -1037,21 +1063,10 @@ function renderAdmin(){
               <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}', '${c.colaboradorEmail || ''}')">🗑️ Excluir</button>
             </div>
           </div>
-        `).join('') || '<div class="empty">Nenhum conteúdo aguardando publicação.</div>'}</div>
-        
-        <h2 style="margin-top:18px">❌ Rejeitados (${rejectedContents.length})</h2>
-        <div class="list">${rejectedContents.map(c => `
-          <div class="item">
-            <b>${c.titulo}</b>
-            <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)}</p>
-            <div class="actions">
-              <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}', '${c.colaboradorEmail || ''}')">🗑️ Excluir</button>
-            </div>
-          </div>
-        `).join('') || '<div class="empty">Nenhum conteúdo rejeitado.</div>'}</div>
+        `).join('') : '<div class="empty">Nenhum conteúdo aguardando publicação.</div>'}</div>
         
         <h2 style="margin-top:18px">🤝 Parceiros Pendentes (${pendingPartners.length})</h2>
-        <div class="list">${pendingPartners.map(p => `
+        <div class="list">${pendingPartners.length > 0 ? pendingPartners.map(p => `
           <div class="item">
             <b>${p.nome}</b>
             <p class="hint">👤 ${p.colaboradorNome} · ${p.categoria} · ${p.cidade}</p>
@@ -1064,12 +1079,12 @@ function renderAdmin(){
               <button class="danger" onclick="window.deleteAdminPartner(${p.id}, '${p.colaboradorEmail}')">🗑️ Excluir</button>
             </div>
           </div>
-        `).join('') || '<div class="empty">Sem parceiros pendentes.</div>'}</div>
+        `).join('') : '<div class="empty">✨ Nenhum parceiro pendente no momento.</div>'}</div>
       </div>
       
       <div>
         <h2>📜 Certificados Pendentes (${pendingCerts.length})</h2>
-        <div class="list">${pendingCerts.map(c => `
+        <div class="list">${pendingCerts.length > 0 ? pendingCerts.map(c => `
           <div class="item">
             <b>${c.nome}</b>
             <p class="hint">👤 ${c.usuario} · Requer ${c.pts} pontos</p>
@@ -1079,7 +1094,7 @@ function renderAdmin(){
               <button class="danger" onclick="window.deleteAdminCertificate(${c.id})">🗑️ Excluir</button>
             </div>
           </div>
-        `).join('') || '<div class="empty">Nenhum certificado pendente.</div>'}</div>
+        `).join('') : '<div class="empty">✨ Nenhum certificado pendente no momento.</div>'}</div>
         
         <h2 style="margin-top:18px">✅ Parceiros Aprovados (${approvedPartners.length})</h2>
         <div class="list">${approvedPartners.slice(0,5).map(p => `
