@@ -159,6 +159,7 @@ let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,online
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}function userKey(email){return String(email||'').trim().toLowerCase()}function emptyUser(nome='',email='',cidade=''){return{points:0,profile:{nome,email,cidade,telefone:'',bio:'Colaborador do projeto Caminhos do Peruaçu.'},training:{answered:{},bonus:[],completedAt:{}},tasks:JSON.parse(JSON.stringify(defaultTasks)),partners:[],contents:[],onlineTime:0}}let db=load('cpCentralDB',{users:{},creds:{},certs:[],settings:{whatsappConteudos:'',whatsappForum:''},materials:materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true})),chat:[],lastChatCleanup:Date.now()});db.users=db.users||{};db.creds=db.creds||{};db.chat=(db.chat||[]).filter(m=>!['Mariana Lopes','Carlos Pereira','Bianca Souza','Rafael Mendes','Joana Alves'].includes(m.user));db.settings=db.settings||{whatsappConteudos:'',whatsappForum:''};db.materials=db.materials||materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true}));db.certs=db.certs||[];db.lastChatCleanup=db.lastChatCleanup||Date.now();
 Object.values(db.users).forEach(x=>{x.training=x.training||{answered:{},bonus:[],completedAt:{}};x.training.answered=x.training.answered||{};x.training.completedAt=x.training.completedAt||{};x.tasks=x.tasks||JSON.parse(JSON.stringify(defaultTasks));x.partners=x.partners||[];x.contents=x.contents||[];if(x.onlineTime===undefined)x.onlineTime=0});saveDB();
 
+// FUNÇÕES CORRIGIDAS PARA BUSCAR TODOS OS DADOS
 function getAllContents(){
   const allContents = [];
   Object.entries(db.users).forEach(([email, user]) => {
@@ -189,6 +190,10 @@ function getAllPartners(){
     }
   });
   return allPartners;
+}
+
+function getAllCertificates(){
+  return db.certs || [];
 }
 
 function getContentAuthor(content){
@@ -279,8 +284,7 @@ window.answerQ=function(idx,choice){const q=modules[currentModule-1].questions[i
 function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(db.materials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
 function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const found=db.materials.find(m=>m.id===id);const data={id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};if(found)Object.assign(found,data);else db.materials.push(data);saveDB();toast(found?'Material atualizado.':'Material adicionado.');renderAdmin();renderMaterials()}
 function editMaterial(id){const m=db.materials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
-function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}function blogPostFromContent(c){return{title:c.titulo,category:c.categoria,excerpt:c.resumo||'',full:c.texto||'',img:c.img||'',video:c.video||'',link:c.link||'',gallery:c.gallery||[],galleryLayout:c.galleryLayout||3,autoCarousel:!!c.autoCarousel,isFeatured:!!c.isFeatured,author:c.colaboradorNome || 'Colaborador'}}
-
+function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}
 function fileToBase64(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -420,13 +424,13 @@ function renderContents(){
               <p class="hint">
                 ${c.blogStatus==='Publicado'?'✅ Post publicado no blog!':
                   c.status==='Aprovado'?'✅ Aprovado! O post será publicado em breve.':
-                  c.status==='Rejeitado'?'❌ Rejeitado. Você pode excluir esta solicitação.':
+                  c.status==='Rejeitado'?'❌ Rejeitado.':
                   '⏳ Aguardando análise do administrador.'}
               </p>
               <div class="actions">
                 ${c.blogId ? `<button class="ghost" onclick="window.open('blog.html?p=${c.blogId}','_blank')">📖 Ver no blog</button>` : ''}
                 <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
-                ${c.status === 'Rejeitado' ? `<button class="danger" onclick="window.deleteMyContent(${c.id})">🗑️ Excluir</button>` : ''}
+                <button class="danger" onclick="window.deleteMyContent(${c.id})">🗑️ Excluir solicitação</button>
               </div>
             </div>
           `).join('') : '<div class="empty">Nenhum conteúdo enviado ainda.</div>'}
@@ -438,14 +442,47 @@ function renderContents(){
   window.updateGalleryPreview();
 }
 
+// FUNÇÃO PARA COLABORADOR EXCLUIR PRÓPRIO CONTEÚDO
 window.deleteMyContent = function(id){
-  if(!confirm('Tem certeza que deseja excluir este conteúdo rejeitado?')) return;
+  if(!confirm('Tem certeza que deseja excluir esta solicitação de conteúdo?')) return;
   const index = u().contents.findIndex(c => c.id === id);
   if(index !== -1){
+    // Se já foi publicado no blog, também remover do Firebase
+    const content = u().contents[index];
+    if(content.blogId && window.cpBlogApi){
+      window.cpBlogApi.deletePost(content.blogId).catch(e => console.log('Erro ao remover do blog:', e));
+    }
     u().contents.splice(index, 1);
     saveDB();
-    toast('Conteúdo rejeitado removido com sucesso!');
+    toast('Solicitação de conteúdo removida com sucesso!');
     renderContents();
+    renderAdmin();
+  }
+};
+
+// FUNÇÃO PARA COLABORADOR EXCLUIR PRÓPRIO PARCEIRO
+window.deleteMyPartner = function(id){
+  if(!confirm('Tem certeza que deseja excluir esta solicitação de parceiro?')) return;
+  const index = u().partners.findIndex(p => p.id === id);
+  if(index !== -1){
+    u().partners.splice(index, 1);
+    saveDB();
+    toast('Solicitação de parceiro removida com sucesso!');
+    renderPartners();
+    renderAdmin();
+  }
+};
+
+// FUNÇÃO PARA COLABORADOR EXCLUIR PRÓPRIO CERTIFICADO
+window.deleteMyCertificate = function(id){
+  if(!confirm('Tem certeza que deseja excluir esta solicitação de certificado?')) return;
+  const index = db.certs.findIndex(c => c.id === id && c.user === currentUser?.email);
+  if(index !== -1){
+    db.certs.splice(index, 1);
+    saveDB();
+    toast('Solicitação de certificado removida com sucesso!');
+    renderCerts();
+    renderAdmin();
   }
 };
 
@@ -507,7 +544,7 @@ window.addContent = async function(e){
   
   const imgBase64 = document.getElementById('cimg')?.value || '';
   
-  u().contents.push({
+  const newContent = {
     id: Date.now(),
     titulo: document.getElementById('ctitulo').value,
     categoria: document.getElementById('ccat').value || 'COLABORADOR',
@@ -525,10 +562,13 @@ window.addContent = async function(e){
     blogId: '',
     awarded: false,
     createdAt: new Date().toISOString()
-  });
+  };
+  
+  u().contents.push(newContent);
   saveDB();
   toast('📝 Postagem enviada para aprovação do administrador!');
   
+  // Limpar formulário
   document.getElementById('ctitulo').value = '';
   document.getElementById('ccat').value = 'COLABORADOR';
   document.getElementById('cresumo').value = '';
@@ -579,18 +619,20 @@ else{t.done=true;addPoints(t.pontos,'tarefa concluída');}saveDB();renderAll()}
 function helpPartners(){return `<button style="position:fixed;right:22px;bottom:88px;border-radius:999px;width:56px;height:56px;font-size:24px;z-index:45" class="secondary" onclick="window.showPartnerHelp()">?</button>`}
 window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• Plano Comum (R$ 69,90) → Você recebe R$ 20,97 (30%)\n• Plano Premium (R$ 149,90) → Você recebe R$ 44,97 (30%)\n\n✅ Você recebe a comissão APENAS UMA VEZ por plano fechado (não é recorrente mensal).\n\n📋 Fluxo do parceiro:\n1. Você capta o cliente para o app Peruaçu\n2. Cliente assina ordem de serviço e paga o plano\n3. Você envia os comprovantes\n4. Admin aprova e você recebe sua comissão + 100 pontos')}
 function readFileData(input){return new Promise(resolve=>{const f=input?.files?.[0];if(!f)return resolve('');const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>resolve('');r.readAsDataURL(f)})}
-window.deletePartner=function(partnerId){if(!confirm('Excluir este parceiro?'))return;const index=u().partners.findIndex(p=>p.id===partnerId);if(index!==-1){u().partners.splice(index,1);saveDB();toast('Parceiro removido');renderAll()}};
-function renderPartners(){document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado. Verifique as orientações do admin.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deletePartner(${p.id})">Excluir</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
+function renderPartners(){
+  document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deleteMyPartner(${p.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
 window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('🤝 Parceiro enviado para aprovação do admin!');renderAll()};
 window.openAttachment=function(id,field){const p=u().partners.find(x=>x.id===id);if(!p||!p[field])return toast('Anexo não encontrado.');const w=window.open('','_blank');if(p[field].startsWith('data:application/pdf'))w.document.write(`<iframe src="${p[field]}" style="width:100%;height:100vh;border:0"></iframe>`);else w.document.write(`<img src="${p[field]}" style="max-width:100%;height:auto">`);w.document.close()};
-window.approvePartner=function(id,ok, colaboradorEmail){
+
+// FUNÇÃO DE APROVAÇÃO DE PARCEIRO CORRIGIDA
+window.approvePartner = function(partnerId, approved, colaboradorEmail){
   let targetUser = null;
   let targetPartner = null;
   
-  // Buscar o parceiro em todos os colaboradores
+  // Buscar o parceiro em TODOS os colaboradores
   for (const [email, user] of Object.entries(db.users)) {
     if (user.partners) {
-      const found = user.partners.find(p => p.id === id);
+      const found = user.partners.find(p => p.id === partnerId);
       if (found) {
         targetUser = user;
         targetPartner = found;
@@ -599,21 +641,27 @@ window.approvePartner=function(id,ok, colaboradorEmail){
     }
   }
   
-  if (!targetPartner) return toast('Parceiro não encontrado');
+  if (!targetPartner) {
+    toast('Parceiro não encontrado');
+    return;
+  }
   
-  targetPartner.status = ok ? 'Aprovado' : 'Rejeitado';
-  if(ok && !targetPartner.awarded){
-    targetPartner.awarded = true;
-    const comissao = targetPartner.valor * 0.3;
-    targetPartner.comissaoPaga = true;
-    if(targetUser){
-      targetUser.points = (targetUser.points || 0) + 100;
+  const oldStatus = targetPartner.status;
+  targetPartner.status = approved ? 'Aprovado' : 'Rejeitado';
+  
+  if(approved && oldStatus !== 'Aprovado'){
+    if(!targetPartner.awarded){
+      targetPartner.awarded = true;
+      targetPartner.comissaoPaga = true;
+      if(targetUser){
+        targetUser.points = (targetUser.points || 0) + 100;
+      }
+      toast(`✅ Parceiro aprovado! +100 pontos para ${targetUser.profile.nome}. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`);
+      confetti();
+    } else {
+      toast(`✅ Parceiro aprovado!`);
     }
-    toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${comissao.toFixed(2)}`);
-    confetti();
-  } else if(ok) {
-    toast(`✅ Parceiro aprovado!`);
-  } else {
+  } else if(!approved) {
     toast(`❌ Parceiro rejeitado.`);
   }
   saveDB();
@@ -623,7 +671,7 @@ window.approvePartner=function(id,ok, colaboradorEmail){
 function renderRanking(){const rows=[...seedRanking,{nome:u().profile.nome,cidade:u().profile.cidade,pontos:u().points,me:true}].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr>${rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</table>`}
 function renderCerts(){
   const userCerts = db.certs.filter(c => c.user === currentUser?.email);
-  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}</div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
+  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}<div class="actions"><button class="danger" onclick="window.deleteMyCertificate(${c.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
 window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('📜 Certificado solicitado para análise.');renderAll()};
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const online=onlineUsers(),people=allPeople();el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db.settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db.settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${db.chat.length}</b><p class="hint">Chat salvo no navegador via localStorage. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${db.chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db.settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db.settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
@@ -635,7 +683,7 @@ window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nom
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
-// ADMIN FUNCTIONS - CORRIGIDAS
+// ADMIN FUNCTIONS CORRIGIDAS
 window.createCollaboratorAccount = async function() {
   const email = document.getElementById('newCollabEmail')?.value.trim();
   const nome = document.getElementById('newCollabNome')?.value.trim();
@@ -722,7 +770,7 @@ window.showCollaboratorDetails = function(email) {
       <p><strong>📝 Conteúdos:</strong> ${contentsApproved}</p>
     </div>
     <div class="actions">
-      <button class="danger" onclick="window.deleteCollaborator('${email}')">🗑️ Remover</button>
+      <button class="danger" onclick="window.deleteCollaborator('${email}')">🗑️ Remover Colaborador</button>
       <button class="secondary" onclick="window.closeProfile()">Fechar</button>
     </div>
   `;
@@ -730,7 +778,7 @@ window.showCollaboratorDetails = function(email) {
 };
 
 window.deleteCollaborator = function(email) {
-  if(!confirm(`⚠️ Remover colaborador "${email}"?`)) return;
+  if(!confirm(`⚠️ Remover colaborador "${email}"? Isso também excluirá todas as suas solicitações.`)) return;
   const emailKey = userKey(email);
   delete db.users[emailKey];
   delete db.creds[emailKey];
@@ -754,11 +802,12 @@ window.resetCollaboratorPassword = function(email) {
   }
 };
 
-window.approveContent = async function(contentId, ok, colaboradorEmail) {
+// FUNÇÃO DE APROVAÇÃO DE CONTEÚDO CORRIGIDA
+window.approveContent = async function(contentId, approved, colaboradorEmail) {
   let targetUser = null;
   let targetContent = null;
   
-  // Buscar o conteúdo em todos os colaboradores
+  // Buscar o conteúdo em TODOS os colaboradores
   for (const [email, user] of Object.entries(db.users)) {
     if (user.contents) {
       const found = user.contents.find(c => c.id === contentId);
@@ -770,11 +819,15 @@ window.approveContent = async function(contentId, ok, colaboradorEmail) {
     }
   }
   
-  if (!targetContent) return toast('Conteúdo não encontrado');
+  if (!targetContent) {
+    toast('Conteúdo não encontrado');
+    return;
+  }
   
-  targetContent.status = ok ? 'Aprovado' : 'Rejeitado';
+  const oldStatus = targetContent.status;
+  targetContent.status = approved ? 'Aprovado' : 'Rejeitado';
   
-  if(ok){
+  if(approved && oldStatus !== 'Aprovado'){
     try{
       if(!window.cpBlogApi) throw new Error('Firebase não disponível');
       const postForBlog = {
@@ -796,7 +849,7 @@ window.approveContent = async function(contentId, ok, colaboradorEmail) {
       if(!targetContent.awarded){
         targetContent.awarded = true;
         if(targetUser) targetUser.points = (targetUser.points || 0) + 50;
-        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para o colaborador.`);
+        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para ${targetUser.profile.nome}.`);
         confetti();
       } else {
         toast(`✅ Conteúdo aprovado e publicado!`);
@@ -805,16 +858,17 @@ window.approveContent = async function(contentId, ok, colaboradorEmail) {
       targetContent.blogStatus = 'Erro';
       toast('⚠️ Conteúdo aprovado, mas erro na publicação: ' + error.message);
     }
-  } else {
+  } else if(!approved) {
     targetContent.blogStatus = 'Rejeitado';
-    toast('❌ Conteúdo rejeitado.');
+    toast(`❌ Conteúdo rejeitado.`);
   }
   saveDB();
   renderAll();
 };
 
+// FUNÇÃO PARA ADMIN EXCLUIR CONTEÚDO
 window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) {
-  if(!confirm('Excluir este conteúdo permanentemente?')) return;
+  if(!confirm('Excluir este conteúdo permanentemente? Isso também removerá do blog se já publicado.')) return;
   
   if(blogId && window.cpBlogApi){
     try{
@@ -844,6 +898,46 @@ window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) 
   renderAll();
 };
 
+// FUNÇÃO PARA ADMIN EXCLUIR PARCEIRO
+window.deleteAdminPartner = function(partnerId, colaboradorEmail) {
+  if(!confirm('Excluir esta solicitação de parceiro permanentemente?')) return;
+  
+  let found = false;
+  for (const [email, user] of Object.entries(db.users)) {
+    if (user.partners) {
+      const index = user.partners.findIndex(p => p.id === partnerId);
+      if (index !== -1) {
+        user.partners.splice(index, 1);
+        found = true;
+        break;
+      }
+    }
+  }
+  
+  if(found) {
+    saveDB();
+    toast('Parceiro excluído!');
+  } else {
+    toast('Parceiro não encontrado');
+  }
+  renderAll();
+};
+
+// FUNÇÃO PARA ADMIN EXCLUIR CERTIFICADO
+window.deleteAdminCertificate = function(certId) {
+  if(!confirm('Excluir esta solicitação de certificado permanentemente?')) return;
+  
+  const index = db.certs.findIndex(c => c.id === certId);
+  if(index !== -1){
+    db.certs.splice(index, 1);
+    saveDB();
+    toast('Certificado excluído!');
+  } else {
+    toast('Certificado não encontrado');
+  }
+  renderAll();
+};
+
 function renderAdmin(){
   if(currentUser?.uid !== ADMIN_UID){
     document.getElementById('admin').innerHTML='<div class="card">Acesso restrito ao administrador.</div>';
@@ -860,7 +954,8 @@ function renderAdmin(){
   const pendingPartners = allPartners.filter(p => p.status === 'Pendente');
   const approvedPartners = allPartners.filter(p => p.status === 'Aprovado');
   
-  const pendingCerts = db.certs.filter(c => c.status === 'Pendente');
+  const allCertificates = getAllCertificates();
+  const pendingCerts = allCertificates.filter(c => c.status === 'Pendente');
   
   const collaboratorsList = Object.entries(db.users).map(([email, user]) => ({
     email: email,
@@ -927,6 +1022,7 @@ function renderAdmin(){
               <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
               <button class="ok" onclick="window.approveContent(${c.id}, true, '${c.colaboradorEmail || ''}')">✅ Aprovar</button>
               <button class="danger" onclick="window.approveContent(${c.id}, false, '${c.colaboradorEmail || ''}')">❌ Rejeitar</button>
+              <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}', '${c.colaboradorEmail || ''}')">🗑️ Excluir</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum conteúdo pendente.</div>'}</div>
@@ -938,6 +1034,7 @@ function renderAdmin(){
             <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)}</p>
             <div class="actions">
               <button class="ok" onclick="window.approveContent(${c.id}, true, '${c.colaboradorEmail || ''}')">📤 Publicar</button>
+              <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}', '${c.colaboradorEmail || ''}')">🗑️ Excluir</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum conteúdo aguardando publicação.</div>'}</div>
@@ -964,13 +1061,14 @@ function renderAdmin(){
               ${p.pixData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'pixData')">💰 Pix</button>` : ''}
               <button class="ok" onclick="window.approvePartner(${p.id}, true, '${p.colaboradorEmail}')">✅ Aprovar</button>
               <button class="danger" onclick="window.approvePartner(${p.id}, false, '${p.colaboradorEmail}')">❌ Rejeitar</button>
+              <button class="danger" onclick="window.deleteAdminPartner(${p.id}, '${p.colaboradorEmail}')">🗑️ Excluir</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Sem parceiros pendentes.</div>'}</div>
       </div>
       
       <div>
-        <h2>📜 Certificados (${pendingCerts.length})</h2>
+        <h2>📜 Certificados Pendentes (${pendingCerts.length})</h2>
         <div class="list">${pendingCerts.map(c => `
           <div class="item">
             <b>${c.nome}</b>
@@ -978,6 +1076,7 @@ function renderAdmin(){
             <div class="actions">
               <button class="ok" onclick="window.openApproveCertModal(${c.id})">✅ Aprovar</button>
               <button class="danger" onclick="window.rejectCert(${c.id}, 'Não atende aos critérios')">❌ Rejeitar</button>
+              <button class="danger" onclick="window.deleteAdminCertificate(${c.id})">🗑️ Excluir</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum certificado pendente.</div>'}</div>
@@ -987,6 +1086,9 @@ function renderAdmin(){
           <div class="item">
             <b>${p.nome}</b>
             <p class="hint">👤 ${p.colaboradorNome} · Comissão: R$ ${(p.valor * 0.3).toFixed(2)}</p>
+            <div class="actions">
+              <button class="danger" onclick="window.deleteAdminPartner(${p.id}, '${p.colaboradorEmail}')">🗑️ Excluir</button>
+            </div>
           </div>
         `).join('') || '<div class="empty">Nenhum parceiro aprovado.</div>'}</div>
         
