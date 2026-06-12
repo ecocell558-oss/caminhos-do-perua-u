@@ -10,8 +10,8 @@
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, getDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
       apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
@@ -69,18 +69,6 @@
         const items = [];
         snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
         return items;
-      },
-      async sendChatMessage(message) {
-        const chatCollection = collection(firestore, 'central_chat');
-        await addDoc(chatCollection, message);
-        return true;
-      },
-      async loadChatMessages() {
-        const chatCollection = collection(firestore, 'central_chat');
-        const snap = await getDocs(query(chatCollection, orderBy('time', 'asc')));
-        const items = [];
-        snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-        return items;
       }
     };
     
@@ -118,9 +106,6 @@
   </div><div class="toastbox" id="toastbox"></div><div class="confetti" id="confetti"></div>
 
 <script>
-// ============================================================
-// ADMIN UID CORRETO - USUÁRIO CRIADO NO FIREBASE AUTHENTICATION
-// ============================================================
 const ADMIN_UID = "JrfKdbpG0VNPN63wGOPqtYpfIMT2";
 
 const LEVELS=[['Visitante',0],['Explorador',100],['Colaborador',300],['Representante',600],['Embaixador',1000],['Líder Regional',1500]];
@@ -171,8 +156,46 @@ function makeQuestions(){
 const modules=makeQuestions();
 const MODULE_POINTS=[40,60,80,100,120],RETAKE_MS=48*60*60*1000;
 let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,onlineSeconds=0,onlineInterval=null;
-function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}function userKey(email){return String(email||'').trim().toLowerCase()}function emptyUser(nome='',email='',cidade=''){return{points:0,profile:{nome,email,cidade,telefone:'',bio:'Colaborador do projeto Caminhos do Peruaçu.'},training:{answered:{},bonus:[],completedAt:{}},tasks:JSON.parse(JSON.stringify(defaultTasks)),partners:[],contents:[],onlineTime:0}}let db=load('cpCentralDB',{users:{},creds:{},certs:[],settings:{whatsappConteudos:'',whatsappForum:''},materials:materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true})),chat:[],lastChatCleanup:Date.now()});db.users=db.users||{};db.creds=db.creds||{};if(db.users.colaborador&&db.users.colaborador.profile?.email==='colaborador@caminhosdoperuacu.com.br')delete db.users.colaborador;db.chat=(db.chat||[]).filter(m=>!['Mariana Lopes','Carlos Pereira','Bianca Souza','Rafael Mendes','Joana Alves'].includes(m.user));db.settings=db.settings||{whatsappConteudos:'',whatsappForum:''};db.materials=db.materials||materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true}));db.certs=db.certs||[];db.lastChatCleanup=db.lastChatCleanup||Date.now();
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}function userKey(email){return String(email||'').trim().toLowerCase()}function emptyUser(nome='',email='',cidade=''){return{points:0,profile:{nome,email,cidade,telefone:'',bio:'Colaborador do projeto Caminhos do Peruaçu.'},training:{answered:{},bonus:[],completedAt:{}},tasks:JSON.parse(JSON.stringify(defaultTasks)),partners:[],contents:[],onlineTime:0}}let db=load('cpCentralDB',{users:{},creds:{},certs:[],settings:{whatsappConteudos:'',whatsappForum:''},materials:materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true})),chat:[],lastChatCleanup:Date.now()});db.users=db.users||{};db.creds=db.creds||{};db.chat=(db.chat||[]).filter(m=>!['Mariana Lopes','Carlos Pereira','Bianca Souza','Rafael Mendes','Joana Alves'].includes(m.user));db.settings=db.settings||{whatsappConteudos:'',whatsappForum:''};db.materials=db.materials||materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true}));db.certs=db.certs||[];db.lastChatCleanup=db.lastChatCleanup||Date.now();
 Object.values(db.users).forEach(x=>{x.training=x.training||{answered:{},bonus:[],completedAt:{}};x.training.answered=x.training.answered||{};x.training.completedAt=x.training.completedAt||{};x.tasks=x.tasks||JSON.parse(JSON.stringify(defaultTasks));x.partners=x.partners||[];x.contents=x.contents||[];if(x.onlineTime===undefined)x.onlineTime=0});saveDB();
+
+function getAllContents(){
+  const allContents = [];
+  Object.entries(db.users).forEach(([email, user]) => {
+    if(user.contents && user.contents.length){
+      user.contents.forEach(content => {
+        allContents.push({
+          ...content,
+          colaboradorEmail: email,
+          colaboradorNome: user.profile?.nome || email
+        });
+      });
+    }
+  });
+  return allContents.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+function getAllPartners(){
+  const allPartners = [];
+  Object.entries(db.users).forEach(([email, user]) => {
+    if(user.partners && user.partners.length){
+      user.partners.forEach(partner => {
+        allPartners.push({
+          ...partner,
+          colaboradorEmail: email,
+          colaboradorNome: user.profile?.nome || email
+        });
+      });
+    }
+  });
+  return allPartners;
+}
+
+function getContentAuthor(content){
+  if(content.colaboradorNome) return content.colaboradorNome;
+  const user = Object.values(db.users).find(u => u.contents?.some(c => c.id === content.id));
+  return user?.profile?.nome || 'Desconhecido';
+}
 
 function cleanupOldChatMessages(){
   const now = Date.now();
@@ -256,7 +279,7 @@ window.answerQ=function(idx,choice){const q=modules[currentModule-1].questions[i
 function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(db.materials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
 function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const found=db.materials.find(m=>m.id===id);const data={id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};if(found)Object.assign(found,data);else db.materials.push(data);saveDB();toast(found?'Material atualizado.':'Material adicionado.');renderAdmin();renderMaterials()}
 function editMaterial(id){const m=db.materials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
-function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}function blogPostFromContent(c){return{title:c.titulo,category:c.categoria,excerpt:c.resumo||'',full:c.texto||'',img:c.img||'',video:c.video||'',link:c.link||'',gallery:c.gallery||[],galleryLayout:c.galleryLayout||3,autoCarousel:!!c.autoCarousel,isFeatured:!!c.isFeatured,author:u().profile.nome}}
+function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}function blogPostFromContent(c){return{title:c.titulo,category:c.categoria,excerpt:c.resumo||'',full:c.texto||'',img:c.img||'',video:c.video||'',link:c.link||'',gallery:c.gallery||[],galleryLayout:c.galleryLayout||3,autoCarousel:!!c.autoCarousel,isFeatured:!!c.isFeatured,author:c.colaboradorNome || 'Colaborador'}}
 
 function fileToBase64(file){
   return new Promise((resolve, reject) => {
@@ -383,43 +406,36 @@ function renderContents(){
         
         <h2>Minhas solicitações de postagem</h2>
         <div class="list" id="myContentsList">
-          ${renderMyContentsList()}
+          ${u().contents.length ? u().contents.map(c=>`
+            <div class="item">
+              <div class="item-head">
+                <div>
+                  <b>${c.titulo}</b>
+                  <p class="hint">${c.categoria} · ${c.resumo||'Sem resumo'}</p>
+                </div>
+                <span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">
+                  ${c.blogStatus==='Publicado'?'Publicado no blog':c.status}
+                </span>
+              </div>
+              <p class="hint">
+                ${c.blogStatus==='Publicado'?'✅ Post publicado no blog!':
+                  c.status==='Aprovado'?'✅ Aprovado! O post será publicado em breve.':
+                  c.status==='Rejeitado'?'❌ Rejeitado. Você pode excluir esta solicitação.':
+                  '⏳ Aguardando análise do administrador.'}
+              </p>
+              <div class="actions">
+                ${c.blogId ? `<button class="ghost" onclick="window.open('blog.html?p=${c.blogId}','_blank')">📖 Ver no blog</button>` : ''}
+                <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
+                ${c.status === 'Rejeitado' ? `<button class="danger" onclick="window.deleteMyContent(${c.id})">🗑️ Excluir</button>` : ''}
+              </div>
+            </div>
+          `).join('') : '<div class="empty">Nenhum conteúdo enviado ainda.</div>'}
         </div>
       </div>
     </div>
   `;
   setTimeout(window.updatePostPreview, 50);
   window.updateGalleryPreview();
-}
-
-function renderMyContentsList(){
-  if(!u().contents.length) return '<div class="empty">Nenhum conteúdo enviado ainda.</div>';
-  
-  return u().contents.map(c=>`
-    <div class="item">
-      <div class="item-head">
-        <div>
-          <b>${c.titulo}</b>
-          <p class="hint">${c.categoria} · ${c.resumo||'Sem resumo'}</p>
-        </div>
-        <span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">
-          ${c.blogStatus==='Publicado'?'Publicado no blog':c.status}
-        </span>
-      </div>
-      <p class="hint">
-        ${c.blogStatus==='Publicado'?'✅ Post publicado no blog! Disponível em blog.html.':
-          c.blogStatus==='Erro'?'⚠️ Aprovado, mas erro na publicação. O admin pode tentar novamente.':
-          c.status==='Aprovado'?'✅ Aprovado! O post será publicado em breve.':
-          c.status==='Rejeitado'?'❌ Rejeitado pelo administrador. Você pode excluir esta solicitação.':
-          '⏳ Aguardando análise do administrador.'}
-      </p>
-      <div class="actions">
-        ${c.blogId ? `<button class="ghost" onclick="window.open('blog.html?p=${c.blogId}','_blank')">📖 Ver no blog</button>` : ''}
-        <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
-        ${c.status === 'Rejeitado' ? `<button class="danger" onclick="window.deleteMyContent(${c.id})">🗑️ Excluir</button>` : ''}
-      </div>
-    </div>
-  `).join('');
 }
 
 window.deleteMyContent = function(id){
@@ -513,7 +529,6 @@ window.addContent = async function(e){
   saveDB();
   toast('📝 Postagem enviada para aprovação do administrador!');
   
-  // Limpar formulário
   document.getElementById('ctitulo').value = '';
   document.getElementById('ccat').value = 'COLABORADOR';
   document.getElementById('cresumo').value = '';
@@ -568,22 +583,62 @@ window.deletePartner=function(partnerId){if(!confirm('Excluir este parceiro?'))r
 function renderPartners(){document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado. Verifique as orientações do admin.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deletePartner(${p.id})">Excluir</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
 window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('🤝 Parceiro enviado para aprovação do admin!');renderAll()};
 window.openAttachment=function(id,field){const p=u().partners.find(x=>x.id===id);if(!p||!p[field])return toast('Anexo não encontrado.');const w=window.open('','_blank');if(p[field].startsWith('data:application/pdf'))w.document.write(`<iframe src="${p[field]}" style="width:100%;height:100vh;border:0"></iframe>`);else w.document.write(`<img src="${p[field]}" style="max-width:100%;height:auto">`);w.document.close()};
-window.approvePartner=function(id,ok){const p=u().partners.find(x=>x.id===id);if(!p)return;p.status=ok?'Aprovado':'Rejeitado';if(ok&&!p.awarded){p.awarded=true;const comissao = p.valor * 0.3;p.comissaoPaga=true;u().points+=100;toast(`✅ Parceiro aprovado! +100 pontos. Sua comissão de R$ ${comissao.toFixed(2)} será paga em breve!`);window.checkSpecialTasks();}else toast(ok?'Parceiro aprovado.':'Parceiro rejeitado.');saveDB();renderAll()};
+window.approvePartner=function(id,ok, colaboradorEmail){
+  let targetUser = null;
+  let targetPartner = null;
+  
+  if(colaboradorEmail){
+    targetUser = db.users[userKey(colaboradorEmail)];
+    if(targetUser && targetUser.partners){
+      targetPartner = targetUser.partners.find(p => p.id === id);
+    }
+  } else {
+    targetPartner = u().partners.find(p => p.id === id);
+  }
+  
+  if(!targetPartner){
+    const allPartners = getAllPartners();
+    targetPartner = allPartners.find(p => p.id === id);
+    if(targetPartner && targetPartner.colaboradorEmail){
+      targetUser = db.users[userKey(targetPartner.colaboradorEmail)];
+      if(targetUser && targetUser.partners){
+        targetPartner = targetUser.partners.find(p => p.id === id);
+      }
+    }
+  }
+  
+  if(!targetPartner) return toast('Parceiro não encontrado');
+  
+  targetPartner.status = ok ? 'Aprovado' : 'Rejeitado';
+  if(ok && !targetPartner.awarded){
+    targetPartner.awarded = true;
+    const comissao = targetPartner.valor * 0.3;
+    targetPartner.comissaoPaga = true;
+    if(targetUser){
+      targetUser.points = (targetUser.points || 0) + 100;
+    }
+    toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${comissao.toFixed(2)}`);
+  } else {
+    toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.');
+  }
+  saveDB();
+  renderAll();
+};
+
 function renderRanking(){const rows=[...seedRanking,{nome:u().profile.nome,cidade:u().profile.cidade,pontos:u().points,me:true}].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr>${rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</table>`}
 function renderCerts(){
   const userCerts = db.certs.filter(c => c.user === currentUser?.email);
-  const availableCerts = CERTS.filter(cert => u().points >= cert[1] && !userCerts.some(uc => uc.nome === cert[0] && uc.status === 'Aprovado'));
-  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}${c.status==='Rejeitado' && c.motivo?`<p class="hint bad">Motivo: ${c.motivo}</p>`:''}</div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
+  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}</div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
 window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('📜 Certificado solicitado para análise.');renderAll()};
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const online=onlineUsers(),people=allPeople();el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db.settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db.settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${db.chat.length}</b><p class="hint">Chat salvo no navegador via localStorage. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${db.chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db.settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db.settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
-window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;const p=currentProfile(),msg={id:Date.now(),user:p.nome,city:p.cidade,text,time:new Date().toISOString()};db.chat.push(msg);saveDB();try{if(window.cpBlogApi?.sendChatMessage)await window.cpBlogApi.sendChatMessage(msg)}catch(err){console.warn('Chat Firebase indisponível, mantendo localStorage.',err)}toast('Mensagem enviada no chat.');renderCommunity()};
+window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;const p=currentProfile(),msg={id:Date.now(),user:p.nome,city:p.cidade,text,time:new Date().toISOString()};db.chat.push(msg);saveDB();toast('Mensagem enviada no chat.');renderCommunity()};
 window.openProfile=function(id){const p=allPeople().find(x=>x.id===id);if(!p)return;const online=onlineUsers().some(o=>o.id===p.id);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.nome}</h2><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.bio||'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
 window.closeProfile=function(){const m=document.getElementById('profileModal');if(m)m.style.display='none'};
 window.saveGroups=function(e){e.preventDefault();db.settings.whatsappConteudos=waConteudos.value.trim();db.settings.whatsappForum=waForum.value.trim();saveDB();toast('Grupos de WhatsApp atualizados.');renderCommunity()};function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${u().profile.nome}"><label>Cidade</label><input id="profCidade" value="${u().profile.cidade}"><label>Telefone</label><input id="profTel" value="${u().profile.telefone}"><label>Bio</label><textarea id="profBio">${u().profile.bio}</textarea><button class="secondary">Salvar perfil</button></form>`}
 window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nome:profNome.value,cidade:profCidade.value,telefone:profTel.value,bio:profBio.value});saveDB();toast('Perfil atualizado.');const profileTask=u().tasks.find(t=>t.id===1);if(profileTask&&!profileTask.done&&u().profile.nome&&u().profile.cidade&&u().profile.telefone){profileTask.done=true;u().points+=profileTask.pontos;toast(`+${profileTask.pontos} pontos: Perfil completo!`);saveDB();}renderAll()};
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
-window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando. Clique em Atualizar blog em alguns segundos.</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Não foi possível carregar os posts recentes: '+error.message+'</div>'}}
+window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
 // ADMIN FUNCTIONS
 window.createCollaboratorAccount = async function() {
@@ -592,11 +647,11 @@ window.createCollaboratorAccount = async function() {
   const senha = document.getElementById('newCollabSenha')?.value;
   const cidade = document.getElementById('newCollabCidade')?.value.trim() || 'Itacarambi';
   
-  if(!email || !nome || !senha) return toast('Preencha todos os campos (nome, email e senha)');
+  if(!email || !nome || !senha) return toast('Preencha todos os campos');
   if(senha.length < 6) return toast('Senha deve ter no mínimo 6 caracteres');
   
   const emailKey = userKey(email);
-  if(db.users[emailKey]) return toast('Este e-mail já está cadastrado como colaborador');
+  if(db.users[emailKey]) return toast('Este e-mail já está cadastrado');
   
   try {
     const userCredential = await window.cpBlogApi.createFirebaseUser(email, senha, nome);
@@ -626,7 +681,7 @@ window.createCollaboratorAccount = async function() {
     if(error.code === 'auth/email-already-in-use') {
       toast('❌ Este e-mail já está em uso no Firebase.');
     } else {
-      toast('❌ Erro ao criar colaborador: ' + error.message);
+      toast('❌ Erro: ' + error.message);
     }
   }
 };
@@ -644,7 +699,6 @@ window.showCollaboratorDetails = function(email) {
   const totalQuestions = modules.reduce((acc, m) => acc + m.questions.length, 0);
   const answeredQuestions = Object.keys(user.training?.answered || {}).length;
   const progressPercent = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
-  
   const tasksDone = user.tasks?.filter(t => t.done).length || 0;
   const totalTasks = defaultTasks.length;
   const partnersApproved = user.partners?.filter(p => p.status === 'Aprovado').length || 0;
@@ -656,32 +710,23 @@ window.showCollaboratorDetails = function(email) {
       <h4>${user.profile?.nome || email}</h4>
       <p><strong>📧 E-mail:</strong> ${email}</p>
       <p><strong>🔑 Senha:</strong> <span id="passwordRevealSpan">••••••</span> 
-        <button class="ghost" style="padding:4px 8px" onclick="document.getElementById('passwordRevealSpan').innerHTML = '${cred?.senha || 'N/A'}'">Mostrar</button>
-        <button class="ghost" style="padding:4px 8px" onclick="navigator.clipboard.writeText('${cred?.senha || ''}'); toast('Senha copiada!')">📋 Copiar</button>
+        <button class="ghost" onclick="document.getElementById('passwordRevealSpan').innerHTML = '${cred?.senha || 'N/A'}'">Mostrar</button>
+        <button class="ghost" onclick="navigator.clipboard.writeText('${cred?.senha || ''}'); toast('Senha copiada!')">📋 Copiar</button>
       </p>
       <p><strong>🏙️ Cidade:</strong> ${user.profile?.cidade || 'Não informado'}</p>
       <p><strong>📞 Telefone:</strong> ${user.profile?.telefone || 'Não informado'}</p>
     </div>
-    
     <div class="collab-card">
-      <h4>📈 Progresso Acadêmico</h4>
+      <h4>📈 Progresso</h4>
       <p><strong>⭐ Pontos:</strong> ${user.points || 0}</p>
       <p><strong>🏆 Nível:</strong> ${level(user.points || 0)}</p>
-      <p><strong>📚 Questões respondidas:</strong> ${answeredQuestions}/${totalQuestions}</p>
-      <div class="progress-bar-small"><div class="fill" style="width:${progressPercent}%"></div></div>
-      <p><strong>✅ Tarefas concluídas:</strong> ${tasksDone}/${totalTasks}</p>
-      <div class="progress-bar-small"><div class="fill" style="width:${(tasksDone/totalTasks)*100}%"></div></div>
+      <p><strong>📚 Questões:</strong> ${answeredQuestions}/${totalQuestions} (${progressPercent}%)</p>
+      <p><strong>✅ Tarefas:</strong> ${tasksDone}/${totalTasks}</p>
+      <p><strong>🏨 Parceiros:</strong> ${partnersApproved}</p>
+      <p><strong>📝 Conteúdos:</strong> ${contentsApproved}</p>
     </div>
-    
-    <div class="collab-card">
-      <h4>🤝 Atividade Comercial</h4>
-      <p><strong>🏨 Parceiros aprovados:</strong> ${partnersApproved}</p>
-      <p><strong>📝 Conteúdos aprovados:</strong> ${contentsApproved}</p>
-      <p><strong>⏱️ Tempo online:</strong> ${Math.floor((user.onlineTime || 0) / 3600)}h ${Math.floor(((user.onlineTime || 0) % 3600) / 60)}m</p>
-    </div>
-    
     <div class="actions">
-      <button class="danger" onclick="window.deleteCollaborator('${email}')">🗑️ Remover Colaborador</button>
+      <button class="danger" onclick="window.deleteCollaborator('${email}')">🗑️ Remover</button>
       <button class="secondary" onclick="window.closeProfile()">Fechar</button>
     </div>
   `;
@@ -689,13 +734,11 @@ window.showCollaboratorDetails = function(email) {
 };
 
 window.deleteCollaborator = function(email) {
-  if(!confirm(`⚠️ ATENÇÃO: Tem certeza que deseja remover o colaborador "${email}"?`)) return;
-  
+  if(!confirm(`⚠️ Remover colaborador "${email}"?`)) return;
   const emailKey = userKey(email);
   delete db.users[emailKey];
   delete db.creds[emailKey];
   saveDB();
-  
   toast(`Colaborador ${email} removido!`);
   renderAdmin();
   renderCommunity();
@@ -703,76 +746,118 @@ window.deleteCollaborator = function(email) {
 };
 
 window.resetCollaboratorPassword = function(email) {
-  const newPassword = prompt(`Digite a nova senha para o colaborador ${email}:`, 'novaSenha123');
-  if(!newPassword || newPassword.length < 6) {
-    toast('Senha deve ter no mínimo 6 caracteres');
-    return;
-  }
-  
+  const newPassword = prompt(`Nova senha para ${email}:`, 'novaSenha123');
+  if(!newPassword || newPassword.length < 6) return toast('Mínimo 6 caracteres');
   const emailKey = userKey(email);
   if(db.creds[emailKey]) {
     db.creds[emailKey].senha = newPassword;
     saveDB();
-    toast(`✅ Senha atualizada para ${email}!`);
+    toast(`✅ Senha atualizada!`);
     renderAdmin();
-  } else {
-    toast('Colaborador não encontrado');
   }
 };
 
-window.approveContent = async function(id, ok) {
-  let c = u().contents.find(x => x.id === id);
-  if(!c) return;
+window.approveContent = async function(contentId, ok, colaboradorEmail) {
+  let targetUser = null;
+  let targetContent = null;
   
-  c.status = ok ? 'Aprovado' : 'Rejeitado';
+  if(colaboradorEmail){
+    targetUser = db.users[userKey(colaboradorEmail)];
+    if(targetUser && targetUser.contents){
+      targetContent = targetUser.contents.find(c => c.id === contentId);
+    }
+  }
+  
+  if(!targetContent){
+    const allContents = getAllContents();
+    const found = allContents.find(c => c.id === contentId);
+    if(found && found.colaboradorEmail){
+      targetUser = db.users[userKey(found.colaboradorEmail)];
+      if(targetUser && targetUser.contents){
+        targetContent = targetUser.contents.find(c => c.id === contentId);
+      }
+    }
+  }
+  
+  if(!targetContent){
+    const userContents = u().contents.find(c => c.id === contentId);
+    if(userContents){
+      targetContent = userContents;
+      targetUser = u();
+    }
+  }
+  
+  if(!targetContent) return toast('Conteúdo não encontrado');
+  
+  targetContent.status = ok ? 'Aprovado' : 'Rejeitado';
   
   if(ok){
     try{
-      if(!window.cpBlogApi) throw new Error('Conexão com Firebase não disponível.');
-      const published = await window.cpBlogApi.publishPost(blogPostFromContent(c));
-      c.blogStatus = 'Publicado';
-      c.blogId = published.id;
-      if(!c.awarded){
-        c.awarded = true;
-        u().points += 50;
-        toast('✅ Conteúdo aprovado e publicado! +50 pontos');
-        window.checkSpecialTasks();
+      if(!window.cpBlogApi) throw new Error('Firebase não disponível');
+      const postForBlog = {
+        titulo: targetContent.titulo,
+        categoria: targetContent.categoria,
+        resumo: targetContent.resumo,
+        texto: targetContent.texto,
+        img: targetContent.img,
+        video: targetContent.video,
+        link: targetContent.link,
+        gallery: targetContent.gallery,
+        galleryLayout: targetContent.galleryLayout,
+        autoCarousel: targetContent.autoCarousel,
+        isFeatured: targetContent.isFeatured
+      };
+      const published = await window.cpBlogApi.publishPost(postForBlog);
+      targetContent.blogStatus = 'Publicado';
+      targetContent.blogId = published.id;
+      if(!targetContent.awarded){
+        targetContent.awarded = true;
+        if(targetUser) targetUser.points = (targetUser.points || 0) + 50;
+        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para o colaborador.`);
       } else {
-        toast('✅ Conteúdo aprovado e publicado!');
+        toast(`✅ Conteúdo aprovado e publicado!`);
       }
     } catch(error){
-      console.error(error);
-      c.blogStatus = 'Erro';
+      targetContent.blogStatus = 'Erro';
       toast('⚠️ Conteúdo aprovado, mas erro na publicação: ' + error.message);
     }
   } else {
-    c.blogStatus = 'Rejeitado';
-    toast('❌ Conteúdo rejeitado. O colaborador pode excluí-lo.');
+    targetContent.blogStatus = 'Rejeitado';
+    toast('❌ Conteúdo rejeitado.');
   }
   saveDB();
   renderAll();
 };
 
-window.deleteAdminContent = async function(id, blogId) {
-  if(!confirm('Tem certeza que deseja excluir este conteúdo permanentemente?')) return;
+window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) {
+  if(!confirm('Excluir este conteúdo permanentemente?')) return;
   
   if(blogId && window.cpBlogApi){
     try{
       await window.cpBlogApi.deletePost(blogId);
-      toast('Post removido do blog com sucesso!');
-    } catch(e){
-      toast('Erro ao remover do blog: ' + e.message);
-    }
+      toast('Post removido do blog');
+    } catch(e){}
   }
   
-  const index = u().contents.findIndex(c => c.id === id);
-  if(index !== -1){
-    u().contents.splice(index, 1);
-    saveDB();
-    toast('Conteúdo excluído permanentemente!');
-    renderAdmin();
-    renderContents();
+  if(colaboradorEmail){
+    const targetUser = db.users[userKey(colaboradorEmail)];
+    if(targetUser && targetUser.contents){
+      const index = targetUser.contents.findIndex(c => c.id === contentId);
+      if(index !== -1){
+        targetUser.contents.splice(index, 1);
+        saveDB();
+        toast('Conteúdo excluído!');
+      }
+    }
+  } else {
+    const index = u().contents.findIndex(c => c.id === contentId);
+    if(index !== -1){
+      u().contents.splice(index, 1);
+      saveDB();
+      toast('Conteúdo excluído!');
+    }
   }
+  renderAll();
 };
 
 function renderAdmin(){
@@ -781,21 +866,24 @@ function renderAdmin(){
     return;
   }
   
-  let pendingC = u().contents.filter(c => c.status === 'Pendente');
-  let approvedC = u().contents.filter(c => c.status === 'Aprovado' && c.blogStatus !== 'Publicado');
-  let rejectedC = u().contents.filter(c => c.status === 'Rejeitado');
-  let pendingCerts = db.certs.filter(c => c.status === 'Pendente');
-  let pendingP = u().partners.filter(p => p.status === 'Pendente');
-  let approvedPartners = u().partners.filter(p => p.status === 'Aprovado');
-  let rejectedPartners = u().partners.filter(p => p.status === 'Rejeitado');
+  const allContents = getAllContents();
+  const pendingContents = allContents.filter(c => c.status === 'Pendente');
+  const approvedContents = allContents.filter(c => c.status === 'Aprovado' && c.blogStatus !== 'Publicado');
+  const rejectedContents = allContents.filter(c => c.status === 'Rejeitado');
+  const publishedContents = allContents.filter(c => c.blogStatus === 'Publicado');
+  
+  const allPartners = getAllPartners();
+  const pendingPartners = allPartners.filter(p => p.status === 'Pendente');
+  const approvedPartners = allPartners.filter(p => p.status === 'Aprovado');
+  
+  const pendingCerts = db.certs.filter(c => c.status === 'Pendente');
   
   const collaboratorsList = Object.entries(db.users).map(([email, user]) => ({
     email: email,
     nome: user.profile?.nome || email,
     cidade: user.profile?.cidade || '',
     pontos: user.points || 0,
-    nivel: level(user.points || 0),
-    dataCriacao: db.creds[email]?.createdAt || 'N/A'
+    nivel: level(user.points || 0)
   }));
   
   document.getElementById('admin').innerHTML = `
@@ -804,111 +892,108 @@ function renderAdmin(){
       <h3>➕ Criar Novo Colaborador</h3>
       <div class="split">
         <div>
-          <label>Nome completo</label>
-          <input type="text" id="newCollabNome" placeholder="Ex: João Silva">
+          <label>Nome</label>
+          <input type="text" id="newCollabNome" placeholder="Nome completo">
           <label>E-mail</label>
           <input type="email" id="newCollabEmail" placeholder="colaborador@exemplo.com">
         </div>
         <div>
-          <label>Senha (mínimo 6 caracteres)</label>
+          <label>Senha</label>
           <input type="password" id="newCollabSenha" placeholder="********">
-          <label>Cidade (opcional)</label>
+          <label>Cidade</label>
           <input type="text" id="newCollabCidade" placeholder="Itacarambi">
         </div>
       </div>
-      <button class="secondary" style="margin-top:12px" onclick="window.createCollaboratorAccount()">➕ Criar Conta no Firebase</button>
+      <button class="secondary" onclick="window.createCollaboratorAccount()">➕ Criar Conta</button>
     </div>
     
     <div class="card">
-      <h3>📋 Lista de Colaboradores (${collaboratorsList.length})</h3>
-      <div class="list" style="max-height:400px;overflow-y:auto">
-        ${collaboratorsList.length ? collaboratorsList.map(c => `
+      <h3>📋 Colaboradores (${collaboratorsList.length})</h3>
+      <div class="list" style="max-height:300px;overflow-y:auto">
+        ${collaboratorsList.map(c => `
           <div class="item">
             <div class="item-head">
-              <div>
-                <b>${c.nome}</b>
-                <p class="hint">📧 ${c.email} · 🏆 ${c.nivel} · ⭐ ${c.pontos} pts</p>
-              </div>
+              <div><b>${c.nome}</b><p class="hint">${c.email} · ${c.nivel} · ${c.pontos} pts</p></div>
               <div class="actions">
                 <button class="ghost" onclick="window.showCollaboratorDetails('${c.email}')">📊 Ver</button>
-                <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Reset Senha</button>
-                <button class="danger" onclick="window.deleteCollaborator('${c.email}')">🗑️ Remover</button>
+                <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Senha</button>
+                <button class="danger" onclick="window.deleteCollaborator('${c.email}')">🗑️</button>
               </div>
             </div>
           </div>
-        `).join('') : '<div class="empty">Nenhum colaborador cadastrado</div>'}
+        `).join('')}
       </div>
     </div>
     
-    <div class="grid" style="margin-top:20px;margin-bottom:20px">
-      <div class="card stat"><span>📝 Pendentes</span><b>${pendingC.length}</b></div>
-      <div class="card stat"><span>✅ Aprovados</span><b>${approvedC.length}</b></div>
-      <div class="card stat"><span>🤝 Parceiros Pendentes</span><b>${pendingP.length}</b></div>
-      <div class="card stat"><span>📜 Certificados</span><b>${pendingCerts.length}</b></div>
+    <div class="grid" style="margin-top:20px">
+      <div class="card stat"><span>📝 Pendentes</span><b>${pendingContents.length}</b></div>
+      <div class="card stat"><span>✅ Aprovados</span><b>${approvedContents.length}</b></div>
+      <div class="card stat"><span>📰 Publicados</span><b>${publishedContents.length}</b></div>
+      <div class="card stat"><span>🤝 Parceiros</span><b>${pendingPartners.length}</b></div>
     </div>
     
     <div class="split">
       <div>
-        <h2>📝 Conteúdos Pendentes (${pendingC.length})</h2>
-        <div class="list">${pendingC.map(c => `
+        <h2>📝 Conteúdos Pendentes (${pendingContents.length})</h2>
+        <div class="list">${pendingContents.map(c => `
           <div class="item">
             <b>${c.titulo}</b>
-            <p class="hint">Por: ${currentUser.email} · ${c.categoria}</p>
+            <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)} · ${c.categoria}</p>
             <div class="actions">
               <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
-              <button class="ok" onclick="window.approveContent(${c.id}, true)">✅ Aprovar e Publicar</button>
-              <button class="danger" onclick="window.approveContent(${c.id}, false)">❌ Rejeitar</button>
+              <button class="ok" onclick="window.approveContent(${c.id}, true, '${c.colaboradorEmail || ''}')">✅ Aprovar</button>
+              <button class="danger" onclick="window.approveContent(${c.id}, false, '${c.colaboradorEmail || ''}')">❌ Rejeitar</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum conteúdo pendente.</div>'}</div>
         
-        <h2 style="margin-top:18px">✅ Conteúdos Aprovados (${approvedC.length})</h2>
-        <div class="list">${approvedC.map(c => `
+        <h2 style="margin-top:18px">✅ Conteúdos Aprovados (${approvedContents.length})</h2>
+        <div class="list">${approvedContents.map(c => `
           <div class="item">
             <b>${c.titulo}</b>
-            <p class="hint">Status: Aguardando publicação automática</p>
+            <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)}</p>
             <div class="actions">
-              <button class="ok" onclick="window.approveContent(${c.id}, true)">📤 Publicar Agora</button>
+              <button class="ok" onclick="window.approveContent(${c.id}, true, '${c.colaboradorEmail || ''}')">📤 Publicar</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum conteúdo aguardando publicação.</div>'}</div>
         
-        <h2 style="margin-top:18px">❌ Conteúdos Rejeitados (${rejectedC.length})</h2>
-        <div class="list">${rejectedC.map(c => `
+        <h2 style="margin-top:18px">❌ Rejeitados (${rejectedContents.length})</h2>
+        <div class="list">${rejectedContents.map(c => `
           <div class="item">
             <b>${c.titulo}</b>
-            <p class="hint">Rejeitado - O colaborador pode excluir</p>
+            <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)}</p>
             <div class="actions">
-              <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}')">🗑️ Excluir Permanentemente</button>
+              <button class="danger" onclick="window.deleteAdminContent(${c.id}, '${c.blogId || ''}', '${c.colaboradorEmail || ''}')">🗑️ Excluir</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum conteúdo rejeitado.</div>'}</div>
         
-        <h2 style="margin-top:18px">🤝 Parceiros Pendentes (${pendingP.length})</h2>
-        <div class="list">${pendingP.map(p => `
+        <h2 style="margin-top:18px">🤝 Parceiros Pendentes (${pendingPartners.length})</h2>
+        <div class="list">${pendingPartners.map(p => `
           <div class="item">
             <b>${p.nome}</b>
-            <p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p>
+            <p class="hint">👤 ${p.colaboradorNome} · ${p.categoria} · ${p.cidade}</p>
             <p class="hint">Plano ${p.plano} · R$ ${Number(p.valor).toFixed(2)}</p>
             <div class="actions">
               ${p.osData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'osData')">📄 Ordem</button>` : ''}
               ${p.pixData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'pixData')">💰 Pix</button>` : ''}
-              <button class="ok" onclick="window.approvePartner(${p.id}, true)">✅ Aprovar (+100pts)</button>
-              <button class="danger" onclick="window.approvePartner(${p.id}, false)">❌ Rejeitar</button>
+              <button class="ok" onclick="window.approvePartner(${p.id}, true, '${p.colaboradorEmail}')">✅ Aprovar</button>
+              <button class="danger" onclick="window.approvePartner(${p.id}, false, '${p.colaboradorEmail}')">❌ Rejeitar</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Sem parceiros pendentes.</div>'}</div>
       </div>
       
       <div>
-        <h2>📜 Certificados Pendentes (${pendingCerts.length})</h2>
+        <h2>📜 Certificados (${pendingCerts.length})</h2>
         <div class="list">${pendingCerts.map(c => `
           <div class="item">
             <b>${c.nome}</b>
-            <p class="hint">Solicitado por: ${c.usuario} · Requer ${c.pts} pontos</p>
+            <p class="hint">👤 ${c.usuario} · Requer ${c.pts} pontos</p>
             <div class="actions">
               <button class="ok" onclick="window.openApproveCertModal(${c.id})">✅ Aprovar</button>
-              <button class="danger" onclick="window.rejectCert(${c.id}, 'Solicitação não atende aos critérios.')">❌ Rejeitar</button>
+              <button class="danger" onclick="window.rejectCert(${c.id}, 'Não atende aos critérios')">❌ Rejeitar</button>
             </div>
           </div>
         `).join('') || '<div class="empty">Nenhum certificado pendente.</div>'}</div>
@@ -917,26 +1002,25 @@ function renderAdmin(){
         <div class="list">${approvedPartners.slice(0,5).map(p => `
           <div class="item">
             <b>${p.nome}</b>
-            <p class="hint">${p.categoria} · Comissão: R$ ${(p.valor * 0.3).toFixed(2)}</p>
+            <p class="hint">👤 ${p.colaboradorNome} · Comissão: R$ ${(p.valor * 0.3).toFixed(2)}</p>
           </div>
         `).join('') || '<div class="empty">Nenhum parceiro aprovado.</div>'}</div>
         
         <form class="card" style="margin-top:18px" onsubmit="window.saveMaterial(event)">
-          <h2>📚 Gerenciar Materiais</h2>
+          <h2>📚 Materiais</h2>
           <input type="hidden" id="matId">
           <label>Título</label><input id="matTitulo" required>
           <label>Descrição</label><textarea id="matDesc" required></textarea>
-          <label>Link (URL para download)</label><input id="matLink" placeholder="https://...">
+          <label>Link (URL)</label><input id="matLink" placeholder="https://...">
           <label><input id="matAtivo" type="checkbox" checked> Ativo</label>
-          <button class="secondary">Salvar Material</button>
+          <button class="secondary">Salvar</button>
         </form>
-        <div class="list" style="margin-top:12px">${db.materials.map(m => `
+        <div class="list">${db.materials.map(m => `
           <div class="item">
             <b>${m.titulo}</b>
-            <p class="hint">${m.descricao}</p>
             <div class="actions">
               <button class="ghost" onclick="window.editMaterial(${m.id})">✏️ Editar</button>
-              <button class="danger" onclick="window.deleteMaterial(${m.id})">🗑️ Remover</button>
+              <button class="danger" onclick="window.deleteMaterial(${m.id})">🗑️</button>
             </div>
           </div>
         `).join('')}</div>
@@ -946,10 +1030,10 @@ function renderAdmin(){
   `;
 }
 
-window.openApproveCertModal=function(certId){const cert=db.certs.find(c=>c.id===certId);if(!cert)return;document.getElementById('certModalBody').innerHTML=`<h2>Aprovar Certificado: ${cert.nome}</h2><p class="hint">Solicitante: ${cert.usuario}</p><label>Enviar certificado em PDF</label><input type="file" id="certFile" accept=".pdf"><br><br><div class="actions"><button class="ok" onclick="window.approveCertWithFile(${cert.id})">✅ Aprovar</button><button class="danger" onclick="closeCertModal()">Cancelar</button></div>`;document.getElementById('certModal').style.display='flex'};
+window.openApproveCertModal=function(certId){const cert=db.certs.find(c=>c.id===certId);if(!cert)return;document.getElementById('certModalBody').innerHTML=`<h2>Aprovar Certificado: ${cert.nome}</h2><p>👤 ${cert.usuario}</p><label>PDF do certificado:</label><input type="file" id="certFile" accept=".pdf"><br><br><div class="actions"><button class="ok" onclick="window.approveCertWithFile(${cert.id})">✅ Aprovar</button><button class="danger" onclick="closeCertModal()">Cancelar</button></div>`;document.getElementById('certModal').style.display='flex'};
 window.closeCertModal=function(){document.getElementById('certModal').style.display='none'};
-window.approveCertWithFile=async function(certId){const fileInput=document.getElementById('certFile');const file=fileInput?.files?.[0];if(!file){toast('Selecione um arquivo PDF.');return;}const reader=new FileReader();reader.onload=function(e){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Aprovado';cert.certificadoUrl=e.target.result;saveDB();toast(`✅ Certificado ${cert.nome} aprovado!`);renderAll();closeCertModal();}};reader.onerror=function(){toast('Erro ao ler o arquivo.');};reader.readAsDataURL(file);};
-window.rejectCert=function(certId,motivo){if(confirm('Rejeitar esta solicitação?')){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Rejeitado';cert.motivo=motivo;saveDB();toast(`Certificado ${cert.nome} rejeitado.`);renderAll();}}};
+window.approveCertWithFile=async function(certId){const file=document.getElementById('certFile')?.files?.[0];if(!file)return toast('Selecione um PDF');const reader=new FileReader();reader.onload=function(e){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Aprovado';cert.certificadoUrl=e.target.result;saveDB();toast(`✅ Certificado aprovado!`);renderAll();closeCertModal();}};reader.readAsDataURL(file);};
+window.rejectCert=function(certId,motivo){if(confirm('Rejeitar?')){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Rejeitado';cert.motivo=motivo;saveDB();toast(`Certificado rejeitado.`);renderAll();}}};
 window.checkSpecialTasks=checkSpecialTasks;
 window.saveMaterial=saveMaterial;
 window.editMaterial=editMaterial;
