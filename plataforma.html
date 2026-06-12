@@ -10,7 +10,7 @@
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
@@ -107,7 +107,6 @@
 
 <script>
 const ADMIN_UID = "JrfKdbpG0VNPN63wGOPqtYpfIMT2";
-
 const LEVELS=[['Visitante',0],['Explorador',100],['Colaborador',300],['Representante',600],['Embaixador',1000],['Líder Regional',1500]];
 const CERTS=[['Iniciante',1500],['Explorador',3000],['Colaborador',4500],['Embaixador',6000],['Especialista',7500]];
 const navItems=[['dashboard','⌂','Dashboard'],['treinamento','▣','Treinamento'],['materiais','⇩','Materiais'],['conteudos','✎','Meus Conteúdos'],['tarefas','✓','Tarefas'],['parceiros','◎','Parceiros'],['ranking','★','Ranking'],['certificados','▤','Certificados'],['comunidade','☏','Comunidade'],['perfil','◉','Perfil'],['blog','↗','Blog'],['admin','♛','Admin']];
@@ -121,8 +120,13 @@ const defaultTasks=[
   {id:7,titulo:'🤝 Cadastrar 2 parceiros',descricao:'Tenha 2 parceiros aprovados pelo administrador.',pontos:100,done:false,tipo:'especial'},
   {id:8,titulo:'⏱️ Ficar 3 horas online',descricao:'Acumule 3 horas de tempo ativo na plataforma.',pontos:100,done:false,tipo:'especial'}
 ];
-const seedRanking=[];
-const materials=[['Portfólio Caminhos do Peruaçu','PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.'],['Cartão de Visita Caminhos do Peruaçu','Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.'],['Material de Serviço','PDF visual de apoio comercial e apresentação dos serviços.'],['Mapa Peruaçu Trilhas','Imagem de referência para orientar rotas, trilhas e atrativos.'],['Panfleto Caminhos do Peruaçu','Material promocional para captação de parceiros e visitantes.']];
+const materialsList = [
+  {id:1,titulo:'Portfólio Caminhos do Peruaçu',descricao:'PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.',link:'',ativo:true},
+  {id:2,titulo:'Cartão de Visita Caminhos do Peruaçu',descricao:'Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.',link:'',ativo:true},
+  {id:3,titulo:'Material de Serviço',descricao:'PDF visual de apoio comercial e apresentação dos serviços.',link:'',ativo:true},
+  {id:4,titulo:'Mapa Peruaçu Trilhas',descricao:'Imagem de referência para orientar rotas, trilhas e atrativos.',link:'',ativo:true},
+  {id:5,titulo:'Panfleto Caminhos do Peruaçu',descricao:'Material promocional para captação de parceiros e visitantes.',link:'',ativo:true}
+];
 
 function makeQuestions(){
  const modulesBase=[
@@ -156,287 +160,370 @@ function makeQuestions(){
 const modules=makeQuestions();
 const MODULE_POINTS=[40,60,80,100,120],RETAKE_MS=48*60*60*1000;
 let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,onlineSeconds=0,onlineInterval=null;
-function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}function userKey(email){return String(email||'').trim().toLowerCase()}function emptyUser(nome='',email='',cidade=''){return{points:0,profile:{nome,email,cidade,telefone:'',bio:'Colaborador do projeto Caminhos do Peruaçu.'},training:{answered:{},bonus:[],completedAt:{}},tasks:JSON.parse(JSON.stringify(defaultTasks)),partners:[],contents:[],onlineTime:0}}let db=load('cpCentralDB',{users:{},creds:{},certs:[],settings:{whatsappConteudos:'',whatsappForum:''},materials:materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true})),chat:[],lastChatCleanup:Date.now()});db.users=db.users||{};db.creds=db.creds||{};db.chat=(db.chat||[]).filter(m=>!['Mariana Lopes','Carlos Pereira','Bianca Souza','Rafael Mendes','Joana Alves'].includes(m.user));db.settings=db.settings||{whatsappConteudos:'',whatsappForum:''};db.materials=db.materials||materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true}));db.certs=db.certs||[];db.lastChatCleanup=db.lastChatCleanup||Date.now();
-Object.values(db.users).forEach(x=>{x.training=x.training||{answered:{},bonus:[],completedAt:{}};x.training.answered=x.training.answered||{};x.training.completedAt=x.training.completedAt||{};x.tasks=x.tasks||JSON.parse(JSON.stringify(defaultTasks));x.partners=x.partners||[];x.contents=x.contents||[];if(x.onlineTime===undefined)x.onlineTime=0});saveDB();
 
-// ========== FUNÇÕES CORRIGIDAS ==========
-function diagnosticLog(){
-  console.log('=== DIAGNÓSTICO DA CENTRAL ===');
-  console.log('Usuários cadastrados:', Object.keys(db.users).length);
-  Object.entries(db.users).forEach(([email, user]) => {
-    console.log(`  - ${email}: ${user.profile.nome}`);
-    console.log(`    Conteúdos: ${user.contents?.length || 0}`);
-    console.log(`    Parceiros: ${user.partners?.length || 0}`);
-    user.contents?.forEach(c => console.log(`      * ${c.titulo} - status: ${c.status}`));
-    user.partners?.forEach(p => console.log(`      * ${p.nome} - status: ${p.status}`));
+// Firebase Database Collections
+const USERS_COLLECTION = 'central_users';
+const SETTINGS_DOC = 'central_settings';
+const CHAT_COLLECTION = 'central_chat';
+const CERTS_COLLECTION = 'central_certificates';
+const MATERIALS_COLLECTION = 'central_materials';
+const PRESENCE_COLLECTION = 'central_presence';
+
+// Helper functions for Firebase operations
+async function loadUserData(email) {
+  if(!email) return null;
+  const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
+  const docSnap = await getDoc(userRef);
+  if(docSnap.exists()){
+    return docSnap.data();
+  }
+  return null;
+}
+
+async function saveUserData(email, data) {
+  const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
+  await setDoc(userRef, data, { merge: true });
+}
+
+async function loadAllUsers() {
+  const usersCollection = collection(firestore, USERS_COLLECTION);
+  const snapshot = await getDocs(usersCollection);
+  const users = {};
+  snapshot.forEach(doc => {
+    users[doc.id] = doc.data();
   });
-  console.log('Certificados:', db.certs.length);
-  console.log('============================');
+  return users;
 }
 
-function getAllContents(){
-  const allContents = [];
-  for (const [email, user] of Object.entries(db.users)) {
-    if(user.contents && Array.isArray(user.contents) && user.contents.length > 0){
-      for (const content of user.contents) {
-        allContents.push({
-          ...content,
-          colaboradorEmail: email,
-          colaboradorNome: user.profile?.nome || email
-        });
-      }
-    }
+async function loadSettings() {
+  const settingsRef = doc(firestore, SETTINGS_DOC, 'main');
+  const docSnap = await getDoc(settingsRef);
+  if(docSnap.exists()){
+    return docSnap.data();
   }
-  console.log(`getAllContents retornou ${allContents.length} conteúdos`);
-  return allContents;
+  return { whatsappConteudos: '', whatsappForum: '', materials: materialsList };
 }
 
-function getAllPartners(){
-  const allPartners = [];
-  for (const [email, user] of Object.entries(db.users)) {
-    if(user.partners && Array.isArray(user.partners) && user.partners.length > 0){
-      for (const partner of user.partners) {
-        allPartners.push({
-          ...partner,
-          colaboradorEmail: email,
-          colaboradorNome: user.profile?.nome || email
-        });
-      }
+async function saveSettings(settings) {
+  const settingsRef = doc(firestore, SETTINGS_DOC, 'main');
+  await setDoc(settingsRef, settings, { merge: true });
+}
+
+async function loadChat() {
+  const chatCollection = collection(firestore, CHAT_COLLECTION);
+  const q = query(chatCollection, orderBy('time', 'desc'));
+  const snapshot = await getDocs(q);
+  const messages = [];
+  snapshot.forEach(doc => {
+    messages.push({ id: doc.id, ...doc.data() });
+  });
+  return messages.reverse();
+}
+
+async function saveChatMessage(msg) {
+  const chatCollection = collection(firestore, CHAT_COLLECTION);
+  await addDoc(chatCollection, msg);
+}
+
+async function clearOldChat() {
+  const chatCollection = collection(firestore, CHAT_COLLECTION);
+  const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+  const q = query(chatCollection, orderBy('time', 'desc'));
+  const snapshot = await getDocs(q);
+  snapshot.forEach(async (doc) => {
+    const data = doc.data();
+    if(data.time && data.time < oneDayAgo){
+      await deleteDoc(doc.ref);
     }
+  });
+}
+
+async function loadCertificates() {
+  const certsCollection = collection(firestore, CERTS_COLLECTION);
+  const snapshot = await getDocs(certsCollection);
+  const certs = [];
+  snapshot.forEach(doc => {
+    certs.push({ id: doc.id, ...doc.data() });
+  });
+  return certs;
+}
+
+async function saveCertificate(cert) {
+  const certsCollection = collection(firestore, CERTS_COLLECTION);
+  const newCert = { ...cert, id: cert.id || Date.now() };
+  if(cert.id){
+    const certRef = doc(firestore, CERTS_COLLECTION, String(cert.id));
+    await setDoc(certRef, newCert);
+  } else {
+    const docRef = await addDoc(certsCollection, newCert);
+    newCert.id = docRef.id;
   }
-  console.log(`getAllPartners retornou ${allPartners.length} parceiros`);
-  return allPartners;
+  return newCert;
 }
 
-function getAllCertificates(){
-  console.log(`getAllCertificates retornou ${db.certs?.length || 0} certificados`);
-  return db.certs || [];
+async function deleteCertificate(certId) {
+  const certRef = doc(firestore, CERTS_COLLECTION, String(certId));
+  await deleteDoc(certRef);
 }
 
-function getContentAuthor(content){
-  if(content.colaboradorNome) return content.colaboradorNome;
-  for (const [email, user] of Object.entries(db.users)) {
-    if(user.contents?.some(c => c.id === content.id)){
-      return user.profile?.nome || email;
-    }
+async function loadMaterials() {
+  const settings = await loadSettings();
+  return settings.materials || materialsList;
+}
+
+async function saveMaterial(material) {
+  const settings = await loadSettings();
+  const materials = settings.materials || materialsList;
+  const existingIndex = materials.findIndex(m => m.id === material.id);
+  if(existingIndex !== -1){
+    materials[existingIndex] = material;
+  } else {
+    materials.push(material);
   }
-  return 'Desconhecido';
+  await saveSettings({ ...settings, materials });
 }
 
-function cleanupOldChatMessages(){
+async function deleteMaterial(materialId) {
+  const settings = await loadSettings();
+  const materials = (settings.materials || materialsList).filter(m => m.id !== materialId);
+  await saveSettings({ ...settings, materials });
+}
+
+async function updatePresence(userId, userData) {
+  const presenceRef = doc(firestore, PRESENCE_COLLECTION, userId);
+  await setDoc(presenceRef, {
+    ...userData,
+    lastSeen: Date.now(),
+    id: userId
+  }, { merge: true });
+}
+
+async function loadOnlineUsers() {
+  const presenceCollection = collection(firestore, PRESENCE_COLLECTION);
+  const snapshot = await getDocs(presenceCollection);
   const now = Date.now();
-  const twentyFourHours = 24 * 60 * 60 * 1000;
-  const lastCleanup = db.lastChatCleanup || 0;
-  if(now - lastCleanup >= twentyFourHours){
-    db.chat = [];
-    db.lastChatCleanup = now;
-    saveDB();
-    if(currentTab === 'comunidade') renderCommunity();
-  }
-}
-setInterval(() => { cleanupOldChatMessages(); }, 60 * 60 * 1000);
-
-function startOnlineTracking(){
-  if(onlineInterval) clearInterval(onlineInterval);
-  onlineInterval = setInterval(() => {
-    if(currentUser && currentUser.role !== 'admin' && document.hasFocus()){
-      const task = u().tasks.find(t => t.id === 8);
-      if(task && !task.done){
-        u().onlineTime = (u().onlineTime || 0) + 1;
-        if(u().onlineTime >= 10800){
-          task.done = true;
-          u().points += task.pontos;
-          saveDB();
-          toast(`🎉 Tarefa "${task.titulo}" concluída! +${task.pontos} pontos!`);
-          confetti();
-          if(currentTab === 'tarefas') renderTasks();
-        }
-        saveDB();
-        if(currentTab === 'tarefas') renderTasks();
-      }
+  const online = [];
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if(now - (data.lastSeen || 0) < 45000){
+      online.push(data);
     }
-  }, 1000);
+  });
+  return online;
 }
 
-function checkSpecialTasks(){
-  const task6 = u().tasks.find(t => t.id === 6);
-  if(task6 && !task6.done){
-    const approvedContents = u().contents.filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
-    if(approvedContents >= 3){
-      task6.done = true;
-      u().points += task6.pontos;
-      saveDB();
-      toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
-      confetti();
-      if(currentTab === 'tarefas') renderTasks();
-    }
+async function loadAllPeople() {
+  const users = await loadAllUsers();
+  const admin = { id: 'admin', nome: 'Administrador', cidade: 'Itacarambi', nivel: 'Admin', pontos: '-', bio: 'Aprova conteúdos, certificados e gerencia a plataforma.' };
+  const people = [admin];
+  for(const [email, user] of Object.entries(users)){
+    people.push({
+      id: email,
+      nome: user.profile?.nome || email,
+      cidade: user.profile?.cidade || '',
+      nivel: level(user.points || 0),
+      pontos: user.points || 0,
+      bio: user.profile?.bio || '',
+      me: currentUser?.email === email
+    });
   }
-  
-  const task7 = u().tasks.find(t => t.id === 7);
-  if(task7 && !task7.done){
-    const approvedPartners = u().partners.filter(p => p.status === 'Aprovado').length;
-    if(approvedPartners >= 2){
-      task7.done = true;
-      u().points += task7.pontos;
-      saveDB();
-      toast(`🎉 Tarefa "${task7.titulo}" concluída! +${task7.pontos} pontos!`);
-      confetti();
-      if(currentTab === 'tarefas') renderTasks();
-    }
+  return people;
+}
+
+function emptyUser(nome='',email='',cidade=''){
+  return {
+    points: 0,
+    profile: { nome, email, cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
+    training: { answered: {}, bonus: [], completedAt: {} },
+    tasks: JSON.parse(JSON.stringify(defaultTasks)),
+    partners: [],
+    contents: [],
+    onlineTime: 0
+  };
+}
+
+function level(points){
+  for(let i = LEVELS.length-1; i >= 0; i--){
+    if(points >= LEVELS[i][1]) return LEVELS[i][0];
+  }
+  return LEVELS[0][0];
+}
+
+function nextLevel(){
+  return LEVELS.find(x => (currentUser && currentUser.role === 'colaborator' ? (currentUser.points || 0) : 0) < x[1]) || LEVELS[LEVELS.length-1];
+}
+
+async function addPoints(n, why){
+  if(currentUser?.role !== 'colaborador') return;
+  const userData = await loadUserData(currentUser.email);
+  if(userData){
+    userData.points = (userData.points || 0) + n;
+    await saveUserData(currentUser.email, userData);
+  }
+  toast('+'+n+' pontos: '+why);
+  await renderAll();
+}
+
+async function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.getElementById('toastbox').appendChild(t);
+  setTimeout(()=>t.remove(),3300);
+}
+
+function confetti(){
+  const c=document.getElementById('confetti');
+  for(let i=0;i<90;i++){
+    let s=document.createElement('span');
+    s.style.left=Math.random()*100+'%';
+    s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];
+    s.style.animationDelay=Math.random()*.35+'s';
+    c.appendChild(s);
+    setTimeout(()=>s.remove(),2300);
   }
 }
 
-function u(){
-  if(currentUser?.role==='colaborador'){
-    const key = userKey(currentUser.email);
-    if(!db.users[key]){
-      db.users[key] = emptyUser(currentUser.nome, currentUser.email, currentUser.cidade);
-      saveDB();
-    }
-    return db.users[key];
-  }
-  return {points:0, profile:{nome:'',cidade:''}, tasks:[], partners:[], contents:[], training:{answered:{}}};
-}
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
 
-function userEntries(){return Object.entries(db.users||{})}
-function totalAnswered(){return Object.keys(u().training.answered||{}).length}
-function level(points=u().points){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}
-function nextLevel(){return LEVELS.find(x=>u().points<x[1])||LEVELS[LEVELS.length-1]}
-function addPoints(n,why){u().points+=n;saveDB();toast('+'+n+' pontos: '+why);renderAll()}
-function saveDB(){
-  save('cpCentralDB',db);
-  diagnosticLog();
-}
-
-// LOGIN - CORRIGIDO
-document.getElementById('loginForm').onsubmit=async e=>{
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  const senha = document.getElementById('senha').value;
-  try{
-    const userCredential = await window.cpBlogApi.signIn(email,senha);
-    const firebaseUser = userCredential.user;
-    let role = 'colaborador';
-    let isAdminUser = false;
-    if(firebaseUser.uid === ADMIN_UID){
-      role = 'admin';
-      isAdminUser = true;
-    }
-    currentUser = {
-      email: firebaseUser.email,
-      role: role,
-      nome: role==='admin' ? 'Administrador' : 'Colaborador',
-      cidade: 'Itacarambi',
-      uid: firebaseUser.uid,
-      isAdmin: isAdminUser
-    };
-    
-    if(role === 'colaborador'){
-      const key = userKey(firebaseUser.email);
-      if(!db.users[key]){
-        db.users[key] = emptyUser(currentUser.nome, firebaseUser.email, currentUser.cidade);
-        saveDB();
-      }
-    }
-    
-    localStorage.setItem('cpSession', JSON.stringify(currentUser));
-    startApp();
-  } catch(error){
-    toast('Login inválido: '+error.message);
-  }
-};
-
-function meId(){return currentUser?.role==='admin'?'admin':userKey(currentUser?.email)}
-function currentProfile(){
-  if(currentUser?.role==='admin'){
-    return {nome:'Administrador', cidade:'Itacarambi', bio:'Gestão da Central do Colaborador.', email:currentUser.email};
-  }
-  return u().profile;
-}
-function touchPresence(){if(!currentUser)return;const p=load('cpPresence',{});p[meId()]={id:meId(),nome:currentProfile().nome,cidade:currentProfile().cidade||currentUser.cidade,role:currentUser.role,last:Date.now()};save('cpPresence',p)}
-function onlineUsers(){const p=load('cpPresence',{}),now=Date.now();return Object.values(p).filter(x=>now-x.last<45000)}
-function allPeople(){const admin={id:'admin',nome:'Administrador',cidade:'Itacarambi',nivel:'Admin',pontos:'-',bio:'Aprova conteúdos, certificados e gerencia a plataforma.'};return [admin,...userEntries().map(([email,user])=>({id:email,nome:user.profile.nome,cidade:user.profile.cidade,nivel:level(user.points),pontos:user.points,bio:user.profile.bio,me:currentUser?.email===email}))]}
-window.addEventListener('storage',e=>{if(['cpCentralDB','cpPresence'].includes(e.key)&&currentUser)renderAll()});
-setInterval(()=>{touchPresence();if(currentTab==='comunidade')renderCommunity()},15000);
-
-function startApp(){
-  touchPresence();
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
+async function renderNav(){
   const isAdmin = (currentUser?.uid === ADMIN_UID);
-  document.body.classList.toggle('is-admin',isAdmin);
+  document.getElementById('nav').innerHTML=navItems.map(x=>`<button class="${x[0]===currentTab?'active':''} ${x[0]==='admin' && !isAdmin?'admin-only':''}" onclick="window.showTab('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('');
+}
+
+window.showTab=function(id){
+  currentTab=id;
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));
+  document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];
+  document.getElementById('sidebar').classList.remove('open');
   renderNav();
   renderAll();
-  showTab('dashboard');
-  cleanupOldChatMessages();
-  checkSpecialTasks();
-  if(currentUser.role !== 'admin') startOnlineTracking();
-}
-
-window.logout=function(){if(onlineInterval)clearInterval(onlineInterval);localStorage.removeItem('cpSession');location.reload()};
-function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
-function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toastbox').appendChild(t);setTimeout(()=>t.remove(),3300)}
-function confetti(){const c=document.getElementById('confetti');for(let i=0;i<90;i++){let s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];s.style.animationDelay=Math.random()*.35+'s';c.appendChild(s);setTimeout(()=>s.remove(),2300)}}
-function renderNav(){const isAdmin = (currentUser?.uid === ADMIN_UID);document.getElementById('nav').innerHTML=navItems.map(x=>`<button class="${x[0]===currentTab?'active':''} ${x[0]==='admin' && !isAdmin?'admin-only':''}" onclick="window.showTab('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}
-window.showTab=function(id){currentTab=id;document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];document.getElementById('sidebar').classList.remove('open');renderNav();renderAll()};
-function renderAll(){if(!currentUser)return;document.getElementById('sideName').textContent=currentUser.role==='admin'?'Administrador':u().profile.nome;document.getElementById('sideLevel').textContent=currentUser.role==='admin'?'Painel administrativo':level();document.getElementById('sidePoints').textContent=currentUser.role==='admin'?'Admin':u().points+' pontos';renderDashboard();renderTraining();renderMaterials();renderContents();renderTasks();renderPartners();renderRanking();renderCerts();renderCommunity();renderProfile();renderBlog();renderAdmin()}
-function renderDashboard(){const doneTasks=u().tasks.filter(t=>t.done).length,closed=u().partners.filter(p=>p.status==='Aprovado').length,ans=totalAnswered(),nl=nextLevel(),pct=nl[1]===0?100:Math.min(100,Math.round(u().points/nl[1]*100));document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${u().points}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${u().tasks.length} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
-function canRetakeModule(id){const t=u().training.completedAt?.[id];return t&&Date.now()-new Date(t).getTime()>=RETAKE_MS}
-window.retakeModule=function(id){if(!canRetakeModule(id))return toast('Este módulo poderá ser refeito 48h após a conclusão.');Object.keys(u().training.answered).forEach(k=>{if(k.startsWith(id+'-'))delete u().training.answered[k]});delete u().training.completedAt[id];currentModule=id;currentPage=0;saveDB();toast('Módulo liberado para refazer e pontuar novamente.');renderAll()};
-function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.questions.filter((_,i)=>u().training.answered[currentModule+'-'+i]?.correct).length,start=currentPage*10,qs=m.questions.slice(start,start+10),total=totalAnswered(),phrase=prog<10?'Vamos construir a base com calma.':'Ótimo ritmo. Agora transforme conhecimento em segurança para orientar visitantes e parceiros.',completedAt=u().training.completedAt?.[currentModule],next=completedAt?new Date(new Date(completedAt).getTime()+RETAKE_MS):null;document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">${phrase} Sua missão atual é concluir todas as 10 questões do módulo, revisar as explicações e avançar no mapa de aprendizagem.</p><div class="actions"><span class="pill gold">${total}/50 questões</span><span class="pill gold">Módulo ${currentModule}: ${prog}/10</span><span class="pill gold">Módulo completo: ${MODULE_POINTS[currentModule-1]} pontos</span>${completedAt?`<span class="pill gold">Refazer após ${next.toLocaleString('pt-BR')}</span>`:''}</div></div></div><div class="lesson-path">${modules.map(mm=>{const done=mm.questions.filter((_,i)=>u().training.answered[mm.id+'-'+i]?.correct).length,ready=canRetakeModule(mm.id);return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===10?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/10 concluídas · ${MODULE_POINTS[mm.id-1]} pts</small>${ready?'<br><small>Disponível para refazer</small>':''}<div class="bar" style="margin-top:8px"><i style="width:${(done/10)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b><p class="hint">Responda todas as 10 questões corretamente para concluir o módulo e ganhar ${MODULE_POINTS[currentModule-1]} pontos.</p></div><span class="pill gold">${prog}% do módulo</span></div><div class="bar"><i style="width:${(prog/10)*100}%"></i></div>${canRetakeModule(currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo e pontuar novamente</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Questões anteriores</button><strong>Questões ${start+1} a ${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximas questões →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx)).join('')}`}
-function renderQ(q,idx){const key=currentModule+'-'+idx,answered=u().training.answered[key],locked=answered?.correct;return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`}
-window.answerQ=function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(u().training.answered[key]?.correct)return;const ok=choice===q.correta;u().training.answered[key]={choice,correct:ok};if(ok){u().points+=5;toast('Resposta correta! +5 pontos');}else toast('Resposta incorreta. Leia a explicação e tente novamente.');const completed=modules[currentModule-1].questions.every((_,i)=>u().training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!u().training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1]||40;u().training.completedAt[currentModule]=new Date().toISOString();u().points+=pts;saveDB();toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);confetti();}else{saveDB();}renderAll()};
-function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(db.materials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
-function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const found=db.materials.find(m=>m.id===id);const data={id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};if(found)Object.assign(found,data);else db.materials.push(data);saveDB();toast(found?'Material atualizado.':'Material adicionado.');renderAdmin();renderMaterials()}
-function editMaterial(id){const m=db.materials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
-function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}
-function fileToBase64(file){
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-window.handleImageUpload = function(event, elementId, previewId){
-  const file = event.target.files[0];
-  if(file && file.type.startsWith('image/')){
-    fileToBase64(file).then(base64 => {
-      document.getElementById(elementId).value = base64;
-      const preview = document.getElementById(previewId);
-      if(preview){
-        preview.src = base64;
-        preview.style.display = 'block';
-      }
-      updatePostPreview();
-    }).catch(err => toast('Erro ao carregar imagem: '+err));
-  } else if(file){
-    toast('Por favor, selecione apenas arquivos de imagem.');
-    event.target.value = '';
-  }
 };
 
-window.handleGalleryUpload = function(index, fileInput){
-  const file = fileInput.files[0];
-  if(file && file.type.startsWith('image/')){
-    fileToBase64(file).then(base64 => {
-      const inputField = document.getElementById(`galleryBase64${index}`);
-      if(inputField) inputField.value = base64;
-      const preview = document.getElementById(`galleryPreview${index}`);
-      if(preview){
-        preview.src = base64;
-        preview.style.display = 'block';
-      }
-      updatePostPreview();
-    }).catch(err => toast('Erro ao carregar imagem da galeria: '+err));
-  } else if(file){
-    toast('Por favor, selecione apenas arquivos de imagem para a galeria.');
-    fileInput.value = '';
+async function renderAll(){
+  if(!currentUser) return;
+  let userData = null;
+  if(currentUser.role === 'colaborador'){
+    userData = await loadUserData(currentUser.email);
+    if(!userData){
+      userData = emptyUser(currentUser.nome, currentUser.email, currentUser.cidade);
+      await saveUserData(currentUser.email, userData);
+    }
   }
+  document.getElementById('sideName').textContent = currentUser.role==='admin'?'Administrador':(userData?.profile?.nome || currentUser.nome);
+  document.getElementById('sideLevel').textContent = currentUser.role==='admin'?'Painel administrativo':level(userData?.points || 0);
+  document.getElementById('sidePoints').textContent = currentUser.role==='admin'?'Admin':(userData?.points || 0)+' pontos';
+  
+  await renderDashboard();
+  await renderTraining();
+  await renderMaterials();
+  await renderContents();
+  await renderTasks();
+  await renderPartners();
+  await renderRanking();
+  await renderCerts();
+  await renderCommunity();
+  await renderProfile();
+  await renderBlog();
+  await renderAdmin();
+}
+
+async function renderDashboard(){
+  if(currentUser?.role !== 'colaborador'){
+    document.getElementById('dashboard').innerHTML=`<div class="card">Bem-vindo, Administrador! Acesse as abas para gerenciar a plataforma.</div>`;
+    return;
+  }
+  const userData = await loadUserData(currentUser.email);
+  const doneTasks = userData?.tasks?.filter(t=>t.done).length || 0;
+  const closed = userData?.partners?.filter(p=>p.status==='Aprovado').length || 0;
+  const ans = Object.keys(userData?.training?.answered || {}).length;
+  const nl = nextLevel();
+  const pct = nl[1]===0?100:Math.min(100,Math.round((userData?.points||0)/nl[1]*100));
+  document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${userData?.points||0}</b></div><div class="card stat"><span>Nível</span><b>${level(userData?.points||0)}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${defaultTasks.length} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+}
+
+function canRetakeModule(userData, id){
+  const t = userData?.training?.completedAt?.[id];
+  return t && Date.now() - new Date(t).getTime() >= RETAKE_MS;
+}
+
+async function renderTraining(){
+  if(currentUser?.role !== 'colaborador'){
+    document.getElementById('treinamento').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
+    return;
+  }
+  const userData = await loadUserData(currentUser.email);
+  const m = modules.find(x=>x.id===currentModule);
+  const prog = m.questions.filter((_,i)=>userData?.training?.answered[currentModule+'-'+i]?.correct).length;
+  const start = currentPage*10;
+  const qs = m.questions.slice(start, start+10);
+  const total = Object.keys(userData?.training?.answered || {}).length;
+  const phrase = prog<10?'Vamos construir a base com calma.':'Ótimo ritmo. Agora transforme conhecimento em segurança para orientar visitantes e parceiros.';
+  const completedAt = userData?.training?.completedAt?.[currentModule];
+  const next = completedAt ? new Date(new Date(completedAt).getTime()+RETAKE_MS) : null;
+  
+  document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">${phrase} Sua missão atual é concluir todas as 10 questões do módulo, revisar as explicações e avançar no mapa de aprendizagem.</p><div class="actions"><span class="pill gold">${total}/50 questões</span><span class="pill gold">Módulo ${currentModule}: ${prog}/10</span><span class="pill gold">Módulo completo: ${MODULE_POINTS[currentModule-1]} pontos</span>${completedAt?`<span class="pill gold">Refazer após ${next.toLocaleString('pt-BR')}</span>`:''}</div></div></div><div class="lesson-path">${modules.map(mm=>{const done = userData?.training?.answered ? Object.keys(userData.training.answered).filter(k=>k.startsWith(mm.id+'-') && userData.training.answered[k]?.correct).length : 0;const ready = canRetakeModule(userData, mm.id);return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===10?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/10 concluídas · ${MODULE_POINTS[mm.id-1]} pts</small>${ready?'<br><small>Disponível para refazer</small>':''}<div class="bar" style="margin-top:8px"><i style="width:${(done/10)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b><p class="hint">Responda todas as 10 questões corretamente para concluir o módulo e ganhar ${MODULE_POINTS[currentModule-1]} pontos.</p></div><span class="pill gold">${prog}% do módulo</span></div><div class="bar"><i style="width:${(prog/10)*100}%"></i></div>${canRetakeModule(userData, currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo e pontuar novamente</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Questões anteriores</button><strong>Questões ${start+1} a ${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximas questões →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx, userData)).join('')}`;
+}
+
+function renderQ(q, idx, userData){
+  const key = currentModule+'-'+idx;
+  const answered = userData?.training?.answered?.[key];
+  const locked = answered?.correct;
+  return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`;
+}
+
+window.answerQ = async function(idx, choice){
+  if(currentUser?.role !== 'colaborador') return;
+  const userData = await loadUserData(currentUser.email);
+  const q = modules[currentModule-1].questions[idx];
+  const key = currentModule+'-'+idx;
+  if(userData?.training?.answered?.[key]?.correct) return;
+  const ok = choice === q.correta;
+  if(!userData.training.answered) userData.training.answered = {};
+  userData.training.answered[key] = {choice, correct: ok};
+  if(ok){
+    userData.points = (userData.points || 0) + 5;
+    toast('Resposta correta! +5 pontos');
+  } else {
+    toast('Resposta incorreta. Leia a explicação e tente novamente.');
+  }
+  const completed = modules[currentModule-1].questions.every((_,i)=>userData.training.answered[currentModule+'-'+i]?.correct===true);
+  if(completed && !userData.training.completedAt?.[currentModule]){
+    const pts = MODULE_POINTS[currentModule-1] || 40;
+    if(!userData.training.completedAt) userData.training.completedAt = {};
+    userData.training.completedAt[currentModule] = new Date().toISOString();
+    userData.points = (userData.points || 0) + pts;
+    await saveUserData(currentUser.email, userData);
+    toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);
+    confetti();
+  } else {
+    await saveUserData(currentUser.email, userData);
+  }
+  await renderAll();
 };
 
-function renderContents(){
+window.retakeModule = async function(id){
+  if(currentUser?.role !== 'colaborador') return;
+  const userData = await loadUserData(currentUser.email);
+  if(!canRetakeModule(userData, id)) return toast('Este módulo poderá ser refeito 48h após a conclusão.');
+  Object.keys(userData.training.answered).forEach(k=>{if(k.startsWith(id+'-')) delete userData.training.answered[k];});
+  if(userData.training.completedAt) delete userData.training.completedAt[id];
+  currentModule = id;
+  currentPage = 0;
+  await saveUserData(currentUser.email, userData);
+  toast('Módulo liberado para refazer e pontuar novamente.');
+  await renderAll();
+};
+
+async function renderMaterials(){
+  const materials = await loadMaterials();
+  document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(materials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`;
+}
+
+async function renderContents(){
+  if(currentUser?.role !== 'colaborador'){
+    document.getElementById('conteudos').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
+    return;
+  }
+  const userData = await loadUserData(currentUser.email);
   const galleryInputsHtml = [];
   for(let i = 1; i <= 6; i++){
     galleryInputsHtml.push(`
@@ -515,7 +602,7 @@ function renderContents(){
         
         <h2>Minhas solicitações de postagem</h2>
         <div class="list" id="myContentsList">
-          ${u().contents.length ? u().contents.map(c=>`
+          ${(userData?.contents || []).length ? (userData.contents).map(c=>`
             <div class="item">
               <div class="item-head">
                 <div>
@@ -547,43 +634,33 @@ function renderContents(){
   window.updateGalleryPreview();
 }
 
-window.deleteMyContent = function(id){
+window.deleteMyContent = async function(id){
   if(!confirm('Tem certeza que deseja excluir esta solicitação de conteúdo?')) return;
-  const index = u().contents.findIndex(c => c.id === id);
+  const userData = await loadUserData(currentUser.email);
+  const index = (userData.contents || []).findIndex(c => c.id === id);
   if(index !== -1){
-    const content = u().contents[index];
+    const content = userData.contents[index];
     if(content.blogId && window.cpBlogApi){
       window.cpBlogApi.deletePost(content.blogId).catch(e => console.log('Erro ao remover do blog:', e));
     }
-    u().contents.splice(index, 1);
-    saveDB();
+    userData.contents.splice(index, 1);
+    await saveUserData(currentUser.email, userData);
     toast('Solicitação de conteúdo removida com sucesso!');
-    renderContents();
-    if(currentUser?.uid === ADMIN_UID) renderAdmin();
+    await renderContents();
+    if(currentUser?.uid === ADMIN_UID) await renderAdmin();
   }
 };
 
-window.deleteMyPartner = function(id){
+window.deleteMyPartner = async function(id){
   if(!confirm('Tem certeza que deseja excluir esta solicitação de parceiro?')) return;
-  const index = u().partners.findIndex(p => p.id === id);
+  const userData = await loadUserData(currentUser.email);
+  const index = (userData.partners || []).findIndex(p => p.id === id);
   if(index !== -1){
-    u().partners.splice(index, 1);
-    saveDB();
+    userData.partners.splice(index, 1);
+    await saveUserData(currentUser.email, userData);
     toast('Solicitação de parceiro removida com sucesso!');
-    renderPartners();
-    if(currentUser?.uid === ADMIN_UID) renderAdmin();
-  }
-};
-
-window.deleteMyCertificate = function(id){
-  if(!confirm('Tem certeza que deseja excluir esta solicitação de certificado?')) return;
-  const index = db.certs.findIndex(c => c.id === id && c.user === currentUser?.email);
-  if(index !== -1){
-    db.certs.splice(index, 1);
-    saveDB();
-    toast('Solicitação de certificado removida com sucesso!');
-    renderCerts();
-    if(currentUser?.uid === ADMIN_UID) renderAdmin();
+    await renderPartners();
+    if(currentUser?.uid === ADMIN_UID) await renderAdmin();
   }
 };
 
@@ -637,6 +714,7 @@ window.updateGalleryPreview = function(){
 
 window.addContent = async function(e){
   e.preventDefault();
+  if(currentUser?.role !== 'colaborador') return;
   const galleryUrls = [];
   for(let i = 1; i <= 6; i++){
     const base64 = document.getElementById(`galleryBase64${i}`)?.value.trim();
@@ -665,12 +743,14 @@ window.addContent = async function(e){
     createdAt: new Date().toISOString()
   };
   
-  u().contents.push(newContent);
-  saveDB();
+  const userData = await loadUserData(currentUser.email);
+  if(!userData.contents) userData.contents = [];
+  userData.contents.push(newContent);
+  await saveUserData(currentUser.email, userData);
   toast('📝 Postagem enviada para aprovação do administrador!');
   toast('🔔 O administrador verá esta solicitação na aba Admin > Conteúdos Pendentes');
   
-  // Limpar formulário
+  // Clear form
   document.getElementById('ctitulo').value = '';
   document.getElementById('ccat').value = 'COLABORADOR';
   document.getElementById('cresumo').value = '';
@@ -688,116 +768,362 @@ window.addContent = async function(e){
   document.getElementById('ccarousel').checked = false;
   document.getElementById('cfeatured').checked = false;
   
-  renderAll();
+  await renderAll();
 };
 
-window.previewContent=function(id){const c=u().contents.find(x=>x.id===id);if(!c)return;const w=window.open('','_blank');w.document.write(`<title>${c.titulo}</title><body style="font-family:Arial;padding:24px;max-width:860px;margin:auto"><p style="font-weight:bold;color:#D99F0C">${c.categoria}</p><h1>${c.titulo}</h1><p>${c.resumo||''}</p>${c.img?`<img src="${c.img}" style="max-width:100%;border-radius:12px">`:''}${c.gallery?.length?`<div style="display:grid;grid-template-columns:repeat(${c.galleryLayout||3},1fr);gap:10px;margin:16px 0">${c.gallery.map(url=>`<img src="${url}" style="width:100%;border-radius:8px">`).join('')}</div>`:''}<main>${c.texto||''}</main></body>`);w.document.close()};
-function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${u().tasks.map(t=>{
-  let progresso = '';
-  if(t.id === 6 && !t.done){
-    const aprovados = u().contents.filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
-    progresso = `<p class="hint">📊 Progresso: ${aprovados}/3 conteúdos aprovados</p>`;
-  }
-  if(t.id === 7 && !t.done){
-    const aprovados = u().partners.filter(p => p.status === 'Aprovado').length;
-    progresso = `<p class="hint">📊 Progresso: ${aprovados}/2 parceiros aprovados</p>`;
-  }
-  if(t.id === 8 && !t.done){
-    const horas = Math.floor((u().onlineTime || 0) / 3600);
-    const minutos = Math.floor(((u().onlineTime || 0) % 3600) / 60);
-    progresso = `<p class="hint">⏱️ Progresso: ${horas}h ${minutos}m / 3h online</p>`;
-  }
-  return `<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pontos</span>${progresso}</div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`;
-}).join('')}</div>`}
-window.doneTask=function(id){let t=u().tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = u().profile.nome && u().profile.cidade && u().profile.telefone;if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}t.done=true;addPoints(t.pontos,'tarefa concluída');}
-else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e baixando o conteúdo!');}
-else if(t.id===3){toast('Conclua esta tarefa cadastrando 3 parceiros na aba Parceiros!');}
-else if(t.id===4){toast('Conclua esta tarefa enviando um conteúdo que seja aprovado pelo admin!');}
-else if(t.id===5){toast('Conclua esta tarefa mantendo parceiros atualizados!');}
-else if(t.id===6){toast('Esta tarefa será concluída automaticamente ao ter 3 conteúdos aprovados!');}
-else if(t.id===7){toast('Esta tarefa será concluída automaticamente ao ter 2 parceiros aprovados!');}
-else if(t.id===8){toast('Esta tarefa será concluída automaticamente ao acumular 3 horas online!');}
-else{t.done=true;addPoints(t.pontos,'tarefa concluída');}saveDB();renderAll()}
-function helpPartners(){return `<button style="position:fixed;right:22px;bottom:88px;border-radius:999px;width:56px;height:56px;font-size:24px;z-index:45" class="secondary" onclick="window.showPartnerHelp()">?</button>`}
-window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• Plano Comum (R$ 69,90) → Você recebe R$ 20,97 (30%)\n• Plano Premium (R$ 149,90) → Você recebe R$ 44,97 (30%)\n\n✅ Você recebe a comissão APENAS UMA VEZ por plano fechado (não é recorrente mensal).\n\n📋 Fluxo do parceiro:\n1. Você capta o cliente para o app Peruaçu\n2. Cliente assina ordem de serviço e paga o plano\n3. Você envia os comprovantes\n4. Admin aprova e você recebe sua comissão + 100 pontos')}
-function readFileData(input){return new Promise(resolve=>{const f=input?.files?.[0];if(!f)return resolve('');const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>resolve('');r.readAsDataURL(f)})}
-function renderPartners(){
-  document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${u().partners.length?u().partners.map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deleteMyPartner(${p.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`}
-window.addPartner=async function(e){e.preventDefault();const[plano,valor]=pplano.value.split('|');const osData=await readFileData(pos),pixData=await readFileData(ppix);u().partners.push({id:Date.now(),nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,osData,pixData,status:'Pendente',awarded:false,comissaoPaga:false,createdAt:new Date().toISOString()});saveDB();toast('🤝 Parceiro enviado para aprovação do admin!');toast('🔔 O administrador verá esta solicitação na aba Admin > Parceiros Pendentes');renderAll()};
-window.openAttachment=function(id,field){const p=u().partners.find(x=>x.id===id);if(!p||!p[field])return toast('Anexo não encontrado.');const w=window.open('','_blank');if(p[field].startsWith('data:application/pdf'))w.document.write(`<iframe src="${p[field]}" style="width:100%;height:100vh;border:0"></iframe>`);else w.document.write(`<img src="${p[field]}" style="max-width:100%;height:auto">`);w.document.close()};
+window.previewContent = function(id){
+  if(currentUser?.role !== 'colaborador') return;
+  loadUserData(currentUser.email).then(userData => {
+    const c = (userData.contents || []).find(x=>x.id===id);
+    if(!c) return;
+    const w = window.open('','_blank');
+    w.document.write(`<title>${c.titulo}</title><body style="font-family:Arial;padding:24px;max-width:860px;margin:auto"><p style="font-weight:bold;color:#D99F0C">${c.categoria}</p><h1>${c.titulo}</h1><p>${c.resumo||''}</p>${c.img?`<img src="${c.img}" style="max-width:100%;border-radius:12px">`:''}${c.gallery?.length?`<div style="display:grid;grid-template-columns:repeat(${c.galleryLayout||3},1fr);gap:10px;margin:16px 0">${c.gallery.map(url=>`<img src="${url}" style="width:100%;border-radius:8px">`).join('')}</div>`:''}<main>${c.texto||''}</main></body>`);
+    w.document.close();
+  });
+};
 
-window.approvePartner = function(partnerId, approved, colaboradorEmail){
-  let targetUser = null;
-  let targetPartner = null;
-  
-  for (const [email, user] of Object.entries(db.users)) {
-    if (user.partners) {
-      const found = user.partners.find(p => p.id === partnerId);
-      if (found) {
-        targetUser = user;
-        targetPartner = found;
-        break;
-      }
-    }
-  }
-  
-  if (!targetPartner) {
-    toast('Parceiro não encontrado');
+async function renderTasks(){
+  if(currentUser?.role !== 'colaborador'){
+    document.getElementById('tarefas').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
     return;
   }
-  
-  const oldStatus = targetPartner.status;
-  targetPartner.status = approved ? 'Aprovado' : 'Rejeitado';
-  
-  if(approved && oldStatus !== 'Aprovado'){
-    if(!targetPartner.awarded){
-      targetPartner.awarded = true;
-      targetPartner.comissaoPaga = true;
-      if(targetUser){
-        targetUser.points = (targetUser.points || 0) + 100;
-      }
-      toast(`✅ Parceiro aprovado! +100 pontos para ${targetUser.profile.nome}. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`);
-      confetti();
-    } else {
-      toast(`✅ Parceiro aprovado!`);
+  const userData = await loadUserData(currentUser.email);
+  document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(userData.tasks || []).map(t=>{
+    let progresso = '';
+    if(t.id === 6 && !t.done){
+      const aprovados = (userData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
+      progresso = `<p class="hint">📊 Progresso: ${aprovados}/3 conteúdos aprovados</p>`;
     }
-  } else if(!approved) {
-    toast(`❌ Parceiro rejeitado.`);
+    if(t.id === 7 && !t.done){
+      const aprovados = (userData.partners || []).filter(p => p.status === 'Aprovado').length;
+      progresso = `<p class="hint">📊 Progresso: ${aprovados}/2 parceiros aprovados</p>`;
+    }
+    if(t.id === 8 && !t.done){
+      const horas = Math.floor((userData.onlineTime || 0) / 3600);
+      const minutos = Math.floor(((userData.onlineTime || 0) % 3600) / 60);
+      progresso = `<p class="hint">⏱️ Progresso: ${horas}h ${minutos}m / 3h online</p>`;
+    }
+    return `<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pontos</span>${progresso}</div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`;
+  }).join('')}</div>`;
+}
+
+window.doneTask = async function(id){
+  if(currentUser?.role !== 'colaborador') return;
+  const userData = await loadUserData(currentUser.email);
+  let t = (userData.tasks || []).find(x=>x.id===id);
+  if(t.done) return;
+  if(t.id===1){
+    const perfilCompleto = userData.profile?.nome && userData.profile?.cidade && userData.profile?.telefone;
+    if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}
+    t.done=true;
+    userData.points = (userData.points || 0) + t.pontos;
+    await saveUserData(currentUser.email, userData);
+    toast(`+${t.pontos} pontos: tarefa concluída`);
   }
-  saveDB();
-  renderAll();
+  else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e baixando o conteúdo!');}
+  else if(t.id===3){toast('Conclua esta tarefa cadastrando 3 parceiros na aba Parceiros!');}
+  else if(t.id===4){toast('Conclua esta tarefa enviando um conteúdo que seja aprovado pelo admin!');}
+  else if(t.id===5){toast('Conclua esta tarefa mantendo parceiros atualizados!');}
+  else if(t.id===6){toast('Esta tarefa será concluída automaticamente ao ter 3 conteúdos aprovados!');}
+  else if(t.id===7){toast('Esta tarefa será concluída automaticamente ao ter 2 parceiros aprovados!');}
+  else if(t.id===8){toast('Esta tarefa será concluída automaticamente ao acumular 3 horas online!');}
+  else{
+    t.done=true;
+    userData.points = (userData.points || 0) + t.pontos;
+    await saveUserData(currentUser.email, userData);
+    toast(`+${t.pontos} pontos: tarefa concluída`);
+  }
+  await renderAll();
 };
 
-function renderRanking(){const rows=[...seedRanking,{nome:u().profile.nome,cidade:u().profile.cidade,pontos:u().points,me:true}].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th><tr>${rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</table>`}
-function renderCerts(){
-  const userCerts = db.certs.filter(c => c.user === currentUser?.email);
-  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}<div class="actions"><button class="danger" onclick="window.deleteMyCertificate(${c.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`}
-window.askCert=function(nome,pts){if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado'))return toast('Você já solicitou este certificado.');db.certs.push({id:Date.now(),user:currentUser?.email,usuario:u().profile.nome,nome,pts,status:'Pendente',requestDate:new Date().toISOString(),certificadoUrl:'',motivo:''});saveDB();toast('📜 Certificado solicitado para análise.');toast('🔔 O administrador verá esta solicitação na aba Admin > Certificados Pendentes');renderAll()};
-function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
-function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const online=onlineUsers(),people=allPeople();el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db.settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db.settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${db.chat.length}</b><p class="hint">Chat salvo no navegador via localStorage. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${db.chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db.settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db.settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
-window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;const p=currentProfile(),msg={id:Date.now(),user:p.nome,city:p.cidade,text,time:new Date().toISOString()};db.chat.push(msg);saveDB();toast('Mensagem enviada no chat.');renderCommunity()};
-window.openProfile=function(id){const p=allPeople().find(x=>x.id===id);if(!p)return;const online=onlineUsers().some(o=>o.id===p.id);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.nome}</h2><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.bio||'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
-window.closeProfile=function(){const m=document.getElementById('profileModal');if(m)m.style.display='none'};
-window.saveGroups=function(e){e.preventDefault();db.settings.whatsappConteudos=waConteudos.value.trim();db.settings.whatsappForum=waForum.value.trim();saveDB();toast('Grupos de WhatsApp atualizados.');renderCommunity()};function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${u().profile.nome}"><label>Cidade</label><input id="profCidade" value="${u().profile.cidade}"><label>Telefone</label><input id="profTel" value="${u().profile.telefone}"><label>Bio</label><textarea id="profBio">${u().profile.bio}</textarea><button class="secondary">Salvar perfil</button></form>`}
-window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nome:profNome.value,cidade:profCidade.value,telefone:profTel.value,bio:profBio.value});saveDB();toast('Perfil atualizado.');const profileTask=u().tasks.find(t=>t.id===1);if(profileTask&&!profileTask.done&&u().profile.nome&&u().profile.cidade&&u().profile.telefone){profileTask.done=true;u().points+=profileTask.pontos;toast(`+${profileTask.pontos} pontos: Perfil completo!`);saveDB();}renderAll()};
-function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
-window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
+function helpPartners(){
+  return `<button style="position:fixed;right:22px;bottom:88px;border-radius:999px;width:56px;height:56px;font-size:24px;z-index:45" class="secondary" onclick="window.showPartnerHelp()">?</button>`;
+}
 
-// ========== ADMIN FUNCTIONS CORRIGIDAS ==========
-window.forceRefreshAdmin = function(){
+window.showPartnerHelp = function(){
+  alert('🟢 COMISSÃO DO COLABORADOR:\n\n• Plano Comum (R$ 69,90) → Você recebe R$ 20,97 (30%)\n• Plano Premium (R$ 149,90) → Você recebe R$ 44,97 (30%)\n\n✅ Você recebe a comissão APENAS UMA VEZ por plano fechado (não é recorrente mensal).\n\n📋 Fluxo do parceiro:\n1. Você capta o cliente para o app Peruaçu\n2. Cliente assina ordem de serviço e paga o plano\n3. Você envia os comprovantes\n4. Admin aprova e você recebe sua comissão + 100 pontos');
+}
+
+function readFileData(input){
+  return new Promise(resolve=>{
+    const f=input?.files?.[0];
+    if(!f) return resolve('');
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=()=>resolve('');
+    r.readAsDataURL(f);
+  });
+}
+
+async function renderPartners(){
+  if(currentUser?.role !== 'colaborador'){
+    document.getElementById('parceiros').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
+    return;
+  }
+  const userData = await loadUserData(currentUser.email);
+  document.getElementById('parceiros').innerHTML=`${helpPartners()}<div class="blog-hero"><h2>Captação de parceiros para o app Peruaçu</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span></div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>Cadastrar parceiro captado</h2><label>Nome do parceiro/cliente</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required><label>Contato</label><input id="pcontato" required><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (sua comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (sua comissão: R$ 44,97)</option></select><label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf"><label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram, descrição para o app..."></textarea><button class="secondary">Enviar para aprovação</button></form><div><h2>Meus parceiros</h2><div class="list">${(userData.partners || []).length ? (userData.partners).map(p=>`<div class="item"><div class="item-head"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.cidade} · ${p.contato}</p><p class="hint">${p.plano||'Plano não informado'} · ${p.valor?('R$ '+Number(p.valor).toFixed(2).replace('.',',')) : ''}${p.comissaoPaga?`<span class="pill ok" style="margin-left:8px">💰 Comissão R$ ${(p.valor*0.3).toFixed(2)} paga</span>`:''}</p></div><span class="pill ${p.status==='Aprovado'?'ok':p.status==='Rejeitado'?'bad':'gold'}">${p.status||'Pendente'}</span></div><p class="hint">${p.status==='Aprovado'?'✅ Aprovado! O serviço será adicionado ao app Peruaçu.':p.status==='Rejeitado'?'❌ Cadastro rejeitado.':'⏳ Aguardando aprovação do admin.'}</p><div class="actions">${p.osData?`<button class="ghost" onclick="window.openAttachment(${p.id},'osData')">Ver ordem</button>`:''}${p.pixData?`<button class="ghost" onclick="window.openAttachment(${p.id},'pixData')">Ver Pix</button>`:''}<button class="danger" onclick="window.deleteMyPartner(${p.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhum parceiro cadastrado.</div>'}</div></div></div>`;
+}
+
+window.addPartner = async function(e){
+  e.preventDefault();
+  if(currentUser?.role !== 'colaborador') return;
+  const [plano,valor] = document.getElementById('pplano').value.split('|');
+  const osData = await readFileData(document.getElementById('pos'));
+  const pixData = await readFileData(document.getElementById('ppix'));
+  const newPartner = {
+    id: Date.now(),
+    nome: document.getElementById('pnome').value,
+    categoria: document.getElementById('pcat').value,
+    cidade: document.getElementById('pcidade').value,
+    contato: document.getElementById('pcontato').value,
+    plano,
+    valor: Number(valor),
+    obs: document.getElementById('pobs').value,
+    osData,
+    pixData,
+    status: 'Pendente',
+    awarded: false,
+    comissaoPaga: false,
+    createdAt: new Date().toISOString()
+  };
+  const userData = await loadUserData(currentUser.email);
+  if(!userData.partners) userData.partners = [];
+  userData.partners.push(newPartner);
+  await saveUserData(currentUser.email, userData);
+  toast('🤝 Parceiro enviado para aprovação do admin!');
+  toast('🔔 O administrador verá esta solicitação na aba Admin > Parceiros Pendentes');
+  await renderAll();
+};
+
+window.openAttachment = function(id, field){
+  if(currentUser?.role !== 'colaborador') return;
+  loadUserData(currentUser.email).then(userData => {
+    const p = (userData.partners || []).find(x=>x.id===id);
+    if(!p || !p[field]) return toast('Anexo não encontrado.');
+    const w = window.open('','_blank');
+    if(p[field].startsWith('data:application/pdf')) w.document.write(`<iframe src="${p[field]}" style="width:100%;height:100vh;border:0"></iframe>`);
+    else w.document.write(`<img src="${p[field]}" style="max-width:100%;height:auto">`);
+    w.document.close();
+  });
+};
+
+async function renderRanking(){
+  const users = await loadAllUsers();
+  const rows = [];
+  for(const [email, userData] of Object.entries(users)){
+    rows.push({
+      nome: userData.profile?.nome || email,
+      cidade: userData.profile?.cidade || '',
+      pontos: userData.points || 0,
+      me: currentUser?.email === email
+    });
+  }
+  rows.sort((a,b)=>b.pontos - a.pontos);
+  document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr>${rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</table>`;
+}
+
+async function renderCerts(){
+  const certs = await loadCertificates();
+  const userCerts = certs.filter(c => c.user === currentUser?.email);
+  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${(currentUser?.role === 'colaborador' ? (await loadUserData(currentUser.email))?.points||0 : 0) < c[1] ?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length?userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p></div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl?`<div class="actions"><button class="ghost" onclick="window.open('${c.certificadoUrl}','_blank')">📄 Baixar Certificado</button></div>`:''}<div class="actions"><button class="danger" onclick="window.deleteMyCertificate(${c.id})">🗑️ Excluir solicitação</button></div></div>`).join(''):'<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`;
+}
+
+window.askCert = async function(nome, pts){
+  if(currentUser?.role !== 'colaborador') return;
+  const certs = await loadCertificates();
+  if(certs.some(c => c.user === currentUser?.email && c.nome === nome && c.status !== 'Rejeitado')) return toast('Você já solicitou este certificado.');
+  const userData = await loadUserData(currentUser.email);
+  const newCert = {
+    id: Date.now(),
+    user: currentUser?.email,
+    usuario: userData.profile?.nome || currentUser.email,
+    nome,
+    pts,
+    status: 'Pendente',
+    requestDate: new Date().toISOString(),
+    certificadoUrl: '',
+    motivo: ''
+  };
+  await saveCertificate(newCert);
+  toast('📜 Certificado solicitado para análise.');
+  toast('🔔 O administrador verá esta solicitação na aba Admin > Certificados Pendentes');
+  await renderAll();
+};
+
+window.deleteMyCertificate = async function(id){
+  if(!confirm('Tem certeza que deseja excluir esta solicitação de certificado?')) return;
+  const certs = await loadCertificates();
+  const cert = certs.find(c => c.id === id && c.user === currentUser?.email);
+  if(cert){
+    await deleteCertificate(id);
+    toast('Solicitação de certificado removida com sucesso!');
+    await renderCerts();
+    if(currentUser?.uid === ADMIN_UID) await renderAdmin();
+  }
+};
+
+function groupLink(label, link){
+  return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`;
+}
+
+async function renderCommunity(){
+  const el = document.getElementById('comunidade');
+  if(!el) return;
+  const online = await loadOnlineUsers();
+  const people = await loadAllPeople();
+  const settings = await loadSettings();
+  const chat = await loadChat();
+  el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">🧹 Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${chat.length}</b><p class="hint">Chat salvo no Firebase. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;
+  setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50);
+}
+
+async function currentProfile(){
+  if(currentUser?.role === 'admin'){
+    return {nome:'Administrador', cidade:'Itacarambi', bio:'Gestão da Central do Colaborador.', email:currentUser.email};
+  }
+  const userData = await loadUserData(currentUser.email);
+  return userData?.profile || {nome:currentUser.email, cidade:'', bio:''};
+}
+
+window.sendChat = async function(e){
+  e.preventDefault();
+  const text = document.getElementById('chatText').value.trim();
+  if(!text) return;
+  const p = await currentProfile();
+  const msg = {
+    id: Date.now(),
+    user: p.nome,
+    city: p.cidade,
+    text,
+    time: Date.now()
+  };
+  await saveChatMessage(msg);
+  toast('Mensagem enviada no chat.');
+  await renderCommunity();
+};
+
+window.openProfile = function(id){
+  loadAllPeople().then(people => {
+    const p = people.find(x=>x.id===id);
+    if(!p) return;
+    loadOnlineUsers().then(online => {
+      const isOnline = online.some(o=>o.id===p.id);
+      document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.nome}</h2><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p>${isOnline?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.bio||'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;
+      document.getElementById('profileModal').style.display='flex';
+    });
+  });
+};
+
+window.closeProfile = function(){
+  const m = document.getElementById('profileModal');
+  if(m) m.style.display = 'none';
+};
+
+window.saveGroups = async function(e){
+  e.preventDefault();
+  const settings = await loadSettings();
+  settings.whatsappConteudos = document.getElementById('waConteudos').value.trim();
+  settings.whatsappForum = document.getElementById('waForum').value.trim();
+  await saveSettings(settings);
+  toast('Grupos de WhatsApp atualizados.');
+  await renderCommunity();
+};
+
+async function renderProfile(){
+  if(currentUser?.role !== 'colaborador'){
+    document.getElementById('perfil').innerHTML='<div class="card">Acesso restrito a colaboradores.</div>';
+    return;
+  }
+  const userData = await loadUserData(currentUser.email);
+  document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${userData.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${userData.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${userData.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${userData.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`;
+}
+
+window.saveProfile = async function(e){
+  e.preventDefault();
+  if(currentUser?.role !== 'colaborador') return;
+  const userData = await loadUserData(currentUser.email);
+  if(!userData.profile) userData.profile = {};
+  userData.profile.nome = document.getElementById('profNome').value;
+  userData.profile.cidade = document.getElementById('profCidade').value;
+  userData.profile.telefone = document.getElementById('profTel').value;
+  userData.profile.bio = document.getElementById('profBio').value;
+  await saveUserData(currentUser.email, userData);
+  toast('Perfil atualizado.');
+  const profileTask = (userData.tasks || []).find(t=>t.id===1);
+  if(profileTask && !profileTask.done && userData.profile.nome && userData.profile.cidade && userData.profile.telefone){
+    profileTask.done = true;
+    userData.points = (userData.points || 0) + profileTask.pontos;
+    await saveUserData(currentUser.email, userData);
+    toast(`+${profileTask.pontos} pontos: Perfil completo!`);
+  }
+  await renderAll();
+};
+
+async function renderBlog(){
+  document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Esta visualização abre o blog original sem alterar o arquivo blog.html. Após aprovação, atualize para conferir a publicação.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no Firebase</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;
+  setTimeout(window.refreshBlogFeed,300);
+}
+
+window.refreshBlogFeed = async function(){
+  const box = document.getElementById('liveBlogPosts');
+  if(!box) return;
+  if(!window.cpBlogApi){
+    box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';
+    return;
+  }
+  try{
+    const posts = await window.cpBlogApi.loadPosts();
+    box.innerHTML = posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('') || '<div class="empty">Nenhum post encontrado.</div>';
+  } catch(error){
+    box.innerHTML = '<div class="empty">Erro: '+error.message+'</div>';
+  }
+};
+
+// ADMIN FUNCTIONS
+window.forceRefreshAdmin = async function(){
   toast('🔄 Forçando atualização do painel admin...');
-  diagnosticLog();
-  renderAdmin();
-  const contentsCount = getAllContents().length;
-  const partnersCount = getAllPartners().length;
-  const certsCount = getAllCertificates().length;
-  toast(`✅ Admin atualizado! Conteúdos: ${contentsCount}, Parceiros: ${partnersCount}, Certificados: ${certsCount}`);
-  
-  // Exibir alerta com os dados encontrados
-  alert(`📊 DADOS ENCONTRADOS:\n\nConteúdos: ${contentsCount}\nParceiros: ${partnersCount}\nCertificados: ${certsCount}\nColaboradores: ${Object.keys(db.users).length}\n\nVerifique o console do navegador (F12) para mais detalhes.`);
+  await renderAdmin();
+  const allContents = await getAllContents();
+  const allPartners = await getAllPartners();
+  const certs = await loadCertificates();
+  toast(`✅ Admin atualizado! Conteúdos: ${allContents.length}, Parceiros: ${allPartners.length}, Certificados: ${certs.length}`);
 };
 
-window.createCollaboratorAccount = async function() {
+async function getAllContents(){
+  const users = await loadAllUsers();
+  const allContents = [];
+  for(const [email, user] of Object.entries(users)){
+    if(user.contents && Array.isArray(user.contents)){
+      for(const content of user.contents){
+        allContents.push({
+          ...content,
+          colaboradorEmail: email,
+          colaboradorNome: user.profile?.nome || email
+        });
+      }
+    }
+  }
+  return allContents;
+}
+
+async function getAllPartners(){
+  const users = await loadAllUsers();
+  const allPartners = [];
+  for(const [email, user] of Object.entries(users)){
+    if(user.partners && Array.isArray(user.partners)){
+      for(const partner of user.partners){
+        allPartners.push({
+          ...partner,
+          colaboradorEmail: email,
+          colaboradorNome: user.profile?.nome || email
+        });
+      }
+    }
+  }
+  return allPartners;
+}
+
+window.createCollaboratorAccount = async function(){
   const email = document.getElementById('newCollabEmail')?.value.trim();
   const nome = document.getElementById('newCollabNome')?.value.trim();
   const senha = document.getElementById('newCollabSenha')?.value;
@@ -806,23 +1132,15 @@ window.createCollaboratorAccount = async function() {
   if(!email || !nome || !senha) return toast('Preencha todos os campos');
   if(senha.length < 6) return toast('Senha deve ter no mínimo 6 caracteres');
   
-  const emailKey = userKey(email);
-  if(db.users[emailKey]) return toast('Este e-mail já está cadastrado');
+  const existingUser = await loadUserData(email);
+  if(existingUser) return toast('Este e-mail já está cadastrado');
   
-  try {
+  try{
     const userCredential = await window.cpBlogApi.createFirebaseUser(email, senha, nome);
     const firebaseUid = userCredential.uid;
     
-    db.users[emailKey] = emptyUser(nome, email, cidade);
-    db.creds[emailKey] = {
-      senha: senha,
-      role: 'colaborador',
-      nome: nome,
-      cidade: cidade,
-      uid: firebaseUid,
-      createdAt: new Date().toISOString()
-    };
-    saveDB();
+    const newUserData = emptyUser(nome, email, cidade);
+    await saveUserData(email, newUserData);
     
     toast(`✅ Colaborador "${nome}" criado com sucesso!`);
     toast(`🔑 Email: ${email} | Senha: ${senha}`);
@@ -832,14 +1150,11 @@ window.createCollaboratorAccount = async function() {
     document.getElementById('newCollabSenha').value = '';
     if(document.getElementById('newCollabCidade')) document.getElementById('newCollabCidade').value = '';
     
-    renderAdmin();
-    renderCommunity();
-    renderRanking();
-    
-    // Forçar atualização para mostrar o novo colaborador
-    setTimeout(() => window.forceRefreshAdmin(), 500);
-  } catch (error) {
-    if(error.code === 'auth/email-already-in-use') {
+    await renderAdmin();
+    await renderCommunity();
+    await renderRanking();
+  } catch(error){
+    if(error.code === 'auth/email-already-in-use'){
       toast('❌ Este e-mail já está em uso no Firebase.');
     } else {
       toast('❌ Erro: ' + error.message);
@@ -847,40 +1162,33 @@ window.createCollaboratorAccount = async function() {
   }
 };
 
-window.showCollaboratorDetails = function(email) {
-  const emailKey = userKey(email);
-  const user = db.users[emailKey];
-  const cred = db.creds[emailKey];
-  
-  if(!user) {
+window.showCollaboratorDetails = async function(email){
+  const userData = await loadUserData(email);
+  if(!userData){
     toast('Colaborador não encontrado');
     return;
   }
   
   const totalQuestions = modules.reduce((acc, m) => acc + m.questions.length, 0);
-  const answeredQuestions = Object.keys(user.training?.answered || {}).length;
+  const answeredQuestions = Object.keys(userData.training?.answered || {}).length;
   const progressPercent = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
-  const tasksDone = user.tasks?.filter(t => t.done).length || 0;
+  const tasksDone = (userData.tasks || []).filter(t => t.done).length || 0;
   const totalTasks = defaultTasks.length;
-  const partnersApproved = user.partners?.filter(p => p.status === 'Aprovado').length || 0;
-  const contentsApproved = user.contents?.filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length || 0;
+  const partnersApproved = (userData.partners || []).filter(p => p.status === 'Aprovado').length || 0;
+  const contentsApproved = (userData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length || 0;
   
   document.getElementById('profileModalBody').innerHTML = `
     <h2>📊 Detalhes do Colaborador</h2>
     <div class="collab-card">
-      <h4>${user.profile?.nome || email}</h4>
+      <h4>${userData.profile?.nome || email}</h4>
       <p><strong>📧 E-mail:</strong> ${email}</p>
-      <p><strong>🔑 Senha:</strong> <span id="passwordRevealSpan">••••••</span> 
-        <button class="ghost" onclick="document.getElementById('passwordRevealSpan').innerHTML = '${cred?.senha || 'N/A'}'">Mostrar</button>
-        <button class="ghost" onclick="navigator.clipboard.writeText('${cred?.senha || ''}'); toast('Senha copiada!')">📋 Copiar</button>
-      </p>
-      <p><strong>🏙️ Cidade:</strong> ${user.profile?.cidade || 'Não informado'}</p>
-      <p><strong>📞 Telefone:</strong> ${user.profile?.telefone || 'Não informado'}</p>
+      <p><strong>🏙️ Cidade:</strong> ${userData.profile?.cidade || 'Não informado'}</p>
+      <p><strong>📞 Telefone:</strong> ${userData.profile?.telefone || 'Não informado'}</p>
     </div>
     <div class="collab-card">
       <h4>📈 Progresso</h4>
-      <p><strong>⭐ Pontos:</strong> ${user.points || 0}</p>
-      <p><strong>🏆 Nível:</strong> ${level(user.points || 0)}</p>
+      <p><strong>⭐ Pontos:</strong> ${userData.points || 0}</p>
+      <p><strong>🏆 Nível:</strong> ${level(userData.points || 0)}</p>
       <p><strong>📚 Questões:</strong> ${answeredQuestions}/${totalQuestions} (${progressPercent}%)</p>
       <p><strong>✅ Tarefas:</strong> ${tasksDone}/${totalTasks}</p>
       <p><strong>🏨 Parceiros:</strong> ${partnersApproved}</p>
@@ -894,48 +1202,39 @@ window.showCollaboratorDetails = function(email) {
   document.getElementById('profileModal').style.display = 'flex';
 };
 
-window.deleteCollaborator = function(email) {
+window.deleteCollaborator = async function(email){
   if(!confirm(`⚠️ Remover colaborador "${email}"? Isso também excluirá todas as suas solicitações.`)) return;
-  const emailKey = userKey(email);
-  delete db.users[emailKey];
-  delete db.creds[emailKey];
-  saveDB();
+  const userRef = doc(firestore, USERS_COLLECTION, email.toLowerCase());
+  await deleteDoc(userRef);
   toast(`Colaborador ${email} removido!`);
-  renderAdmin();
-  renderCommunity();
-  renderRanking();
-  closeProfile();
-  window.forceRefreshAdmin();
+  await renderAdmin();
+  await renderCommunity();
+  await renderRanking();
+  window.closeProfile();
 };
 
-window.resetCollaboratorPassword = function(email) {
-  const newPassword = prompt(`Nova senha para ${email}:`, 'novaSenha123');
-  if(!newPassword || newPassword.length < 6) return toast('Mínimo 6 caracteres');
-  const emailKey = userKey(email);
-  if(db.creds[emailKey]) {
-    db.creds[emailKey].senha = newPassword;
-    saveDB();
-    toast(`✅ Senha atualizada!`);
-    renderAdmin();
-  }
+window.resetCollaboratorPassword = async function(email){
+  toast('Para redefinir senha, use a funcionalidade "Esqueci minha senha" na tela de login ou contate o suporte Firebase.');
 };
 
-window.approveContent = async function(contentId, approved, colaboradorEmail) {
+window.approveContent = async function(contentId, approved, colaboradorEmail){
   let targetUser = null;
   let targetContent = null;
   
-  for (const [email, user] of Object.entries(db.users)) {
-    if (user.contents) {
+  const users = await loadAllUsers();
+  for(const [email, user] of Object.entries(users)){
+    if(user.contents){
       const found = user.contents.find(c => c.id === contentId);
-      if (found) {
+      if(found){
         targetUser = user;
         targetContent = found;
+        targetUser.email = email;
         break;
       }
     }
   }
   
-  if (!targetContent) {
+  if(!targetContent){
     toast('Conteúdo não encontrado');
     return;
   }
@@ -965,9 +1264,11 @@ window.approveContent = async function(contentId, approved, colaboradorEmail) {
       if(!targetContent.awarded){
         targetContent.awarded = true;
         if(targetUser) targetUser.points = (targetUser.points || 0) + 50;
-        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para ${targetUser.profile.nome}.`);
+        await saveUserData(targetUser.email, targetUser);
+        toast(`✅ Conteúdo aprovado e publicado! +50 pontos para ${targetUser.profile?.nome || targetUser.email}.`);
         confetti();
       } else {
+        await saveUserData(targetUser.email, targetUser);
         toast(`✅ Conteúdo aprovado e publicado!`);
       }
     } catch(error){
@@ -976,13 +1277,13 @@ window.approveContent = async function(contentId, approved, colaboradorEmail) {
     }
   } else if(!approved) {
     targetContent.blogStatus = 'Rejeitado';
+    await saveUserData(targetUser.email, targetUser);
     toast(`❌ Conteúdo rejeitado.`);
   }
-  saveDB();
-  renderAll();
+  await renderAll();
 };
 
-window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) {
+window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail){
   if(!confirm('Excluir este conteúdo permanentemente? Isso também removerá do blog se já publicado.')) return;
   
   if(blogId && window.cpBlogApi){
@@ -993,11 +1294,13 @@ window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) 
   }
   
   let found = false;
-  for (const [email, user] of Object.entries(db.users)) {
-    if (user.contents) {
+  const users = await loadAllUsers();
+  for(const [email, user] of Object.entries(users)){
+    if(user.contents){
       const index = user.contents.findIndex(c => c.id === contentId);
-      if (index !== -1) {
+      if(index !== -1){
         user.contents.splice(index, 1);
+        await saveUserData(email, user);
         found = true;
         break;
       }
@@ -1005,24 +1308,70 @@ window.deleteAdminContent = async function(contentId, blogId, colaboradorEmail) 
   }
   
   if(found) {
-    saveDB();
     toast('Conteúdo excluído!');
   } else {
     toast('Conteúdo não encontrado');
   }
-  renderAll();
-  window.forceRefreshAdmin();
+  await renderAll();
 };
 
-window.deleteAdminPartner = function(partnerId, colaboradorEmail) {
+window.approvePartner = async function(partnerId, approved, colaboradorEmail){
+  let targetUser = null;
+  let targetPartner = null;
+  
+  const users = await loadAllUsers();
+  for(const [email, user] of Object.entries(users)){
+    if(user.partners){
+      const found = user.partners.find(p => p.id === partnerId);
+      if(found){
+        targetUser = user;
+        targetPartner = found;
+        targetUser.email = email;
+        break;
+      }
+    }
+  }
+  
+  if(!targetPartner){
+    toast('Parceiro não encontrado');
+    return;
+  }
+  
+  const oldStatus = targetPartner.status;
+  targetPartner.status = approved ? 'Aprovado' : 'Rejeitado';
+  
+  if(approved && oldStatus !== 'Aprovado'){
+    if(!targetPartner.awarded){
+      targetPartner.awarded = true;
+      targetPartner.comissaoPaga = true;
+      if(targetUser){
+        targetUser.points = (targetUser.points || 0) + 100;
+        await saveUserData(targetUser.email, targetUser);
+      }
+      toast(`✅ Parceiro aprovado! +100 pontos para ${targetUser.profile?.nome || targetUser.email}. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`);
+      confetti();
+    } else {
+      await saveUserData(targetUser.email, targetUser);
+      toast(`✅ Parceiro aprovado!`);
+    }
+  } else if(!approved) {
+    await saveUserData(targetUser.email, targetUser);
+    toast(`❌ Parceiro rejeitado.`);
+  }
+  await renderAll();
+};
+
+window.deleteAdminPartner = async function(partnerId, colaboradorEmail){
   if(!confirm('Excluir esta solicitação de parceiro permanentemente?')) return;
   
   let found = false;
-  for (const [email, user] of Object.entries(db.users)) {
-    if (user.partners) {
+  const users = await loadAllUsers();
+  for(const [email, user] of Object.entries(users)){
+    if(user.partners){
       const index = user.partners.findIndex(p => p.id === partnerId);
-      if (index !== -1) {
+      if(index !== -1){
         user.partners.splice(index, 1);
+        await saveUserData(email, user);
         found = true;
         break;
       }
@@ -1030,50 +1379,124 @@ window.deleteAdminPartner = function(partnerId, colaboradorEmail) {
   }
   
   if(found) {
-    saveDB();
     toast('Parceiro excluído!');
   } else {
     toast('Parceiro não encontrado');
   }
-  renderAll();
-  window.forceRefreshAdmin();
+  await renderAll();
 };
 
-window.deleteAdminCertificate = function(certId) {
+window.deleteAdminCertificate = async function(certId){
   if(!confirm('Excluir esta solicitação de certificado permanentemente?')) return;
-  
-  const index = db.certs.findIndex(c => c.id === certId);
-  if(index !== -1){
-    db.certs.splice(index, 1);
-    saveDB();
-    toast('Certificado excluído!');
-  } else {
-    toast('Certificado não encontrado');
-  }
-  renderAll();
-  window.forceRefreshAdmin();
+  await deleteCertificate(certId);
+  toast('Certificado excluído!');
+  await renderAll();
 };
 
-function renderAdmin(){
+window.openApproveCertModal = function(certId){
+  const modalBody = document.getElementById('certModalBody');
+  if(!modalBody) return;
+  modalBody.innerHTML = `<h2>Aprovar Certificado</h2><p>Selecione o arquivo PDF do certificado para enviar ao colaborador.</p><label>PDF do certificado:</label><input type="file" id="certFile" accept=".pdf"><br><br><div class="actions"><button class="ok" onclick="window.approveCertWithFile(${certId})">✅ Aprovar</button><button class="danger" onclick="window.closeCertModal()">Cancelar</button></div>`;
+  document.getElementById('certModal').style.display = 'flex';
+};
+
+window.closeCertModal = function(){
+  document.getElementById('certModal').style.display = 'none';
+};
+
+window.approveCertWithFile = async function(certId){
+  const file = document.getElementById('certFile')?.files?.[0];
+  if(!file) return toast('Selecione um PDF');
+  const reader = new FileReader();
+  reader.onload = async function(e){
+    const cert = (await loadCertificates()).find(c => c.id === certId);
+    if(cert){
+      cert.status = 'Aprovado';
+      cert.certificadoUrl = e.target.result;
+      await saveCertificate(cert);
+      toast(`✅ Certificado aprovado!`);
+      await renderAll();
+      window.closeCertModal();
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+window.rejectCert = async function(certId, motivo){
+  if(confirm('Rejeitar?')){
+    const cert = (await loadCertificates()).find(c => c.id === certId);
+    if(cert){
+      cert.status = 'Rejeitado';
+      cert.motivo = motivo;
+      await saveCertificate(cert);
+      toast(`Certificado rejeitado.`);
+      await renderAll();
+    }
+  }
+};
+
+window.saveMaterial = async function(e){
+  e.preventDefault();
+  const id = document.getElementById('matId').value ? Number(document.getElementById('matId').value) : Date.now();
+  const material = {
+    id,
+    titulo: document.getElementById('matTitulo').value,
+    descricao: document.getElementById('matDesc').value,
+    link: document.getElementById('matLink').value,
+    ativo: document.getElementById('matAtivo').checked
+  };
+  await saveMaterial(material);
+  toast('Material salvo!');
+  document.getElementById('matId').value = '';
+  document.getElementById('matTitulo').value = '';
+  document.getElementById('matDesc').value = '';
+  document.getElementById('matLink').value = '';
+  document.getElementById('matAtivo').checked = true;
+  await renderAdmin();
+  await renderMaterials();
+};
+
+window.editMaterial = function(id){
+  loadMaterials().then(materials => {
+    const m = materials.find(x=>x.id===id);
+    if(!m) return;
+    document.getElementById('matId').value = m.id;
+    document.getElementById('matTitulo').value = m.titulo;
+    document.getElementById('matDesc').value = m.descricao;
+    document.getElementById('matLink').value = m.link || '';
+    document.getElementById('matAtivo').checked = m.ativo !== false;
+    toast('Material carregado para edição.');
+  });
+};
+
+window.deleteMaterial = async function(id){
+  if(!confirm('Remover este material?')) return;
+  await deleteMaterial(id);
+  toast('Material removido.');
+  await renderAdmin();
+  await renderMaterials();
+};
+
+async function renderAdmin(){
   if(currentUser?.uid !== ADMIN_UID){
     document.getElementById('admin').innerHTML='<div class="card">Acesso restrito ao administrador.</div>';
     return;
   }
   
-  const allContents = getAllContents();
+  const allContents = await getAllContents();
   const pendingContents = allContents.filter(c => c.status === 'Pendente');
   const approvedContents = allContents.filter(c => c.status === 'Aprovado' && c.blogStatus !== 'Publicado');
-  const rejectedContents = allContents.filter(c => c.status === 'Rejeitado');
   const publishedContents = allContents.filter(c => c.blogStatus === 'Publicado');
   
-  const allPartners = getAllPartners();
+  const allPartners = await getAllPartners();
   const pendingPartners = allPartners.filter(p => p.status === 'Pendente');
   const approvedPartners = allPartners.filter(p => p.status === 'Aprovado');
   
-  const allCertificates = getAllCertificates();
+  const allCertificates = await loadCertificates();
   const pendingCerts = allCertificates.filter(c => c.status === 'Pendente');
   
-  const collaboratorsList = Object.entries(db.users).map(([email, user]) => ({
+  const users = await loadAllUsers();
+  const collaboratorsList = Object.entries(users).map(([email, user]) => ({
     email: email,
     nome: user.profile?.nome || email,
     cidade: user.profile?.cidade || '',
@@ -1081,13 +1504,14 @@ function renderAdmin(){
     nivel: level(user.points || 0)
   }));
   
+  const materials = await loadMaterials();
+  
   document.getElementById('admin').innerHTML = `
     <div class="diagnostic-box">
-      <strong>🔍 Diagnóstico do Sistema</strong>
+      <strong>🔍 Diagnóstico do Sistema (Firebase)</strong>
       <pre>Colaboradores: ${collaboratorsList.length} | Conteúdos: ${allContents.length} | Parceiros: ${allPartners.length} | Certificados: ${allCertificates.length}
 Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pendingPartners.length} | Certificados Pendentes: ${pendingCerts.length}</pre>
       <button class="secondary" onclick="window.forceRefreshAdmin()">🔄 FORÇAR ATUALIZAÇÃO</button>
-      <button class="debug-btn" onclick="window.showStorageDebug()">🐛 DEBUG STORAGE</button>
     </div>
     
     <h2>👥 Gerenciar Colaboradores</h2>
@@ -1143,7 +1567,7 @@ Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pending
         <div class="list">${pendingContents.length > 0 ? pendingContents.map(c => `
           <div class="item">
             <b>${c.titulo}</b>
-            <p class="hint">👤 ${c.colaboradorNome || getContentAuthor(c)} · ${c.categoria}</p>
+            <p class="hint">👤 ${c.colaboradorNome || c.colaboradorEmail} · ${c.categoria}</p>
             <div class="actions">
               <button class="ghost" onclick="window.previewContent(${c.id})">👁️ Prévia</button>
               <button class="ok" onclick="window.approveContent(${c.id}, true, '${c.colaboradorEmail || ''}')">✅ Aprovar</button>
@@ -1160,8 +1584,8 @@ Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pending
             <p class="hint">👤 ${p.colaboradorNome} · ${p.categoria} · ${p.cidade}</p>
             <p class="hint">Plano ${p.plano} · R$ ${Number(p.valor).toFixed(2)}</p>
             <div class="actions">
-              ${p.osData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'osData')">📄 Ordem</button>` : ''}
-              ${p.pixData ? `<button class="ghost" onclick="window.openAttachment(${p.id}, 'pixData')">💰 Pix</button>` : ''}
+              ${p.osData ? `<button class="ghost" onclick="window.openAttachmentViewer('${p.osData}')">📄 Ordem</button>` : ''}
+              ${p.pixData ? `<button class="ghost" onclick="window.openAttachmentViewer('${p.pixData}')">💰 Pix</button>` : ''}
               <button class="ok" onclick="window.approvePartner(${p.id}, true, '${p.colaboradorEmail}')">✅ Aprovar</button>
               <button class="danger" onclick="window.approvePartner(${p.id}, false, '${p.colaboradorEmail}')">❌ Rejeitar</button>
               <button class="danger" onclick="window.deleteAdminPartner(${p.id}, '${p.colaboradorEmail}')">🗑️ Excluir</button>
@@ -1204,7 +1628,7 @@ Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pending
           <label><input id="matAtivo" type="checkbox" checked> Ativo</label>
           <button class="secondary">Salvar</button>
         </form>
-        <div class="list">${db.materials.map(m => `
+        <div class="list">${(materials || []).map(m => `
           <div class="item">
             <b>${m.titulo}</b>
             <div class="actions">
@@ -1219,40 +1643,212 @@ Conteúdos Pendentes: ${pendingContents.length} | Parceiros Pendentes: ${pending
   `;
 }
 
-window.showStorageDebug = function(){
-  const stored = localStorage.getItem('cpCentralDB');
-  if(stored){
-    try{
-      const parsed = JSON.parse(stored);
-      alert(`📦 DADOS NO LOCALSTORAGE:\n\nColaboradores: ${Object.keys(parsed.users || {}).length}\nCertificados: ${(parsed.certs || []).length}\n\nTotal de conteúdos: ${Object.values(parsed.users || {}).reduce((acc, u) => acc + (u.contents?.length || 0), 0)}\nTotal de parceiros: ${Object.values(parsed.users || {}).reduce((acc, u) => acc + (u.partners?.length || 0), 0)}`);
-      console.log('Dados completos:', parsed);
-    } catch(e){
-      alert('Erro ao ler dados: ' + e.message);
-    }
-  } else {
-    alert('Nenhum dado encontrado no localStorage!');
+window.openAttachmentViewer = function(dataUrl){
+  if(!dataUrl) return toast('Anexo não encontrado.');
+  const w = window.open('','_blank');
+  if(dataUrl.startsWith('data:application/pdf')) w.document.write(`<iframe src="${dataUrl}" style="width:100%;height:100vh;border:0"></iframe>`);
+  else w.document.write(`<img src="${dataUrl}" style="max-width:100%;height:auto">`);
+  w.document.close();
+};
+
+// File handling helpers
+window.handleImageUpload = function(event, elementId, previewId){
+  const file = event.target.files[0];
+  if(file && file.type.startsWith('image/')){
+    fileToBase64(file).then(base64 => {
+      document.getElementById(elementId).value = base64;
+      const preview = document.getElementById(previewId);
+      if(preview){
+        preview.src = base64;
+        preview.style.display = 'block';
+      }
+      if(window.updatePostPreview) window.updatePostPreview();
+    }).catch(err => toast('Erro ao carregar imagem: '+err));
+  } else if(file){
+    toast('Por favor, selecione apenas arquivos de imagem.');
+    event.target.value = '';
   }
 };
 
-window.openApproveCertModal=function(certId){const cert=db.certs.find(c=>c.id===certId);if(!cert)return;document.getElementById('certModalBody').innerHTML=`<h2>Aprovar Certificado: ${cert.nome}</h2><p>👤 ${cert.usuario}</p><label>PDF do certificado:</label><input type="file" id="certFile" accept=".pdf"><br><br><div class="actions"><button class="ok" onclick="window.approveCertWithFile(${cert.id})">✅ Aprovar</button><button class="danger" onclick="closeCertModal()">Cancelar</button></div>`;document.getElementById('certModal').style.display='flex'};
-window.closeCertModal=function(){document.getElementById('certModal').style.display='none'};
-window.approveCertWithFile=async function(certId){const file=document.getElementById('certFile')?.files?.[0];if(!file)return toast('Selecione um PDF');const reader=new FileReader();reader.onload=function(e){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Aprovado';cert.certificadoUrl=e.target.result;saveDB();toast(`✅ Certificado aprovado!`);renderAll();closeCertModal();}};reader.readAsDataURL(file);};
-window.rejectCert=function(certId,motivo){if(confirm('Rejeitar?')){const cert=db.certs.find(c=>c.id===certId);if(cert){cert.status='Rejeitado';cert.motivo=motivo;saveDB();toast(`Certificado rejeitado.`);renderAll();}}};
-window.checkSpecialTasks=checkSpecialTasks;
-window.saveMaterial=saveMaterial;
-window.editMaterial=editMaterial;
-window.deleteMaterial=deleteMaterial;
-
-const session=load('cpSession',null);
-if(session){
-  currentUser=session;
-  if(currentUser.uid === ADMIN_UID){
-    currentUser.role = 'admin';
-    currentUser.isAdmin = true;
-  } else {
-    currentUser.role = 'colaborador';
+window.handleGalleryUpload = function(index, fileInput){
+  const file = fileInput.files[0];
+  if(file && file.type.startsWith('image/')){
+    fileToBase64(file).then(base64 => {
+      const inputField = document.getElementById(`galleryBase64${index}`);
+      if(inputField) inputField.value = base64;
+      const preview = document.getElementById(`galleryPreview${index}`);
+      if(preview){
+        preview.src = base64;
+        preview.style.display = 'block';
+      }
+      if(window.updatePostPreview) window.updatePostPreview();
+      if(window.updateGalleryPreview) window.updateGalleryPreview();
+    }).catch(err => toast('Erro ao carregar imagem da galeria: '+err));
+  } else if(file){
+    toast('Por favor, selecione apenas arquivos de imagem para a galeria.');
+    fileInput.value = '';
   }
-  startApp();
+};
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Online tracking
+function startOnlineTracking(){
+  if(onlineInterval) clearInterval(onlineInterval);
+  onlineInterval = setInterval(async () => {
+    if(currentUser && currentUser.role !== 'admin' && document.hasFocus()){
+      const userData = await loadUserData(currentUser.email);
+      if(userData){
+        const task = (userData.tasks || []).find(t => t.id === 8);
+        if(task && !task.done){
+          userData.onlineTime = (userData.onlineTime || 0) + 1;
+          if(userData.onlineTime >= 10800){
+            task.done = true;
+            userData.points = (userData.points || 0) + task.pontos;
+            await saveUserData(currentUser.email, userData);
+            toast(`🎉 Tarefa "${task.titulo}" concluída! +${task.pontos} pontos!`);
+            confetti();
+            if(currentTab === 'tarefas') await renderTasks();
+          } else {
+            await saveUserData(currentUser.email, userData);
+          }
+        }
+      }
+    }
+  }, 1000);
+}
+
+async function checkSpecialTasks(){
+  if(currentUser?.role !== 'colaborador') return;
+  const userData = await loadUserData(currentUser.email);
+  let needsUpdate = false;
+  
+  const task6 = (userData.tasks || []).find(t => t.id === 6);
+  if(task6 && !task6.done){
+    const approvedContents = (userData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
+    if(approvedContents >= 3){
+      task6.done = true;
+      userData.points = (userData.points || 0) + task6.pontos;
+      needsUpdate = true;
+      toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
+      confetti();
+      if(currentTab === 'tarefas') await renderTasks();
+    }
+  }
+  
+  const task7 = (userData.tasks || []).find(t => t.id === 7);
+  if(task7 && !task7.done){
+    const approvedPartners = (userData.partners || []).filter(p => p.status === 'Aprovado').length;
+    if(approvedPartners >= 2){
+      task7.done = true;
+      userData.points = (userData.points || 0) + task7.pontos;
+      needsUpdate = true;
+      toast(`🎉 Tarefa "${task7.titulo}" concluída! +${task7.pontos} pontos!`);
+      confetti();
+      if(currentTab === 'tarefas') await renderTasks();
+    }
+  }
+  
+  if(needsUpdate){
+    await saveUserData(currentUser.email, userData);
+  }
+}
+
+// Clean old chat messages periodically
+setInterval(async () => {
+  await clearOldChat();
+}, 60 * 60 * 1000);
+
+// Presence tracking
+setInterval(async () => {
+  if(currentUser){
+    const profile = await currentProfile();
+    await updatePresence(currentUser.uid || currentUser.email, {
+      id: currentUser.uid || currentUser.email,
+      nome: profile.nome,
+      cidade: profile.cidade,
+      role: currentUser.role
+    });
+    if(currentTab === 'comunidade') await renderCommunity();
+  }
+}, 15000);
+
+// Login handling
+document.getElementById('loginForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  try{
+    const userCredential = await window.cpBlogApi.signIn(email, senha);
+    const firebaseUser = userCredential.user;
+    let role = 'colaborador';
+    let isAdminUser = false;
+    if(firebaseUser.uid === ADMIN_UID){
+      role = 'admin';
+      isAdminUser = true;
+    }
+    currentUser = {
+      email: firebaseUser.email,
+      role: role,
+      nome: role === 'admin' ? 'Administrador' : 'Colaborador',
+      cidade: 'Itacarambi',
+      uid: firebaseUser.uid,
+      isAdmin: isAdminUser
+    };
+    
+    if(role === 'colaborador'){
+      let userData = await loadUserData(firebaseUser.email);
+      if(!userData){
+        userData = emptyUser(currentUser.nome, firebaseUser.email, currentUser.cidade);
+        await saveUserData(firebaseUser.email, userData);
+      }
+    }
+    
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.body.classList.toggle('is-admin', isAdminUser);
+    await renderNav();
+    await renderAll();
+    window.showTab('dashboard');
+    await clearOldChat();
+    checkSpecialTasks();
+    if(currentUser.role !== 'admin') startOnlineTracking();
+    
+    // Initial presence update
+    const profile = await currentProfile();
+    await updatePresence(firebaseUser.uid || firebaseUser.email, {
+      id: firebaseUser.uid || firebaseUser.email,
+      nome: profile.nome,
+      cidade: profile.cidade,
+      role: currentUser.role
+    });
+    
+  } catch(error){
+    toast('Login inválido: '+error.message);
+  }
+};
+
+window.logout = function(){
+  if(onlineInterval) clearInterval(onlineInterval);
+  location.reload();
+};
+
+// Check for existing session
+const session = localStorage.getItem('cpSession');
+if(session){
+  try{
+    const sessionData = JSON.parse(session);
+    if(sessionData && sessionData.email){
+      window.cpBlogApi.signIn(sessionData.email, sessionData.password || '').catch(() => {});
+    }
+  } catch(e){}
 }
 </script>
 </body>
