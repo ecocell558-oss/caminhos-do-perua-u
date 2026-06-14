@@ -959,7 +959,15 @@
   
   async function submitForApproval(postData) {
     try {
-      await addDoc(postsCollection, { ...postData, status: "pending", authorEmail: currentUser?.email, date: new Date().toISOString() });
+      // Garantir que a data seja salva corretamente
+      const dataToSave = {
+        ...postData,
+        status: "pending",
+        authorEmail: currentUser?.email,
+        date: new Date().toISOString()
+      };
+      const docRef = await addDoc(postsCollection, dataToSave);
+      console.log("✅ Solicitação salva com ID:", docRef.id);
       alert("✅ Postagem enviada para aprovação do administrador!");
       return true;
     } catch (error) {
@@ -1547,8 +1555,7 @@
       galleryLayout: contribSelectedLayout, 
       autoCarousel: document.getElementById('contribAutoCarousel').checked, 
       isFeatured: false, 
-      authorEmail: currentUser.email,
-      date: new Date().toISOString()
+      authorEmail: currentUser.email
     };
     await submitForApproval(postData);
     document.getElementById('contributorForm').reset();
@@ -1556,7 +1563,6 @@
     renderContribGalleryInputs();
     await loadPostsFromFirebase();
     await refreshContributorList();
-    alert('Postagem enviada para aprovação!');
   });
   
   document.getElementById('cancelEditBtn')?.addEventListener('click', () => { 
