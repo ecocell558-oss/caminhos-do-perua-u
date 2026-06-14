@@ -172,6 +172,18 @@
         const materialRef = doc(firestore, 'materials', materialId.toString());
         await deleteDoc(materialRef);
         return true;
+      },
+      // CONFIGURAÇÕES (LINKS DOS GRUPOS) - AGORA NO FIREBASE!
+      async saveSettings(settingsData) {
+        const settingsRef = doc(firestore, 'settings', 'appSettings');
+        await setDoc(settingsRef, settingsData, { merge: true });
+        return settingsData;
+      },
+      async loadSettings() {
+        const settingsRef = doc(firestore, 'settings', 'appSettings');
+        const snap = await getDoc(settingsRef);
+        if(snap.exists()) return snap.data();
+        return { whatsappConteudos: '', whatsappForum: '' };
       }
     };
     
@@ -222,6 +234,7 @@ let firebaseUsers = [];
 let firebaseMessages = [];
 let firebaseCerts = [];
 let firebaseMaterials = [];
+let firebaseSettings = { whatsappConteudos: '', whatsappForum: '' };
 let messagesUnsubscribe = null;
 let currentUserData = null;
 
@@ -266,6 +279,22 @@ const defaultMaterials = [
 ];
 
 // ==================== FUNÇÕES DO FIREBASE ====================
+async function syncSettingsFromFirebase() {
+  if(!window.cpBlogApi) return;
+  try {
+    firebaseSettings = await window.cpBlogApi.loadSettings();
+    if(currentTab === 'comunidade') renderCommunity();
+  } catch(e) { console.error('Erro sync settings:', e); }
+}
+
+async function saveSettingsToFirebase(settingsData) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.saveSettings(settingsData);
+    await syncSettingsFromFirebase();
+  } catch(e) { console.error('Erro save settings:', e); }
+}
+
 async function syncUsersFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
@@ -533,6 +562,7 @@ async function startApp(){
   await syncPartnersFromFirebase();
   await syncCertsFromFirebase();
   await syncMaterialsFromFirebase();
+  await syncSettingsFromFirebase();
   await initMessagesListener();
   renderNav();
   renderAll();
@@ -706,10 +736,10 @@ function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profi
 async function renderCerts(){ const userCerts = firebaseCerts.filter(c => c.userUid === currentUser?.uid); document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${(currentUserData?.points||0)<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length ? userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>${c.motivo ? `<p class="hint" style="color:#c0392b">Motivo da rejeição: ${c.motivo}</p>` : ''}</div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl && c.status === 'Aprovado' ? `<div class="actions"><button class="secondary" onclick="window.open('${c.certificadoUrl}','_blank')">📄 BAIXAR CERTIFICADO</button></div>` : ''}</div>`).join('') : '<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`; }
 window.askCert = async function(nome, pts){ if(firebaseCerts.some(c=>c.userUid===currentUser?.uid && c.nome===nome && c.status!=='Rejeitado')){ return toast('Você já solicitou este certificado.'); } const certData = { id: Date.now().toString(), userUid: currentUser?.uid, usuario: currentUserData?.profile?.nome || 'Colaborador', nome: nome, pts: pts, status: 'Pendente', requestDate: new Date().toISOString(), certificadoUrl: '', motivo: '' }; await saveCertToFirebase(certData); toast('📜 Certificado solicitado para análise.'); renderAll(); };
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
-function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db?.settings?.whatsappConteudos || '')}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db?.settings?.whatsappForum || '')}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat salvo no Firebase. Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real via Firebase!</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db?.settings?.whatsappConteudos || ''}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db?.settings?.whatsappForum || ''}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
+function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',firebaseSettings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',firebaseSettings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat salvo no Firebase. Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real via Firebase!</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${firebaseSettings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${firebaseSettings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
 window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');chatText.value='';renderCommunity()};
 window.openProfile=function(uid){const p=firebaseUsers.find(x=>x.uid===uid);if(!p)return;const online=firebaseUsers.some(o=>o.uid===p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
-window.saveGroups=function(e){e.preventDefault();if(!db) db={};if(!db.settings) db.settings={};db.settings.whatsappConteudos=waConteudos.value.trim();db.settings.whatsappForum=waForum.value.trim();localStorage.setItem('cpCentralDB',JSON.stringify(db));toast('Grupos de WhatsApp atualizados.');renderCommunity()};
+window.saveGroups=async function(e){e.preventDefault();const newSettings = { whatsappConteudos: waConteudos.value.trim(), whatsappForum: waForum.value.trim() };await saveSettingsToFirebase(newSettings);toast('Grupos de WhatsApp atualizados e salvos no Firebase!');renderCommunity()};
 async function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`}
 window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.profile) currentUserData.profile={};currentUserData.profile.nome=profNome.value;currentUserData.profile.cidade=profCidade.value;currentUserData.profile.telefone=profTel.value;currentUserData.profile.bio=profBio.value;await saveUserToFirebase(currentUserData);toast('Perfil atualizado.');const profileTask=currentUserData.tasks?.find(t=>t.id===1);if(profileTask&&!profileTask.done&&currentUserData.profile.nome&&currentUserData.profile.cidade&&currentUserData.profile.telefone){profileTask.done=true;currentUserData.points = (currentUserData.points || 0) + profileTask.pontos;await saveUserToFirebase(currentUserData);toast(`+${profileTask.pontos} pontos: Perfil completo!`);}renderAll()};
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: clique 2x e pressione V 2x para acessar. Atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
@@ -1127,6 +1157,7 @@ document.getElementById('loginForm').onsubmit = async e => {
     await syncPartnersFromFirebase();
     await syncCertsFromFirebase();
     await syncMaterialsFromFirebase();
+    await syncSettingsFromFirebase();
     await initMessagesListener();
     startApp();
   } catch(error) {
@@ -1148,6 +1179,7 @@ if(session){
     await syncPartnersFromFirebase();
     await syncCertsFromFirebase();
     await syncMaterialsFromFirebase();
+    await syncSettingsFromFirebase();
     await initMessagesListener();
     if(currentUser.role === 'colaborador') {
       currentUserData = await window.cpBlogApi.loadUser(currentUser.uid);
