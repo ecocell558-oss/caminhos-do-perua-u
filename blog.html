@@ -35,7 +35,7 @@
     };
     
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, limit, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, limit, where, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const app = initializeApp(firebaseConfig);
@@ -44,6 +44,23 @@
     
     window.db = db;
     window.auth = auth;
+    
+    // Forçar permissões de escrita - tentar criar documento de teste
+    async function testFirebaseConnection() {
+      try {
+        const testRef = doc(db, "test", "connection");
+        await setDoc(testRef, { timestamp: new Date().toISOString() });
+        console.log('✅ Firebase connection test successful');
+        return true;
+      } catch (error) {
+        console.error('❌ Firebase connection error:', error);
+        console.log('⚠️ Verifique as regras de segurança do Firebase no console do Firebase: https://console.firebase.google.com/');
+        console.log('⚠️ As regras devem permitir escrita para usuários autenticados');
+        return false;
+      }
+    }
+    
+    testFirebaseConnection();
     console.log('🔥 Firebase conectado com sucesso!');
   </script>
   
@@ -620,7 +637,7 @@
     <div class="form-group"><label>Resumo</label><textarea id="postExcerpt" rows="2"></textarea></div>
     <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="postFull" rows="4"></textarea></div>
     <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="postImg"></div>
-    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo - opcional)</label><input type="text" id="postVideo" placeholder="https://www.youtube.com/embed/..."></div>
+    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo - opcional)</label><input type="text" id="postVideo" placeholder="https://www.youtube.com/embed/... ou URL do vídeo"></div>
     <div class="form-group"><label>Link externo (opcional)</label><input type="text" id="postLink" placeholder="https://..."></div>
     <div class="image-upload-group"><label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label><div id="galleryImagesContainer"></div><button type="button" id="addImageBtn" class="btn-add-img"><i class="fas fa-plus"></i> Adicionar imagem</button>
       <div class="form-group" style="margin-top:12px;"><label>Layout da galeria</label><div id="layoutSelector"><span data-layout="2" class="layout-opt">2 col</span><span data-layout="3" class="layout-opt active-layout">3 col</span><span data-layout="4" class="layout-opt">4 col</span></div><input type="hidden" id="galleryLayout" value="3"></div>
@@ -647,7 +664,7 @@
     <div class="form-group"><label>Resumo</label><textarea id="contribExcerpt" rows="2"></textarea></div>
     <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="contribFull" rows="4"></textarea></div>
     <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="contribImg"></div>
-    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo)</label><input type="text" id="contribVideo" placeholder="https://www.youtube.com/embed/..."></div>
+    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo)</label><input type="text" id="contribVideo" placeholder="https://www.youtube.com/embed/... ou URL do vídeo"></div>
     <div class="form-group"><label>Link externo</label><input type="text" id="contribLink" placeholder="https://..."></div>
     
     <div class="image-upload-group">
@@ -732,6 +749,41 @@
   let swRegistration = null;
   
   const AUTHORIZED_ADMIN_EMAIL = "guia.caminhosdoperuacu@gmail.com";
+  
+  // Função para converter URL do YouTube para embed
+  function convertToEmbedUrl(url) {
+    if (!url) return '';
+    
+    // Se já for embed do YouTube
+    if (url.includes('youtube.com/embed/')) return url;
+    
+    // YouTube padrão: https://www.youtube.com/watch?v=ID
+    if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(url.split('?')[1]);
+      const videoId = urlParams.get('v');
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // YouTube youtu.be
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1].split('?')[0];
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Vimeo
+    if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1].split('?')[0];
+      if (videoId) return `https://player.vimeo.com/video/${videoId}`;
+    }
+    
+    // Já é embed do Vimeo
+    if (url.includes('player.vimeo.com/video/')) return url;
+    
+    // Se for URL direta do Vimeo com embed
+    if (url.includes('vimeo.com/embed/')) return url;
+    
+    return url;
+  }
   
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -866,6 +918,7 @@
       querySnapshot.forEach((doc) => {
         posts.push({ id: doc.id, ...doc.data() });
       });
+      console.log('📚 Posts carregados:', posts.length);
       
       const urlParams = new URLSearchParams(window.location.search);
       const postIdParam = urlParams.get('p');
@@ -901,6 +954,7 @@
       alert("✅ Post aprovado e publicado!");
     } catch(error) {
       console.error("Erro ao aprovar:", error);
+      alert("Erro ao aprovar: " + error.message);
     }
   }
   
@@ -915,6 +969,7 @@
         alert("❌ Solicitação rejeitada e removida.");
       } catch(error) {
         console.error("Erro ao rejeitar:", error);
+        alert("Erro ao rejeitar: " + error.message);
       }
     }
   }
@@ -952,14 +1007,13 @@
       return true;
     } catch (error) {
       console.error("Erro ao deletar:", error);
-      alert("Erro ao deletar publicação");
+      alert("Erro ao deletar publicação: " + error.message);
       return false;
     }
   }
   
   async function submitForApproval(postData) {
     try {
-      // Garantir que a data seja salva corretamente
       const dataToSave = {
         ...postData,
         status: "pending",
@@ -971,8 +1025,8 @@
       alert("✅ Postagem enviada para aprovação do administrador!");
       return true;
     } catch (error) {
-      console.error("Erro ao enviar:", error);
-      alert("Erro ao enviar solicitação: " + error.message);
+      console.error("❌ Erro detalhado ao enviar:", error);
+      alert("Erro ao enviar solicitação: " + error.message + "\n\nVerifique se você está logado e se as regras do Firebase permitem escrita.");
       return false;
     }
   }
@@ -1170,7 +1224,8 @@
     const bodyDiv = document.getElementById('modalBodyContent');
     const galleryImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
     const hasCarousel = (post.autoCarousel && galleryImgs.length >= 2);
-    const videoHtml = post.video ? `<div class="video-wrapper"><iframe src="${post.video}" frameborder="0" allowfullscreen></iframe></div>` : '';
+    const embedVideo = convertToEmbedUrl(post.video || '');
+    const videoHtml = embedVideo ? `<div class="video-wrapper"><iframe src="${embedVideo}" frameborder="0" allowfullscreen></iframe></div>` : '';
     const linkHtml = post.link ? `<a href="${post.link}" target="_blank" class="external-link-btn"><i class="fas fa-external-link-alt"></i> Acessar link externo →</a>` : '';
     const shareUrl = generateShareUrl(post.id);
     
@@ -1519,7 +1574,7 @@
       excerpt: document.getElementById('postExcerpt').value, 
       full: document.getElementById('postFull').value, 
       img: document.getElementById('postImg').value, 
-      video: document.getElementById('postVideo').value, 
+      video: convertToEmbedUrl(document.getElementById('postVideo').value), 
       link: document.getElementById('postLink').value, 
       gallery: filteredGallery, 
       galleryLayout: selectedLayout, 
@@ -1549,7 +1604,7 @@
       excerpt: document.getElementById('contribExcerpt').value, 
       full: document.getElementById('contribFull').value, 
       img: document.getElementById('contribImg').value, 
-      video: document.getElementById('contribVideo').value, 
+      video: convertToEmbedUrl(document.getElementById('contribVideo').value), 
       link: document.getElementById('contribLink').value, 
       gallery: filteredGallery, 
       galleryLayout: contribSelectedLayout, 
