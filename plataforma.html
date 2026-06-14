@@ -236,6 +236,7 @@ let firebaseMaterials = [];
 let firebaseSettings = { whatsappConteudos: '', whatsappForum: '' };
 let messagesUnsubscribe = null;
 let currentUserData = null;
+let certsUnsubscribe = null;
 
 // ==================== NÍVEIS UNIFICADOS ====================
 const LEVELS = [
@@ -345,6 +346,37 @@ async function sendMessageToFirebase(text, userName, userCity) {
     userUid: currentUser?.uid || ''
   };
   await window.cpBlogApi.saveMessage(msg);
+}
+
+// ==================== LISTENER EM TEMPO REAL PARA CERTIFICADOS ====================
+function listenToCertificatesRealtime() {
+  if(!window.cpBlogApi) return;
+  if(certsUnsubscribe) certsUnsubscribe();
+  
+  const certsCollection = collection(firestore, 'certificates');
+  let q;
+  
+  if(currentUser?.uid !== ADMIN_UID && currentUser?.uid) {
+    q = query(certsCollection, where('userUid', '==', currentUser?.uid), orderBy('requestDate', 'desc'));
+  } else if(currentUser?.uid === ADMIN_UID) {
+    q = query(certsCollection, orderBy('requestDate', 'desc'));
+  } else {
+    q = certsCollection;
+  }
+  
+  certsUnsubscribe = onSnapshot(q, (snapshot) => {
+    const items = [];
+    snapshot.forEach(doc => {
+      items.push({ id: doc.id, ...doc.data() });
+    });
+    firebaseCerts = items;
+    console.log('🔄 Certificados atualizados em tempo real:', firebaseCerts.length);
+    
+    if(currentTab === 'certificados') renderCerts();
+    if(currentTab === 'admin' && currentUser?.uid === ADMIN_UID) renderAdmin();
+  }, (error) => {
+    console.error('❌ Erro no listener de certificados:', error);
+  });
 }
 
 async function syncCertsFromFirebase() {
@@ -569,7 +601,8 @@ async function startApp(){
   document.body.classList.toggle('is-admin',isAdmin);
   await syncUsersFromFirebase();
   await syncPartnersFromFirebase();
-  await syncCertsFromFirebase();
+  // Iniciar listener em tempo real para certificados
+  listenToCertificatesRealtime();
   await syncMaterialsFromFirebase();
   await syncSettingsFromFirebase();
   await initMessagesListener();
@@ -583,6 +616,7 @@ async function startApp(){
 window.logout=async function(){
   if(onlineInterval) clearInterval(onlineInterval);
   if(messagesUnsubscribe) messagesUnsubscribe();
+  if(certsUnsubscribe) certsUnsubscribe();
   localStorage.removeItem('cpSession');
   location.reload();
 };
@@ -750,7 +784,6 @@ window.askCert = async function(nome, pts) {
         return;
     }
     
-    // Verificar se o usuário já tem uma solicitação PENDENTE ou APROVADA para este certificado
     const existingCert = firebaseCerts.find(c => 
         c.userUid === currentUser?.uid && 
         c.nome === nome && 
@@ -766,14 +799,12 @@ window.askCert = async function(nome, pts) {
         return;
     }
     
-    // Verificar se o usuário tem pontos suficientes
     if((currentUserData?.points || 0) < pts) {
         toast(`Você precisa de ${pts} pontos para solicitar o certificado ${nome}.`);
         return;
     }
     
     const certData = {
-        id: Date.now().toString(),
         userUid: currentUser.uid,
         usuario: currentUserData?.profile?.nome || currentUser?.email || 'Colaborador',
         nome: nome,
@@ -785,7 +816,9 @@ window.askCert = async function(nome, pts) {
     };
     
     try {
-        await saveCertToFirebase(certData);
+        const certsCollection = collection(firestore, 'certificates');
+        const docRef = await addDoc(certsCollection, certData);
+        certData.id = docRef.id;
         toast(`📜 Certificado "${nome}" solicitado para análise. Aguarde a aprovação do administrador.`);
         confetti();
         if(currentTab === 'certificados') renderCerts();
@@ -822,7 +855,7 @@ async function renderCerts() {
                             </button>
                         </div>
                     ` : ''}
-                    ${c.status === 'Rejeitado' && c.motivo ? `
+                    ${c.status === 'Rejeitado' ? `
                         <div class="actions">
                             <button class="secondary" onclick="window.askCert('${c.nome}',${c.pts})">
                                 🔄 Solicitar Novamente
@@ -872,9 +905,12 @@ window.approveCertWithLink = async function(certId){
   }
   
   try {
-    cert.status = 'Aprovado';
-    cert.certificadoUrl = link;
-    await saveCertToFirebase(cert);
+    const certRef = doc(firestore, 'certificates', certId);
+    await updateDoc(certRef, { 
+      status: 'Aprovado', 
+      certificadoUrl: link,
+      motivo: ''
+    });
     toast(`✅ Certificado "${cert.nome}" aprovado! Link disponível para o colaborador.`);
     renderAll();
     closeCertModal();
@@ -896,10 +932,13 @@ window.rejectCertPrompt = async function(certId){
   }
   
   try {
-    cert.status = 'Rejeitado';
-    cert.motivo = motivo;
-    await saveCertToFirebase(cert);
-    toast(`❌ Certificado "${cert.nome}" rejeitado.`);
+    const certRef = doc(firestore, 'certificates', certId);
+    await updateDoc(certRef, { 
+      status: 'Rejeitado', 
+      motivo: motivo,
+      certificadoUrl: ''
+    });
+    toast(`❌ Certificado "${cert.nome}" rejeitado. Motivo: ${motivo}`);
     renderAll();
   } catch(error) {
     console.error('Erro ao rejeitar certificado:', error);
@@ -1283,7 +1322,7 @@ document.getElementById('loginForm').onsubmit = async e => {
     localStorage.setItem('cpSession', JSON.stringify(currentUser));
     await syncUsersFromFirebase();
     await syncPartnersFromFirebase();
-    await syncCertsFromFirebase();
+    listenToCertificatesRealtime();
     await syncMaterialsFromFirebase();
     await syncSettingsFromFirebase();
     await initMessagesListener();
@@ -1305,7 +1344,7 @@ if(session){
   (async () => {
     await syncUsersFromFirebase();
     await syncPartnersFromFirebase();
-    await syncCertsFromFirebase();
+    listenToCertificatesRealtime();
     await syncMaterialsFromFirebase();
     await syncSettingsFromFirebase();
     await initMessagesListener();
