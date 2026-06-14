@@ -576,7 +576,6 @@
   </div>
 </div>
 
-<!-- MODAL DE LOGIN ADMIN (ACESSO PELO BOTÃO ADMIN OU TECLA C 3 VEZES) -->
 <div id="adminLoginModal" class="login-modal">
   <div class="login-container">
     <h3><i class="fas fa-lock"></i> Acesso Administrativo</h3>
@@ -587,7 +586,6 @@
   </div>
 </div>
 
-<!-- MODAL DE LOGIN COLABORADOR (ACESSO SECRETO - TECLA "V" 2 VEZES) -->
 <div id="contributorLoginModal" class="login-modal">
   <div class="login-container">
     <h3><i class="fas fa-pen-fancy"></i> Acesso Colaborador</h3>
@@ -608,7 +606,6 @@
 
 <div class="admin-overlay" id="adminOverlay"></div>
 
-<!-- PAINEL ADMIN -->
 <div class="admin-panel" id="adminPanel">
   <div class="admin-header"><h2><i class="fas fa-edit"></i> Admin Pro</h2><button id="closeAdminBtn" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">&times;</button></div>
   
@@ -638,7 +635,6 @@
   <button id="logoutAdminBtn" class="btn-admin" style="background:#666; margin-top:10px;"><i class="fas fa-sign-out-alt"></i> Sair do Admin</button>
 </div>
 
-<!-- PAINEL COLABORADOR (AGORA COM MESMAS FUNCIONALIDADES DO ADMIN) -->
 <div class="contributor-panel" id="contributorPanel">
   <div class="admin-header"><h2><i class="fas fa-pen-fancy"></i> Painel Colaborador</h2><button id="closeContributorBtn" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">&times;</button></div>
   <div style="background: #FFF1D6; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
@@ -654,7 +650,6 @@
     <div class="form-group"><label>Vídeo (URL YouTube/Vimeo)</label><input type="text" id="contribVideo" placeholder="https://www.youtube.com/embed/..."></div>
     <div class="form-group"><label>Link externo</label><input type="text" id="contribLink" placeholder="https://..."></div>
     
-    <!-- GALERIA DE IMAGENS (IGUAL AO ADMIN) -->
     <div class="image-upload-group">
       <label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label>
       <div id="contribGalleryContainer"></div>
@@ -736,38 +731,7 @@
   let carouselIntervals = [];
   let swRegistration = null;
   
-  // 🔒 SEGURANÇA: APENAS ESTE EMAIL PODE ACESSAR O PAINEL ADMIN
   const AUTHORIZED_ADMIN_EMAIL = "guia.caminhosdoperuacu@gmail.com";
-  
-  // ========== NOVA FUNÇÃO PARA CONVERTER URL DO YOUTUBE ==========
-  function convertToEmbedUrl(url) {
-    if (!url) return null;
-    
-    // Se já for embed, retorna
-    if (url.includes('/embed/')) return url;
-    
-    // Formato youtu.be/XXXXX (o que você está usando)
-    if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-    
-    // Formato youtube.com/watch?v=XXXXX
-    if (url.includes('youtube.com/watch')) {
-      const urlParams = new URLSearchParams(url.split('?')[1]);
-      const videoId = urlParams.get('v');
-      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
-    }
-    
-    // Formato vimeo
-    if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
-      const vimeoId = url.split('vimeo.com/')[1].split('?')[0];
-      return `https://player.vimeo.com/video/${vimeoId}`;
-    }
-    
-    return url;
-  }
-  // ================================================================
   
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -1000,7 +964,7 @@
       return true;
     } catch (error) {
       console.error("Erro ao enviar:", error);
-      alert("Erro ao enviar solicitação");
+      alert("Erro ao enviar solicitação: " + error.message);
       return false;
     }
   }
@@ -1191,7 +1155,6 @@
     });
   }
   
-  // FUNÇÃO OPENMODAL MODIFICADA - AGORA USA O convertToEmbedUrl
   function openModal(post) {
     if(post.status !== 'approved') return;
     window.currentModalPost = post;
@@ -1199,11 +1162,7 @@
     const bodyDiv = document.getElementById('modalBodyContent');
     const galleryImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
     const hasCarousel = (post.autoCarousel && galleryImgs.length >= 2);
-    
-    // 🔥 CORREÇÃO DO VÍDEO - converte qualquer formato de URL do YouTube
-    const videoEmbedUrl = convertToEmbedUrl(post.video);
-    const videoHtml = videoEmbedUrl ? `<div class="video-wrapper"><iframe src="${videoEmbedUrl}" frameborder="0" allowfullscreen></iframe></div>` : '';
-    
+    const videoHtml = post.video ? `<div class="video-wrapper"><iframe src="${post.video}" frameborder="0" allowfullscreen></iframe></div>` : '';
     const linkHtml = post.link ? `<a href="${post.link}" target="_blank" class="external-link-btn"><i class="fas fa-external-link-alt"></i> Acessar link externo →</a>` : '';
     const shareUrl = generateShareUrl(post.id);
     
@@ -1354,7 +1313,6 @@
     document.querySelectorAll('.remove-img-btn').forEach(btn => btn.addEventListener('click', (e) => { let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { tempGallery.splice(i,1); renderGalleryInputs(); } })); 
   }
   
-  // FUNÇÕES DO PAINEL COLABORADOR (COM GALERIA)
   function renderContribGalleryInputs() { 
     const c = document.getElementById('contribGalleryContainer'); 
     c.innerHTML = ''; 
@@ -1386,7 +1344,6 @@
     }
   }
   
-  // LOGIN FUNCTIONS
   function showAdminLoginModal() {
     document.getElementById('adminLoginModal').style.display = 'flex';
     document.getElementById('adminLoginEmail').value = '';
@@ -1469,7 +1426,6 @@
     document.getElementById('adminOverlay').classList.remove('open');
   }
   
-  // EVENT LISTENERS
   document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
     const email = document.getElementById('adminLoginEmail').value;
     const password = document.getElementById('adminLoginPassword').value;
@@ -1516,7 +1472,6 @@
   document.getElementById('lightboxShare')?.addEventListener('click', shareCurrentImage);
   document.getElementById('lightboxModal')?.addEventListener('click', (e) => { if(e.target === document.getElementById('lightboxModal')) closeLightbox(); });
   
-  // ADMIN GALLERY BUTTONS
   document.getElementById('addImageBtn')?.addEventListener('click', () => { 
     if(tempGallery.length < 6) { 
       tempGallery.push(""); 
@@ -1531,7 +1486,6 @@
     opt.classList.add('active-layout'); 
   }));
   
-  // CONTRIBUTOR GALLERY BUTTONS
   document.getElementById('contribAddImageBtn')?.addEventListener('click', () => { 
     if(contribTempGallery.length < 6) { 
       contribTempGallery.push(""); 
@@ -1546,7 +1500,6 @@
     opt.classList.add('active-layout'); 
   }));
   
-  // ADMIN FORM SUBMIT
   document.getElementById('postForm')?.addEventListener('submit', async (e) => { 
     e.preventDefault(); 
     if(!currentUser || currentRole !== 'admin') { alert('Faça login como administrador!'); return; }
@@ -1578,7 +1531,6 @@
     closeAllPanels();
   });
   
-  // CONTRIBUTOR FORM SUBMIT (com todas as funcionalidades)
   document.getElementById('contributorForm')?.addEventListener('submit', async (e) => { 
     e.preventDefault(); 
     if(!currentUser || currentRole !== 'contributor') { alert('Faça login como colaborador!'); return; }
@@ -1595,7 +1547,8 @@
       galleryLayout: contribSelectedLayout, 
       autoCarousel: document.getElementById('contribAutoCarousel').checked, 
       isFeatured: false, 
-      authorEmail: currentUser.email
+      authorEmail: currentUser.email,
+      date: new Date().toISOString()
     };
     await submitForApproval(postData);
     document.getElementById('contributorForm').reset();
@@ -1603,6 +1556,7 @@
     renderContribGalleryInputs();
     await loadPostsFromFirebase();
     await refreshContributorList();
+    alert('Postagem enviada para aprovação!');
   });
   
   document.getElementById('cancelEditBtn')?.addEventListener('click', () => { 
@@ -1677,7 +1631,6 @@
     alert('Utilizamos cookies apenas para melhorar sua experiência e permitir notificações de novos conteúdos. Seus dados não são compartilhados com terceiros.');
   });
   
-  // ACESSO SECRETO
   let adminKeyCount = 0;
   let contribKeyCount = 0;
   let keyPressTimerAdmin = null;
