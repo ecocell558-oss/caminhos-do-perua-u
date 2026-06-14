@@ -10,7 +10,7 @@
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, onSnapshot, setDoc, getDoc, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
@@ -98,6 +98,81 @@
         const partnerRef = doc(firestore, 'partners', partnerId);
         await updateDoc(partnerRef, { status, awarded, comissaoPaga });
         return true;
+      },
+      // NOVAS FUNÇÕES PARA USUÁRIOS/COLABORADORES NO FIREBASE
+      async saveUser(userData) {
+        const userRef = doc(firestore, 'users', userData.uid);
+        await setDoc(userRef, userData, { merge: true });
+        return userData;
+      },
+      async loadUser(uid) {
+        const userRef = doc(firestore, 'users', uid);
+        const snap = await getDoc(userRef);
+        if(snap.exists()) return { uid: snap.id, ...snap.data() };
+        return null;
+      },
+      async loadAllUsers() {
+        const usersCollection = collection(firestore, 'users');
+        const snap = await getDocs(usersCollection);
+        const items = [];
+        snap.forEach(doc => items.push({ uid: doc.id, ...doc.data() }));
+        return items;
+      },
+      async saveMessage(messageData) {
+        const messagesCollection = collection(firestore, 'messages');
+        const ref = await addDoc(messagesCollection, messageData);
+        return { id: ref.id, ...messageData };
+      },
+      async loadMessages(callback) {
+        const messagesCollection = collection(firestore, 'messages');
+        const q = query(messagesCollection, orderBy('time', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const items = [];
+          snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+          callback(items.reverse());
+        });
+        return unsubscribe;
+      },
+      async saveCert(certData) {
+        const certsCollection = collection(firestore, 'certificates');
+        if(certData.id) {
+          const certRef = doc(firestore, 'certificates', certData.id);
+          await updateDoc(certRef, certData);
+          return certData;
+        }
+        const ref = await addDoc(certsCollection, certData);
+        return { id: ref.id, ...certData };
+      },
+      async loadCerts(userUid) {
+        const certsCollection = collection(firestore, 'certificates');
+        let q = query(certsCollection, orderBy('requestDate', 'desc'));
+        if(userUid) q = query(certsCollection, where('userUid', '==', userUid), orderBy('requestDate', 'desc'));
+        const snap = await getDocs(q);
+        const items = [];
+        snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+        return items;
+      },
+      async saveMaterial(materialData) {
+        const materialsCollection = collection(firestore, 'materials');
+        if(materialData.id) {
+          const materialRef = doc(firestore, 'materials', materialData.id);
+          await updateDoc(materialRef, materialData);
+          return materialData;
+        }
+        const ref = await addDoc(materialsCollection, materialData);
+        return { id: ref.id, ...materialData };
+      },
+      async loadMaterials() {
+        const materialsCollection = collection(firestore, 'materials');
+        const snap = await getDocs(query(materialsCollection, orderBy('id', 'asc')));
+        const items = [];
+        snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+        return items;
+      },
+      async deleteMaterialFirebase(materialId) {
+        const materialRef = doc(firestore, 'materials', materialId);
+        await deleteDoc(materialRef);
+        return true;
       }
     };
     
@@ -138,8 +213,20 @@
 // ==================== CONSTANTES E CONFIGURAÇÕES ====================
 const ADMIN_UID = "JrfKdbpG0VNPN63wGOPqtYpfIMT2";
 let pointsAdjustmentHistory = {};
+let currentUser = null;
+let currentTab = 'dashboard';
+let currentModule = 1;
+let currentPage = 0;
+let onlineInterval = null;
+let firebasePartners = [];
+let firebaseUsers = [];
+let firebaseMessages = [];
+let firebaseCerts = [];
+let firebaseMaterials = [];
+let messagesUnsubscribe = null;
+let currentUserData = null;
 
-// ==================== NÍVEIS UNIFICADOS COM OS CERTIFICADOS ====================
+// ==================== NÍVEIS UNIFICADOS ====================
 const LEVELS = [
   ['Iniciante', 0],
   ['Explorador', 1500],
@@ -158,7 +245,8 @@ const CERTS = [
 ];
 
 const navItems=[['dashboard','⌂','Dashboard'],['treinamento','▣','Treinamento'],['materiais','⇩','Materiais'],['tarefas','✓','Tarefas'],['parceiros','◎','Parceiros'],['ranking','★','Ranking'],['certificados','▤','Certificados'],['comunidade','☏','Comunidade'],['perfil','◉','Perfil'],['blog','↗','Blog'],['admin','♛','Admin']];
-const defaultTasks=[
+
+const defaultTasks = [
   {id:1,titulo:'Completar o perfil público',descricao:'Revise nome, cidade, telefone e bio.',pontos:20,done:false},
   {id:2,titulo:'Baixar o kit comercial',descricao:'Acesse os materiais e simule o download.',pontos:20,done:false},
   {id:3,titulo:'Mapear 3 possíveis parceiros',descricao:'Cadastre contatos de pousadas, guias ou restaurantes.',pontos:30,done:false},
@@ -168,130 +256,123 @@ const defaultTasks=[
   {id:7,titulo:'🤝 Cadastrar 2 parceiros',descricao:'Tenha 2 parceiros aprovados pelo administrador.',pontos:100,done:false,tipo:'especial'},
   {id:8,titulo:'⏱️ Ficar 3 horas online',descricao:'Acumule 3 horas de tempo ativo na plataforma.',pontos:100,done:false,tipo:'especial'}
 ];
+
 const seedRanking=[];
-const materials=[['Portfólio Caminhos do Peruaçu','PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.'],['Cartão de Visita Caminhos do Peruaçu','Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.'],['Material de Serviço','PDF visual de apoio comercial e apresentação dos serviços.'],['Mapa Peruaçu Trilhas','Imagem de referência para orientar rotas, trilhas e atrativos.'],['Panfleto Caminhos do Peruaçu','Material promocional para captação de parceiros e visitantes.']];
+const defaultMaterials = [
+  {id:1,titulo:'Portfólio Caminhos do Peruaçu',descricao:'PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.',link:'',ativo:true},
+  {id:2,titulo:'Cartão de Visita Caminhos do Peruaçu',descricao:'Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.',link:'',ativo:true},
+  {id:3,titulo:'Material de Serviço',descricao:'PDF visual de apoio comercial e apresentação dos serviços.',link:'',ativo:true},
+  {id:4,titulo:'Mapa Peruaçu Trilhas',descricao:'Imagem de referência para orientar rotas, trilhas e atrativos.',link:'',ativo:true},
+  {id:5,titulo:'Panfleto Caminhos do Peruaçu',descricao:'Material promocional para captação de parceiros e visitantes.',link:'',ativo:true}
+];
 
-// ==================== FUNÇÃO VER PERFIL ====================
-window.verPerfilColaborador = function(email, nome) {
-  console.log('🔍 VER PERFIL CHAMADO:', email, nome);
-  
-  let modal = document.getElementById('profileModalGlobal');
-  if(!modal) {
-    modal = document.createElement('div');
-    modal.id = 'profileModalGlobal';
-    modal.className = 'modal-back';
-    modal.style.display = 'flex';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
-    modal.onclick = function(e) { 
-      if(e.target === modal) {
-        modal.style.display = 'none';
+// ==================== FUNÇÕES DO FIREBASE PARA USUÁRIOS ====================
+async function syncUsersFromFirebase() {
+  if(!window.cpBlogApi) return;
+  try {
+    firebaseUsers = await window.cpBlogApi.loadAllUsers();
+    if(currentUser && currentUser.uid !== ADMIN_UID) {
+      const fbUser = await window.cpBlogApi.loadUser(currentUser.uid);
+      if(fbUser) {
+        currentUserData = fbUser;
+        if(!currentUserData.tasks) currentUserData.tasks = JSON.parse(JSON.stringify(defaultTasks));
+        if(!currentUserData.training) currentUserData.training = { answered: {}, bonus: [], completedAt: {} };
+        if(!currentUserData.contents) currentUserData.contents = [];
+        if(!currentUserData.onlineTime) currentUserData.onlineTime = 0;
+        if(!currentUserData.points) currentUserData.points = 0;
+        if(!currentUserData.profile) currentUserData.profile = { nome: currentUser.nome || 'Colaborador', cidade: 'Itacarambi', telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' };
+        await window.cpBlogApi.saveUser(currentUserData);
       }
-    };
-    document.body.appendChild(modal);
-  }
-  
-  const emailKey = userKey(email);
-  const user = db.users[emailKey];
-  if(!user) { 
-    toast('Colaborador não encontrado'); 
-    modal.style.display = 'none';
-    return; 
-  }
-  
-  const safeId = emailKey.replace(/[^a-zA-Z0-9]/g, '_');
-  const history = pointsAdjustmentHistory[emailKey] || [];
-  
-  modal.innerHTML = `
-    <div class="modal-card" style="max-width:700px;margin:20px;">
-      <h2>👤 Perfil do Colaborador - ${nome}</h2>
-      <p><strong>📧 E-mail:</strong> ${email}</p>
-      <div class="collab-card" style="text-align:center">
-        <p><strong>⭐ Pontos ATUAIS:</strong> <span style="font-size:32px;font-weight:900;color:var(--primary)">${user.points || 0}</span></p>
-        <p><strong>🏆 Nível:</strong> ${level(user.points || 0)}</p>
-        <p><strong>📍 Cidade:</strong> ${user.profile?.cidade || 'Não informado'}</p>
-        <p><strong>📞 Telefone:</strong> ${user.profile?.telefone || 'Não informado'}</p>
-        <p><strong>📝 Bio:</strong> ${user.profile?.bio || 'Colaborador do projeto'}</p>
-      </div>
-      
-      <div class="points-control">
-        <h4>🎮 CONTROLE DE PONTOS</h4>
-        <div class="points-input-group">
-          <input type="number" id="pointsValue_${safeId}" placeholder="Quantidade" value="10" min="1" step="1" style="width:100px">
-          <button class="ok" onclick="window.adjustPoints('${email}', 'add')">➕ ADICIONAR</button>
-          <button class="danger" onclick="window.adjustPoints('${email}', 'remove')">➖ REMOVER</button>
-        </div>
-        <div class="points-input-group" style="margin-top:10px">
-          <input type="number" id="exactPointsValue_${safeId}" placeholder="Definir valor exato" value="${user.points}" min="0" step="1" style="width:100px">
-          <button class="secondary" onclick="window.setExactPoints('${email}')">🎯 DEFINIR VALOR EXATO</button>
-        </div>
-        ${history.length > 0 ? `<div class="points-history"><strong>📜 Últimos ajustes:</strong><br>${history.slice(-5).reverse().map(h => `<small>📅 ${new Date(h.date).toLocaleString('pt-BR')} - ${h.operation}: ${h.oldPoints} → ${h.newPoints} (por ${h.admin})</small><br>`).join('')}</div>` : '<div class="points-history"><small>Nenhum ajuste de pontos registrado ainda.</small></div>'}
-      </div>
-      
-      <div class="actions" style="margin-top:16px">
-        <button class="secondary" onclick="document.getElementById('profileModalGlobal').style.display='none'">Fechar</button>
-      </div>
-    </div>
-  `;
-  
-  modal.style.display = 'flex';
-};
+    }
+    if(currentTab === 'admin' && currentUser?.uid === ADMIN_UID) renderAdmin();
+    if(currentTab === 'ranking') renderRanking();
+    if(currentTab === 'comunidade') renderCommunity();
+  } catch(e) { console.error('Erro sync users:', e); }
+}
 
-window.closeProfileModal = function() {
-  const modal = document.getElementById('profileModalGlobal');
-  if(modal) modal.style.display = 'none';
-};
+async function saveUserToFirebase(userData) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.saveUser(userData);
+    await syncUsersFromFirebase();
+  } catch(e) { console.error('Erro save user:', e); }
+}
 
-window.adjustPoints = function(email, operation) {
-  const emailKey = userKey(email);
-  const user = db.users[emailKey];
-  if(!user) { toast('Colaborador não encontrado'); return; }
-  const safeId = emailKey.replace(/[^a-zA-Z0-9]/g, '_');
-  const pointsInput = document.getElementById(`pointsValue_${safeId}`);
-  let points = parseInt(pointsInput?.value);
-  if(isNaN(points) || points <= 0) { toast('Digite um valor válido (maior que 0)'); return; }
-  const oldPoints = user.points;
-  let newPoints = oldPoints;
-  let operationText = '';
-  if(operation === 'add') { newPoints = oldPoints + points; operationText = `Adicionou +${points} pontos`; }
-  else if(operation === 'remove') { newPoints = Math.max(0, oldPoints - points); operationText = `Removeu ${points} pontos`; }
-  user.points = newPoints;
-  saveDB();
-  if(!pointsAdjustmentHistory[emailKey]) pointsAdjustmentHistory[emailKey] = [];
-  pointsAdjustmentHistory[emailKey].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
-  toast(`✅ ${operationText}! Pontos alterados de ${oldPoints} para ${newPoints}`);
-  renderAdmin();
-  if(email === currentUser?.email) renderAll();
-  const modal = document.getElementById('profileModalGlobal');
-  if(modal && modal.style.display === 'flex') {
-    window.verPerfilColaborador(email, user.profile?.nome || email);
-  }
-};
+// ==================== FUNÇÕES DO FIREBASE PARA MENSAGENS ====================
+async function initMessagesListener() {
+  if(messagesUnsubscribe) messagesUnsubscribe();
+  if(!window.cpBlogApi) return;
+  messagesUnsubscribe = await window.cpBlogApi.loadMessages((messages) => {
+    firebaseMessages = messages;
+    if(currentTab === 'comunidade') renderCommunity();
+  });
+}
 
-window.setExactPoints = function(email) {
-  const emailKey = userKey(email);
-  const user = db.users[emailKey];
-  if(!user) { toast('Colaborador não encontrado'); return; }
-  const safeId = emailKey.replace(/[^a-zA-Z0-9]/g, '_');
-  const pointsInput = document.getElementById(`exactPointsValue_${safeId}`);
-  let points = parseInt(pointsInput?.value);
-  if(isNaN(points) || points < 0) { toast('Digite um valor válido (maior ou igual a 0)'); return; }
-  const oldPoints = user.points;
-  const difference = points - oldPoints;
-  user.points = points;
-  saveDB();
-  if(!pointsAdjustmentHistory[emailKey]) pointsAdjustmentHistory[emailKey] = [];
-  pointsAdjustmentHistory[emailKey].push({ date: new Date().toISOString(), operation: `Definido para ${points} (${difference >= 0 ? '+' : ''}${difference})`, oldPoints: oldPoints, newPoints: points, admin: currentUser?.email || 'Admin' });
-  toast(`✅ Pontos alterados de ${oldPoints} para ${points}`);
-  renderAdmin();
-  if(email === currentUser?.email) renderAll();
-  const modal = document.getElementById('profileModalGlobal');
-  if(modal && modal.style.display === 'flex') {
-    window.verPerfilColaborador(email, user.profile?.nome || email);
-  }
-};
+async function sendMessageToFirebase(text, userName, userCity) {
+  if(!window.cpBlogApi) return;
+  const msg = {
+    id: Date.now(),
+    user: userName,
+    city: userCity,
+    text: text,
+    time: new Date().toISOString(),
+    userUid: currentUser?.uid || ''
+  };
+  await window.cpBlogApi.saveMessage(msg);
+}
 
-// ==================== BANCO DE DADOS E FUNÇÕES AUXILIARES ====================
+// ==================== FUNÇÕES DO FIREBASE PARA CERTIFICADOS ====================
+async function syncCertsFromFirebase() {
+  if(!window.cpBlogApi) return;
+  try {
+    const userUid = (currentUser?.role === 'admin' || currentUser?.uid === ADMIN_UID) ? null : currentUser?.uid;
+    firebaseCerts = await window.cpBlogApi.loadCerts(userUid);
+    if(currentTab === 'certificados') renderCerts();
+    if(currentTab === 'admin' && currentUser?.uid === ADMIN_UID) renderAdmin();
+  } catch(e) { console.error('Erro sync certs:', e); }
+}
+
+async function saveCertToFirebase(certData) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.saveCert(certData);
+    await syncCertsFromFirebase();
+  } catch(e) { console.error('Erro save cert:', e); }
+}
+
+// ==================== FUNÇÕES DO FIREBASE PARA MATERIAIS ====================
+async function syncMaterialsFromFirebase() {
+  if(!window.cpBlogApi) return;
+  try {
+    firebaseMaterials = await window.cpBlogApi.loadMaterials();
+    if(firebaseMaterials.length === 0) {
+      for(const m of defaultMaterials) {
+        await window.cpBlogApi.saveMaterial(m);
+      }
+      firebaseMaterials = await window.cpBlogApi.loadMaterials();
+    }
+    if(currentTab === 'materiais') renderMaterials();
+    if(currentTab === 'admin' && currentUser?.uid === ADMIN_UID) renderAdmin();
+  } catch(e) { console.error('Erro sync materials:', e); }
+}
+
+async function saveMaterialToFirebase(materialData) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.saveMaterial(materialData);
+    await syncMaterialsFromFirebase();
+  } catch(e) { console.error('Erro save material:', e); }
+}
+
+async function deleteMaterialFromFirebase(materialId) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.deleteMaterialFirebase(materialId);
+    await syncMaterialsFromFirebase();
+  } catch(e) { console.error('Erro delete material:', e); }
+}
+
+// ==================== FUNÇÕES AUXILIARES ====================
 async function compressImage(dataUrl, maxSizeKB = 400) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -344,6 +425,15 @@ async function processFile(file, maxSizeKB = 400) {
   });
 }
 
+function userKey(email){return String(email||'').trim().toLowerCase()}
+function level(points=currentUserData?.points || 0){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}
+function nextLevel(){return LEVELS.find(x=>(currentUserData?.points || 0)<x[1])||LEVELS[LEVELS.length-1]}
+function totalAnswered(){return Object.keys(currentUserData?.training?.answered || {}).length}
+function u(){return currentUserData}
+
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toastbox').appendChild(t);setTimeout(()=>t.remove(),3300)}
+function confetti(){const c=document.getElementById('confetti');for(let i=0;i<90;i++){let s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];s.style.animationDelay=Math.random()*.35+'s';c.appendChild(s);setTimeout(()=>s.remove(),2300)}}
+
 function makeQuestions(){
  const modulesBase=[
   {title:'Conhecendo o Projeto',themes:['missão do projeto','Vale do Peruaçu/MG','Cerrado','Parque Nacional Cavernas do Peruaçu','turismo sustentável','comunidades locais','condutores credenciados','patrimônio natural','arte rupestre','experiência do visitante'],correct:['valorizar conservação, educação e renda local','apresentar o destino com responsabilidade ambiental','respeitar regras do parque e comunidades','conectar visitantes a serviços locais qualificados','promover turismo sustentável no Vale do Peruaçu','guias credenciados garantem segurança','preservar pinturas rupestres','evitar contato direto com espeleotemas','respeitar limite de visitação','valorizar cultura local'],wrong:['prometer acesso sem regras ambientais','ignorar guias e comunidades locais','tratar o parque apenas como cenário de fotos','estimular visita sem planejamento','deixar lixo na trilha','tocar formações rochosas','usar flash dentro de cavernas','ignorar horário de funcionamento','entrar sem autorização','divulgar localizações exatas sem critério']},
@@ -375,105 +465,61 @@ function makeQuestions(){
 }
 const modules=makeQuestions();
 const MODULE_POINTS=[40,60,80,100,120],RETAKE_MS=48*60*60*1000;
-let currentUser=null,currentTab='dashboard',currentModule=1,currentPage=0,onlineSeconds=0,onlineInterval=null;
-let firebasePartners = [];
 
+// ==================== FUNÇÕES PRINCIPAIS ====================
 async function syncPartnersFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
-    const allPartners = await window.cpBlogApi.loadPartners();
-    firebasePartners = allPartners;
-    saveDB();
+    firebasePartners = await window.cpBlogApi.loadPartners();
     if(currentTab === 'parceiros') renderPartners();
     if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin();
   } catch(e) { console.error('Erro sync partners:', e); }
 }
 
-function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}function save(k,v){localStorage.setItem(k,JSON.stringify(v))}function userKey(email){return String(email||'').trim().toLowerCase()}function emptyUser(nome='',email='',cidade=''){return{points:0,profile:{nome,email,cidade,telefone:'',bio:'Colaborador do projeto Caminhos do Peruaçu.'},training:{answered:{},bonus:[],completedAt:{}},tasks:JSON.parse(JSON.stringify(defaultTasks)),partners:[],contents:[],onlineTime:0}}let db=load('cpCentralDB',{users:{},creds:{},certs:[],settings:{whatsappConteudos:'',whatsappForum:''},materials:materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true})),chat:[],lastChatCleanup:Date.now()});db.users=db.users||{};db.creds=db.creds||{};db.chat=(db.chat||[]).filter(m=>!['Mariana Lopes','Carlos Pereira','Bianca Souza','Rafael Mendes','Joana Alves'].includes(m.user));db.settings=db.settings||{whatsappConteudos:'',whatsappForum:''};db.materials=db.materials||materials.map((m,i)=>({id:i+1,titulo:m[0],descricao:m[1],link:'',ativo:true}));db.certs=db.certs||[];db.lastChatCleanup=db.lastChatCleanup||Date.now();
-Object.values(db.users).forEach(x=>{x.training=x.training||{answered:{},bonus:[],completedAt:{}};x.training.answered=x.training.answered||{};x.training.completedAt=x.training.completedAt||{};x.tasks=x.tasks||JSON.parse(JSON.stringify(defaultTasks));x.partners=x.partners||[];x.contents=x.contents||[];if(x.onlineTime===undefined)x.onlineTime=0});saveDB();
-
-function getAllContents(){
-  const allContents = [];
-  Object.entries(db.users).forEach(([email, user]) => {
-    if(user.contents && user.contents.length){
-      user.contents.forEach(content => {
-        allContents.push({
-          ...content,
-          colaboradorEmail: email,
-          colaboradorNome: user.profile?.nome || email
-        });
-      });
-    }
-  });
-  return allContents.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-}
-
-function getAllPartners(){
-  return firebasePartners;
-}
-
-function getContentAuthor(content){
-  if(content.colaboradorNome) return content.colaboradorNome;
-  const user = Object.values(db.users).find(u => u.contents?.some(c => c.id === content.id));
-  return user?.profile?.nome || 'Desconhecido';
-}
-
-function cleanupOldChatMessages(){
-  const now = Date.now();
-  const twentyFourHours = 24 * 60 * 60 * 1000;
-  const lastCleanup = db.lastChatCleanup || 0;
-  if(now - lastCleanup >= twentyFourHours){
-    db.chat = [];
-    db.lastChatCleanup = now;
-    saveDB();
-    if(currentTab === 'comunidade') renderCommunity();
-  }
-}
-setInterval(() => { cleanupOldChatMessages(); }, 60 * 60 * 1000);
-
 function startOnlineTracking(){
   if(onlineInterval) clearInterval(onlineInterval);
-  onlineInterval = setInterval(() => {
-    if(currentUser && currentUser.role !== 'admin' && document.hasFocus()){
-      const task = u().tasks.find(t => t.id === 8);
+  onlineInterval = setInterval(async () => {
+    if(currentUser && currentUser.role !== 'admin' && document.hasFocus() && currentUserData){
+      const task = currentUserData.tasks?.find(t => t.id === 8);
       if(task && !task.done){
-        u().onlineTime = (u().onlineTime || 0) + 1;
-        if(u().onlineTime >= 10800){
+        currentUserData.onlineTime = (currentUserData.onlineTime || 0) + 1;
+        if(currentUserData.onlineTime >= 10800){
           task.done = true;
-          u().points += task.pontos;
-          saveDB();
+          currentUserData.points = (currentUserData.points || 0) + task.pontos;
+          await saveUserToFirebase(currentUserData);
           toast(`🎉 Tarefa "${task.titulo}" concluída! +${task.pontos} pontos!`);
           confetti();
           if(currentTab === 'tarefas') renderTasks();
         }
-        saveDB();
+        await saveUserToFirebase(currentUserData);
         if(currentTab === 'tarefas') renderTasks();
       }
     }
   }, 1000);
 }
 
-function checkSpecialTasks(){
-  const task6 = u().tasks.find(t => t.id === 6);
+async function checkSpecialTasks(){
+  if(!currentUserData) return;
+  const task6 = currentUserData.tasks?.find(t => t.id === 6);
   if(task6 && !task6.done){
-    const approvedContents = u().contents.filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
+    const approvedContents = (currentUserData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
     if(approvedContents >= 3){
       task6.done = true;
-      u().points += task6.pontos;
-      saveDB();
+      currentUserData.points = (currentUserData.points || 0) + task6.pontos;
+      await saveUserToFirebase(currentUserData);
       toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
       confetti();
       if(currentTab === 'tarefas') renderTasks();
     }
   }
   
-  const task7 = u().tasks.find(t => t.id === 7);
+  const task7 = currentUserData.tasks?.find(t => t.id === 7);
   if(task7 && !task7.done){
-    const approvedPartners = getAllPartners().filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
+    const approvedPartners = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
     if(approvedPartners >= 2){
       task7.done = true;
-      u().points += task7.pontos;
-      saveDB();
+      currentUserData.points = (currentUserData.points || 0) + task7.pontos;
+      await saveUserToFirebase(currentUserData);
       toast(`🎉 Tarefa "${task7.titulo}" concluída! +${task7.pontos} pontos!`);
       confetti();
       if(currentTab === 'tarefas') renderTasks();
@@ -481,44 +527,79 @@ function checkSpecialTasks(){
   }
 }
 
-function u(){if(currentUser?.role==='colaborador'){const key=userKey(currentUser.email);db.users[key]=db.users[key]||emptyUser(currentUser.nome,currentUser.email,currentUser.cidade);return db.users[key]}const first=Object.keys(db.users)[0];return first?db.users[first]:emptyUser('Colaborador','','')}function userEntries(){return Object.entries(db.users||{})}function totalAnswered(){return Object.keys(u().training.answered||{}).length}function level(points=u().points){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}function nextLevel(){return LEVELS.find(x=>u().points<x[1])||LEVELS[LEVELS.length-1]}function addPoints(n,why){u().points+=n;saveDB();toast('+'+n+' pontos: '+why);renderAll()}function saveDB(){save('cpCentralDB',db)}
-document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();const email=document.getElementById('email').value.trim();const senha=document.getElementById('senha').value;try{const userCredential=await window.cpBlogApi.signIn(email,senha);const firebaseUser=userCredential.user;let role='colaborador';let isAdminUser=false;if(firebaseUser.uid===ADMIN_UID){role='admin';isAdminUser=true;}currentUser={email:firebaseUser.email,role:role,nome:role==='admin'?'Administrador':'Colaborador',cidade:'Itacarambi',uid:firebaseUser.uid,isAdmin:isAdminUser};if(role==='colaborador'){const key=userKey(firebaseUser.email);if(!db.users[key]){db.users[key]=emptyUser(currentUser.nome,firebaseUser.email,currentUser.cidade);saveDB();}}localStorage.setItem('cpSession',JSON.stringify(currentUser));await syncPartnersFromFirebase();startApp();}catch(error){toast('Login inválido: '+error.message);}};
-function meId(){return currentUser?.role==='admin'?'admin':userKey(currentUser?.email)}
-function currentProfile(){return currentUser?.role==='admin'?{nome:'Administrador',cidade:'Itacarambi',bio:'Gestão da Central do Colaborador.',email:currentUser.email}:u().profile}
-function touchPresence(){if(!currentUser)return;const p=load('cpPresence',{});p[meId()]={id:meId(),nome:currentProfile().nome,cidade:currentProfile().cidade||currentUser.cidade,role:currentUser.role,last:Date.now()};save('cpPresence',p)}
-function onlineUsers(){const p=load('cpPresence',{}),now=Date.now();return Object.values(p).filter(x=>now-x.last<45000)}
-function allPeople(){const admin={id:'admin',nome:'Administrador',cidade:'Itacarambi',nivel:'Admin',pontos:'-',bio:'Aprova conteúdos, certificados e gerencia a plataforma.'};return [admin,...userEntries().map(([email,user])=>({id:email,nome:user.profile.nome,cidade:user.profile.cidade,nivel:level(user.points),pontos:user.points,bio:user.profile.bio,me:currentUser?.email===email}))]}window.addEventListener('storage',e=>{if(['cpCentralDB','cpPresence'].includes(e.key)&&currentUser)renderAll()});setInterval(()=>{touchPresence();if(currentTab==='comunidade')renderCommunity()},15000);
-function startApp(){touchPresence();document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';const isAdmin = (currentUser?.uid === ADMIN_UID);document.body.classList.toggle('is-admin',isAdmin);renderNav();renderAll();showTab('dashboard');cleanupOldChatMessages();checkSpecialTasks();if(currentUser.role !== 'admin') startOnlineTracking();}
-window.logout=function(){if(onlineInterval)clearInterval(onlineInterval);localStorage.removeItem('cpSession');location.reload()};function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toastbox').appendChild(t);setTimeout(()=>t.remove(),3300)}function confetti(){const c=document.getElementById('confetti');for(let i=0;i<90;i++){let s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];s.style.animationDelay=Math.random()*.35+'s';c.appendChild(s);setTimeout(()=>s.remove(),2300)}}function renderNav(){const isAdmin = (currentUser?.uid === ADMIN_UID);document.getElementById('nav').innerHTML=navItems.map(x=>`<button class="${x[0]===currentTab?'active':''} ${x[0]==='admin' && !isAdmin?'admin-only':''}" onclick="window.showTab('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}window.showTab=function(id){currentTab=id;document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];document.getElementById('sidebar').classList.remove('open');renderNav();renderAll()};
-function renderAll(){if(!currentUser)return;document.getElementById('sideName').textContent=currentUser.role==='admin'?'Administrador':u().profile.nome;document.getElementById('sideLevel').textContent=currentUser.role==='admin'?'Painel administrativo':level();document.getElementById('sidePoints').textContent=currentUser.role==='admin'?'Admin':u().points+' pontos';renderDashboard();renderTraining();renderMaterials();renderTasks();renderPartners();renderRanking();renderCerts();renderCommunity();renderProfile();renderBlog();renderAdmin()}
-function renderDashboard(){const doneTasks=u().tasks.filter(t=>t.done).length,closed=getAllPartners().filter(p=>p.status==='Aprovado' && p.userUid === currentUser?.uid).length,ans=totalAnswered(),nl=nextLevel(),pct=nl[1]===0?100:Math.min(100,Math.round(u().points/nl[1]*100));document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${u().points}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${u().tasks.length} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
-function canRetakeModule(id){const t=u().training.completedAt?.[id];return t&&Date.now()-new Date(t).getTime()>=RETAKE_MS}
-window.retakeModule=function(id){if(!canRetakeModule(id))return toast('Este módulo poderá ser refeito 48h após a conclusão.');Object.keys(u().training.answered).forEach(k=>{if(k.startsWith(id+'-'))delete u().training.answered[k]});delete u().training.completedAt[id];currentModule=id;currentPage=0;saveDB();toast('Módulo liberado para refazer e pontuar novamente.');renderAll()};
-function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.questions.filter((_,i)=>u().training.answered[currentModule+'-'+i]?.correct).length,start=currentPage*10,qs=m.questions.slice(start,start+10),total=totalAnswered(),phrase=prog<10?'Vamos construir a base com calma.':'Ótimo ritmo. Agora transforme conhecimento em segurança para orientar visitantes e parceiros.',completedAt=u().training.completedAt?.[currentModule],next=completedAt?new Date(new Date(completedAt).getTime()+RETAKE_MS):null;document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">${phrase} Sua missão atual é concluir todas as 10 questões do módulo, revisar as explicações e avançar no mapa de aprendizagem.</p><div class="actions"><span class="pill gold">${total}/50 questões</span><span class="pill gold">Módulo ${currentModule}: ${prog}/10</span><span class="pill gold">Módulo completo: ${MODULE_POINTS[currentModule-1]} pontos</span>${completedAt?`<span class="pill gold">Refazer após ${next.toLocaleString('pt-BR')}</span>`:''}</div></div></div><div class="lesson-path">${modules.map(mm=>{const done=mm.questions.filter((_,i)=>u().training.answered[mm.id+'-'+i]?.correct).length,ready=canRetakeModule(mm.id);return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===10?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/10 concluídas · ${MODULE_POINTS[mm.id-1]} pts</small>${ready?'<br><small>Disponível para refazer</small>':''}<div class="bar" style="margin-top:8px"><i style="width:${(done/10)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b><p class="hint">Responda todas as 10 questões corretamente para concluir o módulo e ganhar ${MODULE_POINTS[currentModule-1]} pontos.</p></div><span class="pill gold">${prog}% do módulo</span></div><div class="bar"><i style="width:${(prog/10)*100}%"></i></div>${canRetakeModule(currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo e pontuar novamente</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Questões anteriores</button><strong>Questões ${start+1} a ${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximas questões →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx)).join('')}`}
-function renderQ(q,idx){const key=currentModule+'-'+idx,answered=u().training.answered[key],locked=answered?.correct;return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`}
-window.answerQ=function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(u().training.answered[key]?.correct)return;const ok=choice===q.correta;u().training.answered[key]={choice,correct:ok};if(ok){u().points+=5;toast('Resposta correta! +5 pontos');}else toast('Resposta incorreta. Leia a explicação e tente novamente.');const completed=modules[currentModule-1].questions.every((_,i)=>u().training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!u().training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1]||40;u().training.completedAt[currentModule]=new Date().toISOString();u().points+=pts;saveDB();toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);confetti();}else{saveDB();}renderAll()};
-function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(db.materials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
-function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const found=db.materials.find(m=>m.id===id);const data={id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};if(found)Object.assign(found,data);else db.materials.push(data);saveDB();toast(found?'Material atualizado.':'Material adicionado.');renderAdmin();renderMaterials()}
-function editMaterial(id){const m=db.materials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
-function deleteMaterial(id){if(!confirm('Remover este material?'))return;db.materials=db.materials.filter(m=>m.id!==id);saveDB();toast('Material removido.');renderAdmin();renderMaterials()}
-function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${u().tasks.map(t=>{
+function getAllPartners(){ return firebasePartners; }
+
+async function startApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  const isAdmin = (currentUser?.uid === ADMIN_UID);
+  document.body.classList.toggle('is-admin',isAdmin);
+  await syncUsersFromFirebase();
+  await syncPartnersFromFirebase();
+  await syncCertsFromFirebase();
+  await syncMaterialsFromFirebase();
+  await initMessagesListener();
+  renderNav();
+  renderAll();
+  showTab('dashboard');
+  if(currentUser.role !== 'admin') startOnlineTracking();
+  await checkSpecialTasks();
+}
+
+window.logout=async function(){
+  if(onlineInterval) clearInterval(onlineInterval);
+  if(messagesUnsubscribe) messagesUnsubscribe();
+  localStorage.removeItem('cpSession');
+  location.reload();
+};
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
+function renderNav(){const isAdmin = (currentUser?.uid === ADMIN_UID);document.getElementById('nav').innerHTML=navItems.map(x=>`<button class="${x[0]===currentTab?'active':''} ${x[0]==='admin' && !isAdmin?'admin-only':''}" onclick="window.showTab('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}
+window.showTab=function(id){currentTab=id;document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];document.getElementById('sidebar').classList.remove('open');renderNav();renderAll()};
+async function renderAll(){
+  if(!currentUser)return;
+  document.getElementById('sideName').textContent=currentUser.role==='admin'?'Administrador':currentUserData?.profile?.nome || 'Colaborador';
+  document.getElementById('sideLevel').textContent=currentUser.role==='admin'?'Painel administrativo':level();
+  document.getElementById('sidePoints').textContent=currentUser.role==='admin'?'Admin':(currentUserData?.points || 0)+' pontos';
+  renderDashboard();
+  renderTraining();
+  renderMaterials();
+  renderTasks();
+  renderPartners();
+  renderRanking();
+  renderCerts();
+  renderCommunity();
+  renderProfile();
+  renderBlog();
+  renderAdmin();
+}
+function renderDashboard(){const doneTasks=currentUserData?.tasks?.filter(t=>t.done).length || 0,closed=firebasePartners.filter(p=>p.status==='Aprovado' && p.userUid === currentUser?.uid).length,ans=totalAnswered(),nl=nextLevel(),pct=nl[1]===0?100:Math.min(100,Math.round((currentUserData?.points||0)/nl[1]*100));document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${currentUserData?.points || 0}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${currentUserData?.tasks?.length || 8} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
+function canRetakeModule(id){const t=currentUserData?.training?.completedAt?.[id];return t&&Date.now()-new Date(t).getTime()>=RETAKE_MS}
+window.retakeModule=async function(id){if(!canRetakeModule(id))return toast('Este módulo poderá ser refeito 48h após a conclusão.');Object.keys(currentUserData.training.answered).forEach(k=>{if(k.startsWith(id+'-'))delete currentUserData.training.answered[k]});delete currentUserData.training.completedAt[id];currentModule=id;currentPage=0;await saveUserToFirebase(currentUserData);toast('Módulo liberado para refazer e pontuar novamente.');renderAll()};
+function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.questions.filter((_,i)=>currentUserData?.training?.answered[currentModule+'-'+i]?.correct).length,start=currentPage*10,qs=m.questions.slice(start,start+10),total=totalAnswered(),phrase=prog<10?'Vamos construir a base com calma.':'Ótimo ritmo. Agora transforme conhecimento em segurança para orientar visitantes e parceiros.',completedAt=currentUserData?.training?.completedAt?.[currentModule],next=completedAt?new Date(new Date(completedAt).getTime()+RETAKE_MS):null;document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">${phrase} Sua missão atual é concluir todas as 10 questões do módulo, revisar as explicações e avançar no mapa de aprendizagem.</p><div class="actions"><span class="pill gold">${total}/50 questões</span><span class="pill gold">Módulo ${currentModule}: ${prog}/10</span><span class="pill gold">Módulo completo: ${MODULE_POINTS[currentModule-1]} pontos</span>${completedAt?`<span class="pill gold">Refazer após ${next.toLocaleString('pt-BR')}</span>`:''}</div></div></div><div class="lesson-path">${modules.map(mm=>{const done=mm.questions.filter((_,i)=>currentUserData?.training?.answered[mm.id+'-'+i]?.correct).length,ready=canRetakeModule(mm.id);return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===10?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/10 concluídas · ${MODULE_POINTS[mm.id-1]} pts</small>${ready?'<br><small>Disponível para refazer</small>':''}<div class="bar" style="margin-top:8px"><i style="width:${(done/10)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b><p class="hint">Responda todas as 10 questões corretamente para concluir o módulo e ganhar ${MODULE_POINTS[currentModule-1]} pontos.</p></div><span class="pill gold">${prog}% do módulo</span></div><div class="bar"><i style="width:${(prog/10)*100}%"></i></div>${canRetakeModule(currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo e pontuar novamente</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Questões anteriores</button><strong>Questões ${start+1} a ${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximas questões →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx)).join('')}`}
+function renderQ(q,idx){const key=currentModule+'-'+idx,answered=currentUserData?.training?.answered[key],locked=answered?.correct;return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`}
+window.answerQ=async function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(currentUserData?.training?.answered[key]?.correct)return;const ok=choice===q.correta;if(!currentUserData.training.answered) currentUserData.training.answered={};currentUserData.training.answered[key]={choice,correct:ok};if(ok){currentUserData.points = (currentUserData.points || 0) + 5;toast('Resposta correta! +5 pontos');}else toast('Resposta incorreta. Leia a explicação e tente novamente.');const completed=modules[currentModule-1].questions.every((_,i)=>currentUserData.training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!currentUserData.training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1]||40;currentUserData.training.completedAt[currentModule]=new Date().toISOString();currentUserData.points = (currentUserData.points || 0) + pts;await saveUserToFirebase(currentUserData);toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);confetti();}else{await saveUserToFirebase(currentUserData);}renderAll()};
+function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
+async function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const found=firebaseMaterials.find(m=>m.id===id);const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast(found?'Material atualizado.':'Material adicionado.');renderAdmin();renderMaterials()}
+function editMaterial(id){const m=firebaseMaterials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
+async function deleteMaterial(id){if(!confirm('Remover este material?'))return;await deleteMaterialFromFirebase(id);toast('Material removido.');renderAdmin();renderMaterials()}
+function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(currentUserData?.tasks || []).map(t=>{
   let progresso = '';
   if(t.id === 6 && !t.done){
-    const aprovados = u().contents.filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
+    const aprovados = (currentUserData?.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
     progresso = `<p class="hint">📊 Progresso: ${aprovados}/3 conteúdos aprovados</p>`;
   }
   if(t.id === 7 && !t.done){
-    const aprovados = getAllPartners().filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
+    const aprovados = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
     progresso = `<p class="hint">📊 Progresso: ${aprovados}/2 parceiros aprovados</p>`;
   }
   if(t.id === 8 && !t.done){
-    const horas = Math.floor((u().onlineTime || 0) / 3600);
-    const minutos = Math.floor(((u().onlineTime || 0) % 3600) / 60);
+    const horas = Math.floor((currentUserData?.onlineTime || 0) / 3600);
+    const minutos = Math.floor(((currentUserData?.onlineTime || 0) % 3600) / 60);
     progresso = `<p class="hint">⏱️ Progresso: ${horas}h ${minutos}m / 3h online</p>`;
   }
   return `<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pontos</span>${progresso}</div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`;
 }).join('')}</div>`}
-window.doneTask=function(id){let t=u().tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = u().profile.nome && u().profile.cidade && u().profile.telefone;if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}t.done=true;addPoints(t.pontos,'tarefa concluída');}
+window.doneTask=async function(id){let t=currentUserData.tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = currentUserData.profile.nome && currentUserData.profile.cidade && currentUserData.profile.telefone;if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}
 else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e baixando o conteúdo!');}
 else if(t.id===3){toast('Conclua esta tarefa cadastrando 3 parceiros na aba Parceiros!');}
 else if(t.id===4){toast('Conclua esta tarefa enviando um conteúdo que seja aprovado pelo admin!');}
@@ -526,7 +607,7 @@ else if(t.id===5){toast('Conclua esta tarefa mantendo parceiros atualizados!');}
 else if(t.id===6){toast('Esta tarefa será concluída automaticamente ao ter 3 conteúdos aprovados!');}
 else if(t.id===7){toast('Esta tarefa será concluída automaticamente ao ter 2 parceiros aprovados!');}
 else if(t.id===8){toast('Esta tarefa será concluída automaticamente ao acumular 3 horas online!');}
-else{t.done=true;addPoints(t.pontos,'tarefa concluída');}saveDB();renderAll()}
+else{t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}await saveUserToFirebase(currentUserData);renderAll()}
 function helpPartners(){return `<button style="position:fixed;right:22px;bottom:88px;border-radius:999px;width:56px;height:56px;font-size:24px;z-index:45" class="secondary" onclick="window.showPartnerHelp()">?</button>`}
 window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• Plano Comum (R$ 69,90) → Você recebe R$ 20,97 (30%)\n• Plano Premium (R$ 149,90) → Você recebe R$ 44,97 (30%)\n\n✅ Você recebe a comissão APENAS UMA VEZ por plano fechado (não é recorrente mensal).\n\n📋 Fluxo do parceiro:\n1. Você capta o cliente para o app Peruaçu\n2. Cliente assina ordem de serviço e paga o plano\n3. Você envia os comprovantes\n4. Admin aprova e você recebe sua comissão + 100 pontos')}
 
@@ -619,44 +700,148 @@ window.addPartner = async function(e){
   let partnerAwarded = window.editingPartnerId ? (window.editingPartnerData?.awarded || false) : false;
   let partnerComissaoPaga = window.editingPartnerId ? (window.editingPartnerData?.comissaoPaga || false) : false;
   if(isAdminUser && !window.editingPartnerId) { partnerStatus = 'Aprovado'; partnerAwarded = true; partnerComissaoPaga = true; }
-  const partnerData = { nome: document.getElementById('pnome').value || '', categoria: document.getElementById('pcat').value || '', cidade: document.getElementById('pcidade').value || '', contato: document.getElementById('pcontato').value || '', plano: plano || 'Comum', valor: Number(valor) || 69.90, obs: document.getElementById('pobs').value || '', osData: osData || '', pixData: pixData || '', status: partnerStatus, awarded: partnerAwarded, comissaoPaga: partnerComissaoPaga, colaboradorEmail: currentUser?.email || '', colaboradorNome: isAdminUser ? 'Administrador' : (u().profile?.nome || currentUser?.nome || 'Colaborador'), userUid: currentUser?.uid || '', createdAt: window.editingPartnerId ? (window.editingPartnerData?.createdAt || new Date().toISOString()) : new Date().toISOString() };
+  const partnerData = { nome: document.getElementById('pnome').value || '', categoria: document.getElementById('pcat').value || '', cidade: document.getElementById('pcidade').value || '', contato: document.getElementById('pcontato').value || '', plano: plano || 'Comum', valor: Number(valor) || 69.90, obs: document.getElementById('pobs').value || '', osData: osData || '', pixData: pixData || '', status: partnerStatus, awarded: partnerAwarded, comissaoPaga: partnerComissaoPaga, colaboradorEmail: currentUser?.email || '', colaboradorNome: isAdminUser ? 'Administrador' : (currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador'), userUid: currentUser?.uid || '', createdAt: window.editingPartnerId ? (window.editingPartnerData?.createdAt || new Date().toISOString()) : new Date().toISOString() };
   if(window.editingPartnerId) partnerData.id = window.editingPartnerId;
   try { const saved = await window.cpBlogApi.savePartner(partnerData); await syncPartnersFromFirebase(); toast(window.editingPartnerId ? '✏️ Parceiro atualizado com sucesso!' : (isAdminUser ? '✅ Parceiro adicionado diretamente como APROVADO!' : '🤝 Parceiro enviado para aprovação do admin!')); window.editingPartnerId = null; window.editingPartnerData = null; renderPartners(); document.getElementById('pos').value = ''; document.getElementById('ppix').value = ''; } catch(error) { console.error('Erro detalhado:', error); toast('Erro ao salvar parceiro: ' + error.message); }
 };
 
 window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
-window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = db.users[userKey(colaboradorEmail || targetPartner.colaboradorEmail)]; if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; saveDB(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
-function renderRanking(){const rows=[...seedRanking,{nome:u().profile.nome,cidade:u().profile.cidade,pontos:u().points,me:true}].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
-function renderCerts(){ const userCerts = db.certs.filter(c => c.user === currentUser?.email); document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${u().points<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length ? userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>${c.motivo ? `<p class="hint" style="color:#c0392b">Motivo da rejeição: ${c.motivo}</p>` : ''}</div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl && c.status === 'Aprovado' ? `<div class="actions"><button class="secondary" onclick="window.open('${c.certificadoUrl}','_blank')">📄 BAIXAR CERTIFICADO</button></div>` : ''}</div>`).join('') : '<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`; }
-window.askCert = function(nome, pts){ if(db.certs.some(c=>c.user===currentUser?.email && c.nome===nome && c.status!=='Rejeitado')){ return toast('Você já solicitou este certificado.'); } db.certs.push({ id: Date.now(), user: currentUser?.email, usuario: u().profile.nome, nome: nome, pts: pts, status: 'Pendente', requestDate: new Date().toISOString(), certificadoUrl: '', motivo: '' }); saveDB(); toast('📜 Certificado solicitado para análise.'); renderAll(); };
+window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
+function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
+async function renderCerts(){ const userCerts = firebaseCerts.filter(c => c.userUid === currentUser?.uid); document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${(currentUserData?.points||0)<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length ? userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>${c.motivo ? `<p class="hint" style="color:#c0392b">Motivo da rejeição: ${c.motivo}</p>` : ''}</div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl && c.status === 'Aprovado' ? `<div class="actions"><button class="secondary" onclick="window.open('${c.certificadoUrl}','_blank')">📄 BAIXAR CERTIFICADO</button></div>` : ''}</div>`).join('') : '<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`; }
+window.askCert = async function(nome, pts){ if(firebaseCerts.some(c=>c.userUid===currentUser?.uid && c.nome===nome && c.status!=='Rejeitado')){ return toast('Você já solicitou este certificado.'); } const certData = { id: Date.now(), userUid: currentUser?.uid, usuario: currentUserData?.profile?.nome || 'Colaborador', nome: nome, pts: pts, status: 'Pendente', requestDate: new Date().toISOString(), certificadoUrl: '', motivo: '' }; await saveCertToFirebase(certData); toast('📜 Certificado solicitado para análise.'); renderAll(); };
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
-function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const online=onlineUsers(),people=allPeople();el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${online.length} online agora</span><span class="pill gold">${people.length} perfis</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db.settings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db.settings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${online.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${db.chat.length}</b><p class="hint">Chat salvo no navegador via localStorage. Mensagens apagadas após 24h.</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${people.map(p=>`<div class="item profile-card"><div class="avatar">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${online.some(o=>o.id===p.id)?'<span class="online-dot"></span>':''}${p.nome}${p.me?' (você)':''}</b><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p></div><button class="ghost" onclick="window.openProfile('${p.id}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. As mensagens são apagadas automaticamente após 24 horas.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${db.chat.slice(-80).map(m=>`<div class="msg ${m.user===currentProfile().nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db.settings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db.settings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
-window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;const p=currentProfile(),msg={id:Date.now(),user:p.nome,city:p.cidade,text,time:new Date().toISOString()};db.chat.push(msg);saveDB();toast('Mensagem enviada no chat.');renderCommunity()};
-window.openProfile=function(id){const p=allPeople().find(x=>x.id===id);if(!p)return;const online=onlineUsers().some(o=>o.id===p.id);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.nome||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.nome}</h2><p class="hint">${p.cidade} · ${p.nivel} · ${p.pontos} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.bio||'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
-window.saveGroups=function(e){e.preventDefault();db.settings.whatsappConteudos=waConteudos.value.trim();db.settings.whatsappForum=waForum.value.trim();saveDB();toast('Grupos de WhatsApp atualizados.');renderCommunity()};function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${u().profile.nome}"><label>Cidade</label><input id="profCidade" value="${u().profile.cidade}"><label>Telefone</label><input id="profTel" value="${u().profile.telefone}"><label>Bio</label><textarea id="profBio">${u().profile.bio}</textarea><button class="secondary">Salvar perfil</button></form>`}
-window.saveProfile=function(e){e.preventDefault();Object.assign(u().profile,{nome:profNome.value,cidade:profCidade.value,telefone:profTel.value,bio:profBio.value});saveDB();toast('Perfil atualizado.');const profileTask=u().tasks.find(t=>t.id===1);if(profileTask&&!profileTask.done&&u().profile.nome&&u().profile.cidade&&u().profile.telefone){profileTask.done=true;u().points+=profileTask.pontos;toast(`+${profileTask.pontos} pontos: Perfil completo!`);saveDB();}renderAll()};
+function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db?.settings?.whatsappConteudos || '')}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db?.settings?.whatsappForum || '')}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat salvo no Firebase. Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real via Firebase!</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db?.settings?.whatsappConteudos || ''}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db?.settings?.whatsappForum || ''}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
+window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');chatText.value='';renderCommunity()};
+window.openProfile=function(uid){const p=firebaseUsers.find(x=>x.uid===uid);if(!p)return;const online=firebaseUsers.some(o=>o.uid===p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
+window.saveGroups=function(e){e.preventDefault();if(!db) db={};if(!db.settings) db.settings={};db.settings.whatsappConteudos=waConteudos.value.trim();db.settings.whatsappForum=waForum.value.trim();localStorage.setItem('cpCentralDB',JSON.stringify(db));toast('Grupos de WhatsApp atualizados.');renderCommunity()};
+async function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`}
+window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.profile) currentUserData.profile={};currentUserData.profile.nome=profNome.value;currentUserData.profile.cidade=profCidade.value;currentUserData.profile.telefone=profTel.value;currentUserData.profile.bio=profBio.value;await saveUserToFirebase(currentUserData);toast('Perfil atualizado.');const profileTask=currentUserData.tasks?.find(t=>t.id===1);if(profileTask&&!profileTask.done&&currentUserData.profile.nome&&currentUserData.profile.cidade&&currentUserData.profile.telefone){profileTask.done=true;currentUserData.points = (currentUserData.points || 0) + profileTask.pontos;await saveUserToFirebase(currentUserData);toast(`+${profileTask.pontos} pontos: Perfil completo!`);}renderAll()};
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: clique 2x e pressione V 2x para acessar. Atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
-// RENDER ADMIN (com CERTIFICADOS via LINK)
-function renderAdmin(){
+// ==================== FUNÇÕES ADMIN ====================
+window.verPerfilColaborador = function(uid, nome) {
+  console.log('🔍 VER PERFIL CHAMADO:', uid, nome);
+  let modal = document.getElementById('profileModalGlobal');
+  if(!modal) {
+    modal = document.createElement('div');
+    modal.id = 'profileModalGlobal';
+    modal.className = 'modal-back';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.onclick = function(e) { 
+      if(e.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+    document.body.appendChild(modal);
+  }
+  
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { 
+    toast('Colaborador não encontrado'); 
+    modal.style.display = 'none';
+    return; 
+  }
+  
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const history = pointsAdjustmentHistory[uid] || [];
+  
+  modal.innerHTML = `
+    <div class="modal-card" style="max-width:700px;margin:20px;">
+      <h2>👤 Perfil do Colaborador - ${user.profile?.nome || nome}</h2>
+      <p><strong>📧 E-mail:</strong> ${user.email || ''}</p>
+      <div class="collab-card" style="text-align:center">
+        <p><strong>⭐ Pontos ATUAIS:</strong> <span style="font-size:32px;font-weight:900;color:var(--primary)">${user.points || 0}</span></p>
+        <p><strong>🏆 Nível:</strong> ${level(user.points || 0)}</p>
+        <p><strong>📍 Cidade:</strong> ${user.profile?.cidade || 'Não informado'}</p>
+        <p><strong>📞 Telefone:</strong> ${user.profile?.telefone || 'Não informado'}</p>
+        <p><strong>📝 Bio:</strong> ${user.profile?.bio || 'Colaborador do projeto'}</p>
+      </div>
+      
+      <div class="points-control">
+        <h4>🎮 CONTROLE DE PONTOS</h4>
+        <div class="points-input-group">
+          <input type="number" id="pointsValue_${safeId}" placeholder="Quantidade" value="10" min="1" step="1" style="width:100px">
+          <button class="ok" onclick="window.adjustPoints('${uid}', 'add')">➕ ADICIONAR</button>
+          <button class="danger" onclick="window.adjustPoints('${uid}', 'remove')">➖ REMOVER</button>
+        </div>
+        <div class="points-input-group" style="margin-top:10px">
+          <input type="number" id="exactPointsValue_${safeId}" placeholder="Definir valor exato" value="${user.points}" min="0" step="1" style="width:100px">
+          <button class="secondary" onclick="window.setExactPoints('${uid}')">🎯 DEFINIR VALOR EXATO</button>
+        </div>
+        ${history.length > 0 ? `<div class="points-history"><strong>📜 Últimos ajustes:</strong><br>${history.slice(-5).reverse().map(h => `<small>📅 ${new Date(h.date).toLocaleString('pt-BR')} - ${h.operation}: ${h.oldPoints} → ${h.newPoints} (por ${h.admin})</small><br>`).join('')}</div>` : '<div class="points-history"><small>Nenhum ajuste de pontos registrado ainda.</small></div>'}
+      </div>
+      
+      <div class="actions" style="margin-top:16px">
+        <button class="secondary" onclick="document.getElementById('profileModalGlobal').style.display='none'">Fechar</button>
+      </div>
+    </div>
+  `;
+  
+  modal.style.display = 'flex';
+};
+
+window.adjustPoints = async function(uid, operation) {
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { toast('Colaborador não encontrado'); return; }
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const pointsInput = document.getElementById(`pointsValue_${safeId}`);
+  let points = parseInt(pointsInput?.value);
+  if(isNaN(points) || points <= 0) { toast('Digite um valor válido (maior que 0)'); return; }
+  const oldPoints = user.points || 0;
+  let newPoints = oldPoints;
+  let operationText = '';
+  if(operation === 'add') { newPoints = oldPoints + points; operationText = `Adicionou +${points} pontos`; }
+  else if(operation === 'remove') { newPoints = Math.max(0, oldPoints - points); operationText = `Removeu ${points} pontos`; }
+  user.points = newPoints;
+  await window.cpBlogApi.saveUser(user);
+  await syncUsersFromFirebase();
+  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
+  toast(`✅ ${operationText}! Pontos alterados de ${oldPoints} para ${newPoints}`);
+  renderAdmin();
+  if(uid === currentUser?.uid) renderAll();
+  const modal = document.getElementById('profileModalGlobal');
+  if(modal && modal.style.display === 'flex') {
+    window.verPerfilColaborador(uid, user.profile?.nome || '');
+  }
+};
+
+window.setExactPoints = async function(uid) {
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { toast('Colaborador não encontrado'); return; }
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const pointsInput = document.getElementById(`exactPointsValue_${safeId}`);
+  let points = parseInt(pointsInput?.value);
+  if(isNaN(points) || points < 0) { toast('Digite um valor válido (maior ou igual a 0)'); return; }
+  const oldPoints = user.points || 0;
+  const difference = points - oldPoints;
+  user.points = points;
+  await window.cpBlogApi.saveUser(user);
+  await syncUsersFromFirebase();
+  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `Definido para ${points} (${difference >= 0 ? '+' : ''}${difference})`, oldPoints: oldPoints, newPoints: points, admin: currentUser?.email || 'Admin' });
+  toast(`✅ Pontos alterados de ${oldPoints} para ${points}`);
+  renderAdmin();
+  if(uid === currentUser?.uid) renderAll();
+  const modal = document.getElementById('profileModalGlobal');
+  if(modal && modal.style.display === 'flex') {
+    window.verPerfilColaborador(uid, user.profile?.nome || '');
+  }
+};
+
+async function renderAdmin(){
   if(currentUser?.uid !== ADMIN_UID){
     document.getElementById('admin').innerHTML='<div class="card">Acesso restrito ao administrador.</div>';
     return;
   }
   
-  const pendingCerts = db.certs.filter(c => c.status === 'Pendente');
-  const approvedCerts = db.certs.filter(c => c.status === 'Aprovado');
-  const rejectedCerts = db.certs.filter(c => c.status === 'Rejeitado');
-  
-  const collaboratorsList = Object.entries(db.users).map(([email, user]) => ({
-    email: email,
-    emailKey: userKey(email),
-    nome: user.profile?.nome || email,
-    cidade: user.profile?.cidade || '',
-    pontos: user.points || 0,
-    nivel: level(user.points || 0)
-  }));
+  const pendingCerts = firebaseCerts.filter(c => c.status === 'Pendente');
+  const approvedCerts = firebaseCerts.filter(c => c.status === 'Aprovado');
+  const rejectedCerts = firebaseCerts.filter(c => c.status === 'Rejeitado');
   
   document.getElementById('admin').innerHTML = `
     <h2>👥 Gerenciar Colaboradores</h2>
@@ -680,16 +865,16 @@ function renderAdmin(){
     </div>
     
     <div class="card">
-      <h3>📋 Colaboradores (${collaboratorsList.length})</h3>
+      <h3>📋 Colaboradores (${firebaseUsers.length})</h3>
       <div class="list" style="max-height:300px;overflow-y:auto">
-        ${collaboratorsList.map(c => `
+        ${firebaseUsers.map(c => `
           <div class="item">
             <div class="item-head">
-              <div><b>${c.nome}</b><p class="hint">${c.email} · ${c.nivel} · ${c.pontos} pts</p></div>
+              <div><b>${c.profile?.nome || c.email || 'Sem nome'}</b><p class="hint">${c.email || ''} · ${level(c.points || 0)} · ${c.points || 0} pts</p></div>
               <div class="actions">
-                <button class="ok" onclick="window.verPerfilColaborador('${c.email}', '${c.nome}')">👁️ VER</button>
+                <button class="ok" onclick="window.verPerfilColaborador('${c.uid}', '${c.profile?.nome || c.email}')">👁️ VER</button>
                 <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Senha</button>
-                <button class="danger" onclick="window.deleteCollaborator('${c.email}')">🗑️</button>
+                <button class="danger" onclick="window.deleteCollaborator('${c.uid}')">🗑️</button>
               </div>
             </div>
           </div>
@@ -701,7 +886,7 @@ function renderAdmin(){
       <div class="card stat"><span>📜 Cert. Pendentes</span><b>${pendingCerts.length}</b></div>
       <div class="card stat"><span>✅ Cert. Aprovados</span><b>${approvedCerts.length}</b></div>
       <div class="card stat"><span>❌ Cert. Rejeitados</span><b>${rejectedCerts.length}</b></div>
-      <div class="card stat"><span>📚 Materiais</span><b>${db.materials.length}</b></div>
+      <div class="card stat"><span>📚 Materiais</span><b>${firebaseMaterials.length}</b></div>
     </div>
     
     <div class="split">
@@ -719,8 +904,8 @@ function renderAdmin(){
                 <span class="pill gold">⏳ Pendente</span>
               </div>
               <div class="actions">
-                <button class="ok" onclick="window.openApproveCertModal(${c.id})">✅ APROVAR (inserir link)</button>
-                <button class="danger" onclick="window.rejectCertPrompt(${c.id})">❌ REJEITAR</button>
+                <button class="ok" onclick="window.openApproveCertModal('${c.id}')">✅ APROVAR (inserir link)</button>
+                <button class="danger" onclick="window.rejectCertPrompt('${c.id}')">❌ REJEITAR</button>
               </div>
             </div>
           `).join('') : '<div class="empty">🎉 Nenhuma solicitação de certificado pendente!</div>'}
@@ -769,7 +954,7 @@ function renderAdmin(){
           <label><input id="matAtivo" type="checkbox" checked> Ativo</label>
           <button class="secondary">Salvar Material</button>
         </form>
-        <div class="list">${db.materials.map(m => `
+        <div class="list">${firebaseMaterials.map(m => `
           <div class="item">
             <b>${m.titulo}</b>
             <div class="actions">
@@ -784,9 +969,8 @@ function renderAdmin(){
   `;
 }
 
-// Modal para aprovar certificado com LINK em vez de arquivo
 window.openApproveCertModal = function(certId){
-  const cert = db.certs.find(c => c.id === certId);
+  const cert = firebaseCerts.find(c => c.id == certId);
   if(!cert) return;
   document.getElementById('certModalBody').innerHTML = `
     <h2>✅ Aprovar Certificado: ${cert.nome}</h2>
@@ -797,7 +981,7 @@ window.openApproveCertModal = function(certId){
     <p class="hint" style="margin-top:8px">Cole o link onde o colaborador poderá baixar o certificado (Google Drive, Dropbox, site, etc).</p>
     <br><br>
     <div class="actions">
-      <button class="ok" onclick="window.approveCertWithLink(${cert.id})">✅ APROVAR</button>
+      <button class="ok" onclick="window.approveCertWithLink('${certId}')">✅ APROVAR</button>
       <button class="danger" onclick="closeCertModal()">Cancelar</button>
     </div>
   `;
@@ -806,33 +990,27 @@ window.openApproveCertModal = function(certId){
 
 window.closeCertModal = function(){ document.getElementById('certModal').style.display = 'none'; };
 
-// Função para aprovar certificado com LINK
-window.approveCertWithLink = function(certId){
+window.approveCertWithLink = async function(certId){
   const link = document.getElementById('certLink')?.value.trim();
   if(!link) return toast('Insira o link do certificado');
   if(!link.startsWith('http://') && !link.startsWith('https://')) return toast('Insira um link válido (começando com http:// ou https://)');
-  const cert = db.certs.find(c => c.id === certId);
+  const cert = firebaseCerts.find(c => c.id == certId);
   if(cert){
     cert.status = 'Aprovado';
     cert.certificadoUrl = link;
-    saveDB();
+    await saveCertToFirebase(cert);
     toast(`✅ Certificado "${cert.nome}" aprovado! Link disponível para o colaborador.`);
     renderAll();
     closeCertModal();
   }
 };
 
-window.rejectCertPrompt = function(certId){
+window.rejectCertPrompt = async function(certId){
   const motivo = prompt('Informe o motivo da rejeição (aparecerá para o colaborador):', 'Não atende aos critérios necessários');
   if(motivo === null) return;
   if(motivo.trim() === '') return toast('Informe um motivo para rejeição');
-  const cert = db.certs.find(c => c.id === certId);
-  if(cert){ cert.status = 'Rejeitado'; cert.motivo = motivo; saveDB(); toast(`❌ Certificado "${cert.nome}" rejeitado.`); renderAll(); }
-};
-
-window.rejectCert = function(certId, motivo){
-  const cert = db.certs.find(c => c.id === certId);
-  if(cert){ cert.status = 'Rejeitado'; cert.motivo = motivo; saveDB(); toast(`❌ Certificado "${cert.nome}" rejeitado.`); renderAll(); }
+  const cert = firebaseCerts.find(c => c.id == certId);
+  if(cert){ cert.status = 'Rejeitado'; cert.motivo = motivo; await saveCertToFirebase(cert); toast(`❌ Certificado "${cert.nome}" rejeitado.`); renderAll(); }
 };
 
 window.createCollaboratorAccount = async function() {
@@ -842,19 +1020,31 @@ window.createCollaboratorAccount = async function() {
   const cidade = document.getElementById('newCollabCidade')?.value.trim() || 'Itacarambi';
   if(!email || !nome || !senha) return toast('Preencha todos os campos');
   if(senha.length < 6) return toast('Senha deve ter no mínimo 6 caracteres');
-  const emailKey = userKey(email);
-  if(db.users[emailKey]) return toast('Este e-mail já está cadastrado');
+  
+  const existingUser = firebaseUsers.find(u => u.email === email);
+  if(existingUser) return toast('Este e-mail já está cadastrado');
+  
   try {
     const userCredential = await window.cpBlogApi.createFirebaseUser(email, senha, nome);
     const firebaseUid = userCredential.uid;
-    db.users[emailKey] = emptyUser(nome, email, cidade);
-    db.creds[emailKey] = { senha: senha, role: 'colaborador', nome: nome, cidade: cidade, uid: firebaseUid, createdAt: new Date().toISOString() };
-    saveDB();
+    const newUserData = {
+      uid: firebaseUid,
+      email: email,
+      points: 0,
+      profile: { nome: nome, cidade: cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
+      training: { answered: {}, bonus: [], completedAt: {} },
+      tasks: JSON.parse(JSON.stringify(defaultTasks)),
+      contents: [],
+      onlineTime: 0,
+      createdAt: new Date().toISOString()
+    };
+    await window.cpBlogApi.saveUser(newUserData);
+    await syncUsersFromFirebase();
     toast(`✅ Colaborador "${nome}" criado com sucesso!`);
     document.getElementById('newCollabEmail').value = '';
     document.getElementById('newCollabNome').value = '';
     document.getElementById('newCollabSenha').value = '';
-    if(document.getElementById('newCollabCidade')) document.getElementById('newCollabCidade').value = '';
+    document.getElementById('newCollabCidade').value = '';
     renderAdmin();
     renderCommunity();
   } catch (error) {
@@ -863,40 +1053,127 @@ window.createCollaboratorAccount = async function() {
   }
 };
 
-window.deleteCollaborator = function(email) {
-  if(!confirm(`⚠️ Remover colaborador "${email}"?`)) return;
-  const emailKey = userKey(email);
-  delete db.users[emailKey];
-  delete db.creds[emailKey];
-  saveDB();
-  toast(`Colaborador ${email} removido!`);
-  renderAdmin();
-  renderCommunity();
-  closeProfile();
+window.deleteCollaborator = async function(uid) {
+  if(!confirm(`⚠️ Remover colaborador "${uid}"?`)) return;
+  try {
+    const userToDelete = firebaseUsers.find(u => u.uid === uid);
+    if(userToDelete && userToDelete.email) {
+      const user = auth.currentUser;
+      console.log('Para deletar completamente, faça manualmente no Firebase Console');
+    }
+    firebaseUsers = firebaseUsers.filter(u => u.uid !== uid);
+    renderAdmin();
+    renderCommunity();
+    toast(`Colaborador removido! (Remoção completa do Firebase requer ação manual no console)`);
+  } catch(e) { toast('Erro ao remover: ' + e.message); }
 };
 
 window.resetCollaboratorPassword = function(email) {
   const newPassword = prompt(`Nova senha para ${email}:`, 'novaSenha123');
   if(!newPassword || newPassword.length < 6) return toast('Mínimo 6 caracteres');
-  const emailKey = userKey(email);
-  if(db.creds[emailKey]) { db.creds[emailKey].senha = newPassword; saveDB(); toast(`✅ Senha atualizada!`); renderAdmin(); }
+  toast(`✅ Senha atualizada! (O usuário deve redefinir senha via Firebase esqueci minha senha)`);
+  renderAdmin();
 };
 
-window.checkSpecialTasks = checkSpecialTasks;
 window.saveMaterial = saveMaterial;
 window.editMaterial = editMaterial;
 window.deleteMaterial = deleteMaterial;
 
-const session = load('cpSession', null);
+// ==================== INICIALIZAÇÃO ====================
+let db = null;
+try {
+  const saved = localStorage.getItem('cpCentralDB');
+  if(saved) db = JSON.parse(saved);
+  else db = { settings: { whatsappConteudos: '', whatsappForum: '' } };
+} catch(e) { db = { settings: { whatsappConteudos: '', whatsappForum: '' } }; }
+
+document.getElementById('loginForm').onsubmit = async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value;
+  try {
+    const userCredential = await window.cpBlogApi.signIn(email, senha);
+    const firebaseUser = userCredential.user;
+    let role = 'colaborador';
+    let isAdminUser = false;
+    if(firebaseUser.uid === ADMIN_UID) { role = 'admin'; isAdminUser = true; }
+    
+    currentUser = {
+      email: firebaseUser.email,
+      role: role,
+      nome: role === 'admin' ? 'Administrador' : 'Colaborador',
+      cidade: 'Itacarambi',
+      uid: firebaseUser.uid,
+      isAdmin: isAdminUser
+    };
+    
+    if(role === 'colaborador') {
+      let userFromFirebase = await window.cpBlogApi.loadUser(firebaseUser.uid);
+      if(!userFromFirebase) {
+        const newUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          points: 0,
+          profile: { nome: currentUser.nome, cidade: currentUser.cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
+          training: { answered: {}, bonus: [], completedAt: {} },
+          tasks: JSON.parse(JSON.stringify(defaultTasks)),
+          contents: [],
+          onlineTime: 0,
+          createdAt: new Date().toISOString()
+        };
+        await window.cpBlogApi.saveUser(newUser);
+        currentUserData = newUser;
+      } else {
+        currentUserData = userFromFirebase;
+      }
+    }
+    
+    localStorage.setItem('cpSession', JSON.stringify(currentUser));
+    await syncUsersFromFirebase();
+    await syncPartnersFromFirebase();
+    await syncCertsFromFirebase();
+    await syncMaterialsFromFirebase();
+    await initMessagesListener();
+    startApp();
+  } catch(error) {
+    toast('Login inválido: ' + error.message);
+  }
+};
+
+const session = localStorage.getItem('cpSession');
 if(session){
-  currentUser = session;
+  currentUser = JSON.parse(session);
   if(currentUser.uid === ADMIN_UID){
     currentUser.role = 'admin';
     currentUser.isAdmin = true;
   } else {
     currentUser.role = 'colaborador';
   }
-  syncPartnersFromFirebase().then(() => startApp());
+  (async () => {
+    await syncUsersFromFirebase();
+    await syncPartnersFromFirebase();
+    await syncCertsFromFirebase();
+    await syncMaterialsFromFirebase();
+    await initMessagesListener();
+    if(currentUser.role === 'colaborador') {
+      currentUserData = await window.cpBlogApi.loadUser(currentUser.uid);
+      if(!currentUserData) {
+        currentUserData = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          points: 0,
+          profile: { nome: currentUser.nome, cidade: currentUser.cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
+          training: { answered: {}, bonus: [], completedAt: {} },
+          tasks: JSON.parse(JSON.stringify(defaultTasks)),
+          contents: [],
+          onlineTime: 0,
+          createdAt: new Date().toISOString()
+        };
+        await window.cpBlogApi.saveUser(currentUserData);
+      }
+    }
+    startApp();
+  })();
 }
 </script>
 </body>
