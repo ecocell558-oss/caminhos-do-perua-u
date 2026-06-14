@@ -145,16 +145,15 @@
         const ref = await addDoc(certsCollection, certData);
         return { id: ref.id, ...certData };
       },
-      async loadCerts(userUid) {
+      async loadCertsByUser(userUid) {
         const certsCollection = collection(firestore, 'certificates');
-        let q = query(certsCollection, orderBy('requestDate', 'desc'));
-        if(userUid) q = query(certsCollection, where('userUid', '==', userUid), orderBy('requestDate', 'desc'));
+        const q = query(certsCollection, where('userUid', '==', userUid), orderBy('requestDate', 'desc'));
         const snap = await getDocs(q);
         const items = [];
         snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
         return items;
       },
-      async loadAllCertsForAdmin() {
+      async loadAllCerts() {
         const certsCollection = collection(firestore, 'certificates');
         const snap = await getDocs(query(certsCollection, orderBy('requestDate', 'desc')));
         const items = [];
@@ -354,33 +353,43 @@ async function sendMessageToFirebase(text, userName, userCity) {
   await window.cpBlogApi.saveMessage(msg);
 }
 
-// CORREÇÃO: syncCertsFromFirebase agora carrega TODOS os certificados para admin, 
-// e apenas os do colaborador para usuários normais
+// FUNÇÃO CORRIGIDA: syncCertsFromFirebase - carrega certificados corretamente
 async function syncCertsFromFirebase() {
-  if(!window.cpBlogApi) return;
+  if(!window.cpBlogApi || !currentUser) return;
   try {
-    if(currentUser?.uid === ADMIN_UID) {
+    if(currentUser.uid === ADMIN_UID) {
       // Admin vê todos os certificados
-      firebaseCerts = await window.cpBlogApi.loadAllCertsForAdmin();
-    } else if(currentUser?.uid) {
-      // Colaborador vê apenas seus próprios certificados
-      firebaseCerts = await window.cpBlogApi.loadCerts(currentUser.uid);
+      firebaseCerts = await window.cpBlogApi.loadAllCerts();
+      console.log('📜 Admin - Certificados carregados:', firebaseCerts.length);
     } else {
-      firebaseCerts = [];
+      // Colaborador vê APENAS seus próprios certificados
+      firebaseCerts = await window.cpBlogApi.loadCertsByUser(currentUser.uid);
+      console.log('📜 Colaborador - Certificados carregados:', firebaseCerts.length, firebaseCerts);
     }
     if(currentTab === 'certificados') renderCerts();
-    if(currentTab === 'admin' && currentUser?.uid === ADMIN_UID) renderAdmin();
-  } catch(e) { console.error('Erro sync certs:', e); }
+    if(currentTab === 'admin' && currentUser.uid === ADMIN_UID) renderAdmin();
+  } catch(e) { 
+    console.error('Erro sync certs:', e); 
+    firebaseCerts = [];
+  }
 }
 
 async function saveCertToFirebase(certData) {
   if(!window.cpBlogApi) return;
   try {
-    await window.cpBlogApi.saveCert(certData);
+    console.log('💾 Salvando certificado:', certData);
+    const saved = await window.cpBlogApi.saveCert(certData);
+    console.log('✅ Certificado salvo:', saved);
+    // Recarregar os certificados imediatamente
     await syncCertsFromFirebase();
     toast(`📜 Certificado "${certData.nome}" solicitado com sucesso! Aguarde aprovação do admin.`);
+    // Forçar re-render da aba certificados
+    if(currentTab === 'certificados') renderCerts();
     renderAll();
-  } catch(e) { console.error('Erro save cert:', e); }
+  } catch(e) { 
+    console.error('Erro save cert:', e);
+    toast('Erro ao solicitar certificado: ' + e.message);
+  }
 }
 
 async function syncMaterialsFromFirebase() {
@@ -577,7 +586,7 @@ async function startApp(){
   document.body.classList.toggle('is-admin',isAdmin);
   await syncUsersFromFirebase();
   await syncPartnersFromFirebase();
-  await syncCertsFromFirebase();
+  await syncCertsFromFirebase(); // Carrega certificados
   await syncMaterialsFromFirebase();
   await syncSettingsFromFirebase();
   await initMessagesListener();
@@ -749,13 +758,18 @@ window.addPartner = async function(e){
 
 window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
 window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
-function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody><tr>`}
+function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
+
+// FUNÇÃO RENDER CERTS CORRIGIDA
 async function renderCerts(){ 
-  // Certificados já estão em firebaseCerts via syncCertsFromFirebase()
-  // Para colaborador, firebaseCerts já contém apenas os seus certificados
-  // Para admin, contém todos
+  // Força recarregamento dos certificados para garantir dados atualizados
+  await syncCertsFromFirebase();
+  
+  // firebaseCerts já contém os certificados do usuário logado (ou todos se admin)
   const userCerts = firebaseCerts;
   const isAdmin = currentUser?.uid === ADMIN_UID;
+  
+  console.log('📜 Renderizando certificados para usuário:', currentUser?.email, 'Total:', userCerts.length);
   
   document.getElementById('certificados').innerHTML=`
     <h2>Certificados Disponíveis</h2>
@@ -764,7 +778,7 @@ async function renderCerts(){
         <div class="card">
           <b>${c[0]}</b>
           <p class="hint">Requer ${c[1]} pontos.</p>
-          <button class="secondary" ${(currentUserData?.points||0)<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button>
+          <button class="secondary" ${(currentUserData?.points||0)<c[1] ? 'disabled' : ''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button>
         </div>
       `).join('')}
     </div>
@@ -808,7 +822,7 @@ window.askCert = async function(nome, pts){
   const certData = { 
     id: Date.now().toString(), 
     userUid: currentUser?.uid, 
-    usuario: currentUserData?.profile?.nome || 'Colaborador', 
+    usuario: currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador', 
     nome: nome,
     name: nome,
     pts: pts, 
@@ -818,6 +832,7 @@ window.askCert = async function(nome, pts){
     motivo: '' 
   }; 
   
+  console.log('📤 Solicitando certificado:', certData);
   await saveCertToFirebase(certData); 
   renderAll(); 
 };
@@ -952,7 +967,7 @@ async function renderAdmin(){
   }
   
   // Carregar certificados para admin (todos)
-  const allCerts = await window.cpBlogApi.loadAllCertsForAdmin();
+  const allCerts = await window.cpBlogApi.loadAllCerts();
   const pendingCerts = allCerts.filter(c => c.status === 'Pendente');
   const approvedCerts = allCerts.filter(c => c.status === 'Aprovado');
   const rejectedCerts = allCerts.filter(c => c.status === 'Rejeitado');
