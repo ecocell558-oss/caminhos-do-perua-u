@@ -11,7 +11,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
     import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, onSnapshot, setDoc, getDoc, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
       apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
@@ -36,13 +36,6 @@
       async createFirebaseUser(email, password, displayName) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
-      },
-      async deleteFirebaseUser(uid) {
-        const user = auth.currentUser;
-        if(user && user.uid === uid) {
-          await deleteUser(user);
-        }
-        return true;
       },
       async publishPost(postData) {
         const postsCollection = collection(firestore, 'posts');
@@ -145,8 +138,8 @@
       async saveCert(certData) {
         const certsCollection = collection(firestore, 'certificates');
         if(certData.id) {
-          const certRef = doc(firestore, 'certificates', certData.id);
-          await updateDoc(certRef, certData);
+          const certRef = doc(firestore, 'certificates', certData.id.toString());
+          await setDoc(certRef, certData, { merge: true });
           return certData;
         }
         const ref = await addDoc(certsCollection, certData);
@@ -163,13 +156,10 @@
       },
       async saveMaterial(materialData) {
         const materialsCollection = collection(firestore, 'materials');
-        if(materialData.id && typeof materialData.id === 'number') {
-          const materialRef = doc(firestore, 'materials', materialData.id.toString());
-          await setDoc(materialRef, materialData);
-          return materialData;
-        }
-        const ref = await addDoc(materialsCollection, materialData);
-        return { id: ref.id, ...materialData };
+        const materialId = materialData.id ? materialData.id.toString() : Date.now().toString();
+        const materialRef = doc(firestore, 'materials', materialId);
+        await setDoc(materialRef, { ...materialData, id: materialId });
+        return { id: materialId, ...materialData };
       },
       async loadMaterials() {
         const materialsCollection = collection(firestore, 'materials');
@@ -268,11 +258,11 @@ const defaultTasks = [
 
 const seedRanking=[];
 const defaultMaterials = [
-  {id:1,titulo:'Portfólio Caminhos do Peruaçu',descricao:'PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.',link:'',ativo:true},
-  {id:2,titulo:'Cartão de Visita Caminhos do Peruaçu',descricao:'Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.',link:'',ativo:true},
-  {id:3,titulo:'Material de Serviço',descricao:'PDF visual de apoio comercial e apresentação dos serviços.',link:'',ativo:true},
-  {id:4,titulo:'Mapa Peruaçu Trilhas',descricao:'Imagem de referência para orientar rotas, trilhas e atrativos.',link:'',ativo:true},
-  {id:5,titulo:'Panfleto Caminhos do Peruaçu',descricao:'Material promocional para captação de parceiros e visitantes.',link:'',ativo:true}
+  {id:'1',titulo:'Portfólio Caminhos do Peruaçu',descricao:'PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.',link:'',ativo:true},
+  {id:'2',titulo:'Cartão de Visita Caminhos do Peruaçu',descricao:'Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.',link:'',ativo:true},
+  {id:'3',titulo:'Material de Serviço',descricao:'PDF visual de apoio comercial e apresentação dos serviços.',link:'',ativo:true},
+  {id:'4',titulo:'Mapa Peruaçu Trilhas',descricao:'Imagem de referência para orientar rotas, trilhas e atrativos.',link:'',ativo:true},
+  {id:'5',titulo:'Panfleto Caminhos do Peruaçu',descricao:'Material promocional para captação de parceiros e visitantes.',link:'',ativo:true}
 ];
 
 // ==================== FUNÇÕES DO FIREBASE ====================
@@ -584,9 +574,9 @@ function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.q
 function renderQ(q,idx){const key=currentModule+'-'+idx,answered=currentUserData?.training?.answered[key],locked=answered?.correct;return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`}
 window.answerQ=async function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(currentUserData?.training?.answered[key]?.correct)return;const ok=choice===q.correta;if(!currentUserData.training.answered) currentUserData.training.answered={};currentUserData.training.answered[key]={choice,correct:ok};if(ok){currentUserData.points = (currentUserData.points || 0) + 5;toast('Resposta correta! +5 pontos');}else toast('Resposta incorreta. Leia a explicação e tente novamente.');const completed=modules[currentModule-1].questions.every((_,i)=>currentUserData.training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!currentUserData.training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1]||40;currentUserData.training.completedAt[currentModule]=new Date().toISOString();currentUserData.points = (currentUserData.points || 0) + pts;await saveUserToFirebase(currentUserData);toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);confetti();}else{await saveUserToFirebase(currentUserData);}renderAll()};
 function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
-async function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast('Material salvo com sucesso!');matId.value='';matTitulo.value='';matDesc.value='';matLink.value='';matAtivo.checked=true;renderAdmin();renderMaterials()}
-function editMaterial(id){const m=firebaseMaterials.find(x=>x.id==id || x.id.toString()===id.toString());if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
-async function deleteMaterial(id){if(!confirm('Remover este material?'))return;await deleteMaterialFromFirebase(id);toast('Material removido.');renderAdmin();renderMaterials()}
+async function saveMaterial(e){e.preventDefault();const id = matId.value ? matId.value.toString() : Date.now().toString();const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast('Material salvo com sucesso!');matId.value='';matTitulo.value='';matDesc.value='';matLink.value='';matAtivo.checked=true;renderAdmin();renderMaterials()}
+function editMaterial(id){const m = firebaseMaterials.find(x => x.id == id || x.id === id.toString());if(!m){toast('Material não encontrado');return;}matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
+async function deleteMaterial(id){if(!confirm('Remover este material permanentemente?'))return;await deleteMaterialFromFirebase(id);toast('Material removido com sucesso.');renderAdmin();renderMaterials()}
 function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(currentUserData?.tasks || []).map(t=>{
   let progresso = '';
   if(t.id === 6 && !t.done){
@@ -714,7 +704,7 @@ window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parc
 window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
 function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
 async function renderCerts(){ const userCerts = firebaseCerts.filter(c => c.userUid === currentUser?.uid); document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${(currentUserData?.points||0)<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length ? userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>${c.motivo ? `<p class="hint" style="color:#c0392b">Motivo da rejeição: ${c.motivo}</p>` : ''}</div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl && c.status === 'Aprovado' ? `<div class="actions"><button class="secondary" onclick="window.open('${c.certificadoUrl}','_blank')">📄 BAIXAR CERTIFICADO</button></div>` : ''}</div>`).join('') : '<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`; }
-window.askCert = async function(nome, pts){ if(firebaseCerts.some(c=>c.userUid===currentUser?.uid && c.nome===nome && c.status!=='Rejeitado')){ return toast('Você já solicitou este certificado.'); } const certData = { id: Date.now(), userUid: currentUser?.uid, usuario: currentUserData?.profile?.nome || 'Colaborador', nome: nome, pts: pts, status: 'Pendente', requestDate: new Date().toISOString(), certificadoUrl: '', motivo: '' }; await saveCertToFirebase(certData); toast('📜 Certificado solicitado para análise.'); renderAll(); };
+window.askCert = async function(nome, pts){ if(firebaseCerts.some(c=>c.userUid===currentUser?.uid && c.nome===nome && c.status!=='Rejeitado')){ return toast('Você já solicitou este certificado.'); } const certData = { id: Date.now().toString(), userUid: currentUser?.uid, usuario: currentUserData?.profile?.nome || 'Colaborador', nome: nome, pts: pts, status: 'Pendente', requestDate: new Date().toISOString(), certificadoUrl: '', motivo: '' }; await saveCertToFirebase(certData); toast('📜 Certificado solicitado para análise.'); renderAll(); };
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',db?.settings?.whatsappConteudos || '')}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',db?.settings?.whatsappForum || '')}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat salvo no Firebase. Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real via Firebase!</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${db?.settings?.whatsappConteudos || ''}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${db?.settings?.whatsappForum || ''}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
 window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');chatText.value='';renderCommunity()};
@@ -963,8 +953,8 @@ async function renderAdmin(){
           <div class="item">
             <b>${m.titulo}</b>
             <div class="actions">
-              <button class="ghost" onclick="window.editMaterial(${m.id})">✏️ Editar</button>
-              <button class="danger" onclick="window.deleteMaterial(${m.id})">🗑️ Excluir</button>
+              <button class="ghost" onclick="window.editMaterial('${m.id}')">✏️ Editar</button>
+              <button class="danger" onclick="window.deleteMaterial('${m.id}')">🗑️ Excluir</button>
             </div>
           </div>
         `).join('')}</div>
@@ -1061,17 +1051,9 @@ window.createCollaboratorAccount = async function() {
 window.deleteCollaborator = async function(uid) {
   if(!confirm(`⚠️ Remover colaborador permanentemente? Esta ação é irreversível!`)) return;
   try {
-    const userToDelete = firebaseUsers.find(u => u.uid === uid);
-    if(userToDelete && userToDelete.email) {
-      try {
-        if(window.cpBlogApi.auth && window.cpBlogApi.auth.currentUser && window.cpBlogApi.auth.currentUser.uid === ADMIN_UID) {
-          toast('Para excluir completamente a conta do Firebase Auth, vá no Console do Firebase > Authentication > Usuários e exclua manualmente.');
-        }
-      } catch(e) { console.log('Não foi possível excluir auth:', e); }
-    }
     await window.cpBlogApi.deleteUserFirebase(uid);
     await syncUsersFromFirebase();
-    toast('✅ Colaborador removido com sucesso! (Conta do Auth deve ser removida manualmente no Firebase Console)');
+    toast('✅ Colaborador removido com sucesso!');
     renderAdmin();
     renderCommunity();
   } catch(e) { 
