@@ -11,7 +11,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
     import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, onSnapshot, setDoc, getDoc, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
       apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
@@ -29,15 +29,20 @@
     window.cpBlogApi = {
       userEmail: '',
       userUid: '',
-      async signIn(email, password) {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        this.userEmail = result.user.email;
-        this.userUid = result.user.uid;
-        return result;
+      auth: auth,
+      signIn(email, password) {
+        return signInWithEmailAndPassword(auth, email, password);
       },
       async createFirebaseUser(email, password, displayName) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
+      },
+      async deleteFirebaseUser(uid) {
+        const user = auth.currentUser;
+        if(user && user.uid === uid) {
+          await deleteUser(user);
+        }
+        return true;
       },
       async publishPost(postData) {
         const postsCollection = collection(firestore, 'posts');
@@ -99,7 +104,6 @@
         await updateDoc(partnerRef, { status, awarded, comissaoPaga });
         return true;
       },
-      // NOVAS FUNÇÕES PARA USUÁRIOS/COLABORADORES NO FIREBASE
       async saveUser(userData) {
         const userRef = doc(firestore, 'users', userData.uid);
         await setDoc(userRef, userData, { merge: true });
@@ -117,6 +121,11 @@
         const items = [];
         snap.forEach(doc => items.push({ uid: doc.id, ...doc.data() }));
         return items;
+      },
+      async deleteUserFirebase(uid) {
+        const userRef = doc(firestore, 'users', uid);
+        await deleteDoc(userRef);
+        return true;
       },
       async saveMessage(messageData) {
         const messagesCollection = collection(firestore, 'messages');
@@ -154,9 +163,9 @@
       },
       async saveMaterial(materialData) {
         const materialsCollection = collection(firestore, 'materials');
-        if(materialData.id) {
-          const materialRef = doc(firestore, 'materials', materialData.id);
-          await updateDoc(materialRef, materialData);
+        if(materialData.id && typeof materialData.id === 'number') {
+          const materialRef = doc(firestore, 'materials', materialData.id.toString());
+          await setDoc(materialRef, materialData);
           return materialData;
         }
         const ref = await addDoc(materialsCollection, materialData);
@@ -164,13 +173,13 @@
       },
       async loadMaterials() {
         const materialsCollection = collection(firestore, 'materials');
-        const snap = await getDocs(query(materialsCollection, orderBy('id', 'asc')));
+        const snap = await getDocs(materialsCollection);
         const items = [];
         snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
         return items;
       },
       async deleteMaterialFirebase(materialId) {
-        const materialRef = doc(firestore, 'materials', materialId);
+        const materialRef = doc(firestore, 'materials', materialId.toString());
         await deleteDoc(materialRef);
         return true;
       }
@@ -266,7 +275,7 @@ const defaultMaterials = [
   {id:5,titulo:'Panfleto Caminhos do Peruaçu',descricao:'Material promocional para captação de parceiros e visitantes.',link:'',ativo:true}
 ];
 
-// ==================== FUNÇÕES DO FIREBASE PARA USUÁRIOS ====================
+// ==================== FUNÇÕES DO FIREBASE ====================
 async function syncUsersFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
@@ -298,7 +307,6 @@ async function saveUserToFirebase(userData) {
   } catch(e) { console.error('Erro save user:', e); }
 }
 
-// ==================== FUNÇÕES DO FIREBASE PARA MENSAGENS ====================
 async function initMessagesListener() {
   if(messagesUnsubscribe) messagesUnsubscribe();
   if(!window.cpBlogApi) return;
@@ -321,7 +329,6 @@ async function sendMessageToFirebase(text, userName, userCity) {
   await window.cpBlogApi.saveMessage(msg);
 }
 
-// ==================== FUNÇÕES DO FIREBASE PARA CERTIFICADOS ====================
 async function syncCertsFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
@@ -340,7 +347,6 @@ async function saveCertToFirebase(certData) {
   } catch(e) { console.error('Erro save cert:', e); }
 }
 
-// ==================== FUNÇÕES DO FIREBASE PARA MATERIAIS ====================
 async function syncMaterialsFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
@@ -370,6 +376,15 @@ async function deleteMaterialFromFirebase(materialId) {
     await window.cpBlogApi.deleteMaterialFirebase(materialId);
     await syncMaterialsFromFirebase();
   } catch(e) { console.error('Erro delete material:', e); }
+}
+
+async function syncPartnersFromFirebase() {
+  if(!window.cpBlogApi) return;
+  try {
+    firebasePartners = await window.cpBlogApi.loadPartners();
+    if(currentTab === 'parceiros') renderPartners();
+    if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin();
+  } catch(e) { console.error('Erro sync partners:', e); }
 }
 
 // ==================== FUNÇÕES AUXILIARES ====================
@@ -425,7 +440,6 @@ async function processFile(file, maxSizeKB = 400) {
   });
 }
 
-function userKey(email){return String(email||'').trim().toLowerCase()}
 function level(points=currentUserData?.points || 0){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}
 function nextLevel(){return LEVELS.find(x=>(currentUserData?.points || 0)<x[1])||LEVELS[LEVELS.length-1]}
 function totalAnswered(){return Object.keys(currentUserData?.training?.answered || {}).length}
@@ -467,15 +481,6 @@ const modules=makeQuestions();
 const MODULE_POINTS=[40,60,80,100,120],RETAKE_MS=48*60*60*1000;
 
 // ==================== FUNÇÕES PRINCIPAIS ====================
-async function syncPartnersFromFirebase() {
-  if(!window.cpBlogApi) return;
-  try {
-    firebasePartners = await window.cpBlogApi.loadPartners();
-    if(currentTab === 'parceiros') renderPartners();
-    if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin();
-  } catch(e) { console.error('Erro sync partners:', e); }
-}
-
 function startOnlineTracking(){
   if(onlineInterval) clearInterval(onlineInterval);
   onlineInterval = setInterval(async () => {
@@ -579,8 +584,8 @@ function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.q
 function renderQ(q,idx){const key=currentModule+'-'+idx,answered=currentUserData?.training?.answered[key],locked=answered?.correct;return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`}
 window.answerQ=async function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(currentUserData?.training?.answered[key]?.correct)return;const ok=choice===q.correta;if(!currentUserData.training.answered) currentUserData.training.answered={};currentUserData.training.answered[key]={choice,correct:ok};if(ok){currentUserData.points = (currentUserData.points || 0) + 5;toast('Resposta correta! +5 pontos');}else toast('Resposta incorreta. Leia a explicação e tente novamente.');const completed=modules[currentModule-1].questions.every((_,i)=>currentUserData.training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!currentUserData.training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1]||40;currentUserData.training.completedAt[currentModule]=new Date().toISOString();currentUserData.points = (currentUserData.points || 0) + pts;await saveUserToFirebase(currentUserData);toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);confetti();}else{await saveUserToFirebase(currentUserData);}renderAll()};
 function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
-async function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const found=firebaseMaterials.find(m=>m.id===id);const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast(found?'Material atualizado.':'Material adicionado.');renderAdmin();renderMaterials()}
-function editMaterial(id){const m=firebaseMaterials.find(x=>x.id===id);if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
+async function saveMaterial(e){e.preventDefault();const id=matId.value?Number(matId.value):Date.now();const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast('Material salvo com sucesso!');matId.value='';matTitulo.value='';matDesc.value='';matLink.value='';matAtivo.checked=true;renderAdmin();renderMaterials()}
+function editMaterial(id){const m=firebaseMaterials.find(x=>x.id==id || x.id.toString()===id.toString());if(!m)return;matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
 async function deleteMaterial(id){if(!confirm('Remover este material?'))return;await deleteMaterialFromFirebase(id);toast('Material removido.');renderAdmin();renderMaterials()}
 function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(currentUserData?.tasks || []).map(t=>{
   let progresso = '';
@@ -874,7 +879,7 @@ async function renderAdmin(){
               <div class="actions">
                 <button class="ok" onclick="window.verPerfilColaborador('${c.uid}', '${c.profile?.nome || c.email}')">👁️ VER</button>
                 <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Senha</button>
-                <button class="danger" onclick="window.deleteCollaborator('${c.uid}')">🗑️</button>
+                <button class="danger" onclick="window.deleteCollaborator('${c.uid}')">🗑️ Excluir</button>
               </div>
             </div>
           </div>
@@ -959,7 +964,7 @@ async function renderAdmin(){
             <b>${m.titulo}</b>
             <div class="actions">
               <button class="ghost" onclick="window.editMaterial(${m.id})">✏️ Editar</button>
-              <button class="danger" onclick="window.deleteMaterial(${m.id})">🗑️</button>
+              <button class="danger" onclick="window.deleteMaterial(${m.id})">🗑️ Excluir</button>
             </div>
           </div>
         `).join('')}</div>
@@ -1054,24 +1059,31 @@ window.createCollaboratorAccount = async function() {
 };
 
 window.deleteCollaborator = async function(uid) {
-  if(!confirm(`⚠️ Remover colaborador "${uid}"?`)) return;
+  if(!confirm(`⚠️ Remover colaborador permanentemente? Esta ação é irreversível!`)) return;
   try {
     const userToDelete = firebaseUsers.find(u => u.uid === uid);
     if(userToDelete && userToDelete.email) {
-      const user = auth.currentUser;
-      console.log('Para deletar completamente, faça manualmente no Firebase Console');
+      try {
+        if(window.cpBlogApi.auth && window.cpBlogApi.auth.currentUser && window.cpBlogApi.auth.currentUser.uid === ADMIN_UID) {
+          toast('Para excluir completamente a conta do Firebase Auth, vá no Console do Firebase > Authentication > Usuários e exclua manualmente.');
+        }
+      } catch(e) { console.log('Não foi possível excluir auth:', e); }
     }
-    firebaseUsers = firebaseUsers.filter(u => u.uid !== uid);
+    await window.cpBlogApi.deleteUserFirebase(uid);
+    await syncUsersFromFirebase();
+    toast('✅ Colaborador removido com sucesso! (Conta do Auth deve ser removida manualmente no Firebase Console)');
     renderAdmin();
     renderCommunity();
-    toast(`Colaborador removido! (Remoção completa do Firebase requer ação manual no console)`);
-  } catch(e) { toast('Erro ao remover: ' + e.message); }
+  } catch(e) { 
+    console.error('Erro ao excluir:', e);
+    toast('Erro ao excluir: ' + e.message);
+  }
 };
 
 window.resetCollaboratorPassword = function(email) {
   const newPassword = prompt(`Nova senha para ${email}:`, 'novaSenha123');
   if(!newPassword || newPassword.length < 6) return toast('Mínimo 6 caracteres');
-  toast(`✅ Senha atualizada! (O usuário deve redefinir senha via Firebase esqueci minha senha)`);
+  toast(`✅ Senha atualizada! (O usuário deve redefinir senha via Firebase "Esqueci minha senha")`);
   renderAdmin();
 };
 
