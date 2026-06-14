@@ -739,6 +739,36 @@
   // 🔒 SEGURANÇA: APENAS ESTE EMAIL PODE ACESSAR O PAINEL ADMIN
   const AUTHORIZED_ADMIN_EMAIL = "guia.caminhosdoperuacu@gmail.com";
   
+  // ========== NOVA FUNÇÃO PARA CONVERTER URL DO YOUTUBE ==========
+  function convertToEmbedUrl(url) {
+    if (!url) return null;
+    
+    // Se já for embed, retorna
+    if (url.includes('/embed/')) return url;
+    
+    // Formato youtu.be/XXXXX (o que você está usando)
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Formato youtube.com/watch?v=XXXXX
+    if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(url.split('?')[1]);
+      const videoId = urlParams.get('v');
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Formato vimeo
+    if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
+      const vimeoId = url.split('vimeo.com/')[1].split('?')[0];
+      return `https://player.vimeo.com/video/${vimeoId}`;
+    }
+    
+    return url;
+  }
+  // ================================================================
+  
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -1161,6 +1191,7 @@
     });
   }
   
+  // FUNÇÃO OPENMODAL MODIFICADA - AGORA USA O convertToEmbedUrl
   function openModal(post) {
     if(post.status !== 'approved') return;
     window.currentModalPost = post;
@@ -1168,7 +1199,11 @@
     const bodyDiv = document.getElementById('modalBodyContent');
     const galleryImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
     const hasCarousel = (post.autoCarousel && galleryImgs.length >= 2);
-    const videoHtml = post.video ? `<div class="video-wrapper"><iframe src="${post.video}" frameborder="0" allowfullscreen></iframe></div>` : '';
+    
+    // 🔥 CORREÇÃO DO VÍDEO - converte qualquer formato de URL do YouTube
+    const videoEmbedUrl = convertToEmbedUrl(post.video);
+    const videoHtml = videoEmbedUrl ? `<div class="video-wrapper"><iframe src="${videoEmbedUrl}" frameborder="0" allowfullscreen></iframe></div>` : '';
+    
     const linkHtml = post.link ? `<a href="${post.link}" target="_blank" class="external-link-btn"><i class="fas fa-external-link-alt"></i> Acessar link externo →</a>` : '';
     const shareUrl = generateShareUrl(post.id);
     
