@@ -735,7 +735,7 @@ window.addPartner = async function(e){
 
 window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
 window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
-function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
+function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody><table>`}
 
 // ==================== RENDER DOS CERTIFICADOS (NOVO SISTEMA - DOWNLOAD DIRETO) ====================
 async function renderCerts(){ 
@@ -873,6 +873,7 @@ window.verPerfilColaborador = function(uid, nome) {
   modal.style.display = 'flex';
 };
 
+// FUNÇÃO CORRIGIDA: ADICIONAR PONTOS
 window.adjustPoints = async function(uid, operation) {
   const user = firebaseUsers.find(u => u.uid === uid);
   if(!user) { toast('Colaborador não encontrado'); return; }
@@ -885,21 +886,37 @@ window.adjustPoints = async function(uid, operation) {
   let operationText = '';
   if(operation === 'add') { newPoints = oldPoints + points; operationText = `Adicionou +${points} pontos`; }
   else if(operation === 'remove') { newPoints = Math.max(0, oldPoints - points); operationText = `Removeu ${points} pontos`; }
+  
+  // ATUALIZAR DIRETAMENTE NO FIREBASE
   user.points = newPoints;
-  await window.cpBlogApi.saveUser(user);
-  await syncUsersFromFirebase();
-  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
-  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
-  toast(`✅ ${operationText}! Pontos alterados de ${oldPoints} para ${newPoints}`);
-  renderAdmin();
-  if(uid === currentUser?.uid) renderAll();
-  if(currentTab === 'certificados') renderCerts();
-  const modal = document.getElementById('profileModalGlobal');
-  if(modal && modal.style.display === 'flex') {
-    window.verPerfilColaborador(uid, user.profile?.nome || '');
+  try {
+    await window.cpBlogApi.saveUser(user);
+    await syncUsersFromFirebase();
+    
+    // Registrar no histórico
+    if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+    pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
+    
+    toast(`✅ ${operationText}! Pontos alterados de ${oldPoints} para ${newPoints}`);
+    renderAdmin();
+    if(uid === currentUser?.uid) {
+      await syncUsersFromFirebase(); // Recarregar dados do usuário logado
+      renderAll();
+    }
+    if(currentTab === 'certificados') renderCerts();
+    
+    // Atualizar o modal aberto
+    const modal = document.getElementById('profileModalGlobal');
+    if(modal && modal.style.display === 'flex') {
+      window.verPerfilColaborador(uid, user.profile?.nome || '');
+    }
+  } catch(error) {
+    console.error('Erro ao salvar pontos:', error);
+    toast('❌ Erro ao salvar pontos: ' + error.message);
   }
 };
 
+// FUNÇÃO CORRIGIDA: DEFINIR PONTOS EXATOS
 window.setExactPoints = async function(uid) {
   const user = firebaseUsers.find(u => u.uid === uid);
   if(!user) { toast('Colaborador não encontrado'); return; }
@@ -909,18 +926,33 @@ window.setExactPoints = async function(uid) {
   if(isNaN(points) || points < 0) { toast('Digite um valor válido (maior ou igual a 0)'); return; }
   const oldPoints = user.points || 0;
   const difference = points - oldPoints;
+  
+  // ATUALIZAR DIRETAMENTE NO FIREBASE
   user.points = points;
-  await window.cpBlogApi.saveUser(user);
-  await syncUsersFromFirebase();
-  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
-  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `Definido para ${points} (${difference >= 0 ? '+' : ''}${difference})`, oldPoints: oldPoints, newPoints: points, admin: currentUser?.email || 'Admin' });
-  toast(`✅ Pontos alterados de ${oldPoints} para ${points}`);
-  renderAdmin();
-  if(uid === currentUser?.uid) renderAll();
-  if(currentTab === 'certificados') renderCerts();
-  const modal = document.getElementById('profileModalGlobal');
-  if(modal && modal.style.display === 'flex') {
-    window.verPerfilColaborador(uid, user.profile?.nome || '');
+  try {
+    await window.cpBlogApi.saveUser(user);
+    await syncUsersFromFirebase();
+    
+    // Registrar no histórico
+    if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+    pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `Definido para ${points} (${difference >= 0 ? '+' : ''}${difference})`, oldPoints: oldPoints, newPoints: points, admin: currentUser?.email || 'Admin' });
+    
+    toast(`✅ Pontos alterados de ${oldPoints} para ${points}`);
+    renderAdmin();
+    if(uid === currentUser?.uid) {
+      await syncUsersFromFirebase(); // Recarregar dados do usuário logado
+      renderAll();
+    }
+    if(currentTab === 'certificados') renderCerts();
+    
+    // Atualizar o modal aberto
+    const modal = document.getElementById('profileModalGlobal');
+    if(modal && modal.style.display === 'flex') {
+      window.verPerfilColaborador(uid, user.profile?.nome || '');
+    }
+  } catch(error) {
+    console.error('Erro ao salvar pontos:', error);
+    toast('❌ Erro ao salvar pontos: ' + error.message);
   }
 };
 
