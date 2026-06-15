@@ -468,7 +468,7 @@ function toast(msg){const t=document.createElement('div');t.className='toast';t.
 function confetti(){const c=document.getElementById('confetti');for(let i=0;i<90;i++){let s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];s.style.animationDelay=Math.random()*.35+'s';c.appendChild(s);setTimeout(()=>s.remove(),2300)}}
 
 function makeQuestions(){
- const modulesBase=[
+ const modulesBase = [
   {title:'Conhecendo o Projeto',themes:['missão do projeto','Vale do Peruaçu/MG','Cerrado','Parque Nacional Cavernas do Peruaçu','turismo sustentável','comunidades locais','condutores credenciados','patrimônio natural','arte rupestre','experiência do visitante'],correct:['valorizar conservação, educação e renda local','apresentar o destino com responsabilidade ambiental','respeitar regras do parque e comunidades','conectar visitantes a serviços locais qualificados','promover turismo sustentável no Vale do Peruaçu','guias credenciados garantem segurança','preservar pinturas rupestres','evitar contato direto com espeleotemas','respeitar limite de visitação','valorizar cultura local'],wrong:['prometer acesso sem regras ambientais','ignorar guias e comunidades locais','tratar o parque apenas como cenário de fotos','estimular visita sem planejamento','deixar lixo na trilha','tocar formações rochosas','usar flash dentro de cavernas','ignorar horário de funcionamento','entrar sem autorização','divulgar localizações exatas sem critério']},
   {title:'Vendas e Captação de Parceiros',themes:['abordagem inicial','escuta ativa','objeção de preço','benefícios para parceiros','follow-up comercial','proposta de valor','fechamento de parceria','indicação de novos contatos','registro no funil','pagamento e ordem de serviço'],correct:['ouvir a necessidade e apresentar benefícios concretos','registrar contato, próximo passo e objeções','explicar a vitrine online e os planos com clareza','confirmar ordem de serviço e comprovante Pix','manter relacionamento depois do fechamento','destacar visibilidade para o negócio','mostrar cases de sucesso','oferecer material de apoio','ser transparente sobre prazos','valorizar indicações'],wrong:['pressionar sem entender o cliente','prometer resultado impossível','deixar o contato sem registro','falar apenas da própria pontuação','ignorar dúvidas do parceiro','fornecer informações incompletas','tratar todos parceiros igualmente sem personalização','esquecer de fazer follow-up','não explicar contrato claramente','desconsiderar feedback']},
   {title:'Níveis e Pontuação',themes:['nível Iniciante','nível Explorador','nível Colaborador','nível Embaixador','nível Especialista','nível Mestre','pontos por conteúdo','pontos por parceiro','pontos por questão','bônus de módulo'],correct:['os pontos atualizam nível, ranking e certificados','cada questão correta soma 5 pontos','conteúdo aprovado soma 50 pontos','parceiro aprovado soma 100 pontos','módulo completo soma bônus de 500 pontos','nível superior exige mais pontos','certificados requerem pontuação mínima','tarefas concedem bônus especiais','ranking ordena por pontuação','colaborador ativo acumula mais pontos'],wrong:['questões corretas não contam pontos','conteúdo aprovado tira pontos','parceiro vale menos que uma questão','certificado não depende de pontuação','nível não muda com pontos','pontos não servem para nada','qualquer um pode ser líder regional sem pontos','tarefas não dão pontos','ranking é aleatório','certificados são automáticos']},
@@ -486,8 +486,16 @@ function makeQuestions(){
      const posCorreta = Math.floor(Math.random() * 4);
      alternativas.splice(posCorreta, 0, correct);
      
+     // Para os módulos 1 a 4, remover o texto específico do parque
+     let perguntaTexto = `Questão ${i+1}: Sobre "${theme}"`;
+     if(mi+1 >= 1 && mi+1 <= 4) {
+       perguntaTexto = `Questão ${i+1}: Sobre "${theme}"`;
+     } else {
+       perguntaTexto = `Questão ${i+1}: Sobre "${theme}", qual a informação correta sobre o Parque Nacional Cavernas do Peruaçu?`;
+     }
+     
      questions.push({
-       pergunta: `Questão ${i+1}: Sobre "${theme}", qual a informação correta sobre o Parque Nacional Cavernas do Peruaçu?`,
+       pergunta: perguntaTexto,
        alternativas: alternativas,
        correta: posCorreta,
        explicacao: `Resposta correta: ${correct}. Esta informação está alinhada com os dados oficiais do ICMBio e da UNESCO sobre o Parque Nacional Cavernas do Peruaçu.`
@@ -868,7 +876,6 @@ window.verPerfilColaborador = function(uid, nome) {
   modal.style.display = 'flex';
 };
 
-// FUNÇÃO CORRIGIDA: ADICIONAR PONTOS
 window.adjustPoints = async function(uid) {
   const user = firebaseUsers.find(u => u.uid === uid);
   if(!user) { toast('Colaborador não encontrado'); return; }
@@ -900,6 +907,7 @@ window.adjustPoints = async function(uid) {
     
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
+      modal.style.display = 'none';
       window.verPerfilColaborador(uid, user.profile?.nome || '');
     }
   } catch(error) {
@@ -908,7 +916,6 @@ window.adjustPoints = async function(uid) {
   }
 };
 
-// FUNÇÃO CORRIGIDA: REMOVER PONTOS
 window.removePoints = async function(uid) {
   const user = firebaseUsers.find(u => u.uid === uid);
   if(!user) { toast('Colaborador não encontrado'); return; }
@@ -940,6 +947,7 @@ window.removePoints = async function(uid) {
     
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
+      modal.style.display = 'none';
       window.verPerfilColaborador(uid, user.profile?.nome || '');
     }
   } catch(error) {
@@ -948,7 +956,6 @@ window.removePoints = async function(uid) {
   }
 };
 
-// FUNÇÃO CORRIGIDA: DEFINIR PONTOS EXATOS
 window.setExactPoints = async function(uid) {
   const user = firebaseUsers.find(u => u.uid === uid);
   if(!user) { toast('Colaborador não encontrado'); return; }
@@ -980,6 +987,7 @@ window.setExactPoints = async function(uid) {
     
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
+      modal.style.display = 'none';
       window.verPerfilColaborador(uid, user.profile?.nome || '');
     }
   } catch(error) {
