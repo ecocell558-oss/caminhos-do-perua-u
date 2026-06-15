@@ -6,7 +6,7 @@
   <title>Central do Colaborador | Caminhos do Peruaçu</title>
   <link rel="icon" type="image/png" href="logo2.png">
   <style>
-    :root{--primary:#F5B81B;--secondary:#1E3A2F;--bg:#F9F9F9;--card:#fff;--ink:#243029;--muted:#66736c;--line:#e7ebe8;--ok:#198754;--bad:#c0392b;--info:#1769aa;--warn:#b77900;--shadow:0 12px 30px rgba(30,58,47,.1);--r:16px}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--secondary);color:#fff}button:hover{filter:brightness(1.05)}button.secondary{background:var(--primary);color:var(--secondary)}button.ghost{background:#edf1ee;color:var(--secondary)}button.danger{background:var(--bad)}button.ok{background:var(--ok)}button:disabled{opacity:.5;cursor:not-allowed}.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top left,rgba(245,184,27,.28),transparent 35%),linear-gradient(135deg,#f9f9f9,#eef5f0)}.login-card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.mark{width:56px;height:56px;border-radius:18px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000;font-size:26px}.brand h1{font-size:24px;margin:0;color:var(--secondary)}.brand p{margin:2px 0 0;color:var(--muted)}label{display:block;font-weight:800;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--ink)}textarea{min-height:120px;resize:vertical}.hint{font-size:13px;color:var(--muted);line-height:1.45}.app{display:none;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:286px;background:var(--secondary);color:#fff;z-index:5;overflow:auto;transition:.25s;box-shadow:8px 0 24px rgba(0,0,0,.16)}.side-head{padding:22px;border-bottom:1px solid rgba(255,255,255,.12)}.side-head h2{margin:0;font-size:21px}.side-head small{color:var(--primary);font-weight:800}.userbox{margin:16px;padding:14px;border-radius:16px;background:rgba(255,255,255,.09)}.userbox b{display:block}.nav{padding:8px}.nav button{width:100%;margin:4px 0;text-align:left;background:transparent;color:#e8f1ec;display:flex;gap:10px;align-items:center}.nav button.active,.nav button:hover{background:var(--primary);color:var(--secondary)}.logout{margin:16px;width:calc(100% - 32px);background:rgba(255,255,255,.12)}.main{margin-left:286px;padding:26px 30px 60px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.topbar h1{margin:0;color:var(--secondary);font-size:28px}.hamb{display:none}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 4px 18px rgba(0,0,0,.035);padding:18px}.stat b{display:block;color:var(--secondary);font-size:28px;margin-top:4px}.stat span{color:var(--muted);font-weight:800;font-size:13px}.bar{height:12px;border-radius:99px;background:#e9eee9;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),#ffd76b);width:0}.section{display:none}.section.active{display:block}.section h2{margin:4px 0 14px;color:var(--secondary)}.split{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.list{display:grid;gap:12px}.item{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px}.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.pill{display:inline-flex;align-items:center;border-radius:99px;padding:4px 9px;font-size:12px;font-weight:900;background:#eef4ef;color:var(--secondary)}.pill.gold{background:#fff1c6}.pill.ok{background:#e7f7ee;color:var(--ok)}.pill.bad{background:#feeceb;color:var(--bad)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.module-btn{background:#fff;color:var(--secondary);border:1px solid var(--line);padding:12px;text-align:left}.module-btn.active{background:var(--secondary);color:#fff}.quiz-tools{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;margin:12px 0}.q-card{margin-bottom:12px}.alts{display:grid;gap:8px;margin-top:10px}.alt{display:block;text-align:left;background:#f5f7f5;color:var(--ink);border:1px solid var(--line);font-weight:700}.alt.correct{background:#dff4e8;border-color:#6bc58f}.alt.wrong{background:#fde7e5;border-color:#ec8f86}.explain{margin-top:8px;color:var(--muted);font-size:14px}.table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;background:#fff}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left}.table th{background:#eef4ef;color:var(--secondary)}.me{background:#fff8df!important;font-weight:900}.toastbox{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:50}.toast{background:var(--secondary);color:#fff;padding:12px 14px;border-radius:14px;box-shadow:var(--shadow);max-width:360px}.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}.confetti span{position:absolute;top:-20px;width:10px;height:16px;background:var(--primary);animation:fall 1.9s linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}.blog-hero{background:linear-gradient(135deg,var(--secondary),#284f41);color:#fff;border-radius:18px;padding:22px}.blog-hero a{color:var(--primary);font-weight:1000}.empty{color:var(--muted);padding:12px}.admin-only{display:none!important}.is-admin .admin-only{display:flex!important}.gallery-preview{display:grid;gap:10px;margin-top:10px}.gallery-preview img{width:100%;height:120px;object-fit:cover;border-radius:8px}.gallery-preview.cols-2{grid-template-columns:repeat(2,1fr)}.gallery-preview.cols-3{grid-template-columns:repeat(3,1fr)}.gallery-preview.cols-4{grid-template-columns:repeat(4,1fr)}.gallery-url-input{margin-bottom:8px;display:flex;gap:8px;align-items:center}.gallery-url-input input{flex:1}.gallery-url-input button{padding:8px 12px;width:auto}.comission-badge{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:800;display:inline-block;margin-bottom:12px}.brand-logo{width:64px;height:64px;border-radius:18px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:6px}.side-logo{width:74px;height:74px;border-radius:22px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:7px;margin-bottom:10px}.training-hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,var(--secondary),#2f604e);color:#fff;border-radius:22px;padding:22px;margin-bottom:16px;overflow:hidden;position:relative}.training-hero:after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(245,184,27,.22)}.professor{width:98px;height:98px;border-radius:28px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-size:58px;box-shadow:0 14px 30px rgba(0,0,0,.18)}.lesson-path{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}.lesson-node{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--secondary);position:relative}.lesson-node.active{background:var(--primary)}.lesson-node.done:before{content:"✓";position:absolute;right:10px;top:8px;font-weight:1000}.quiz-question{font-size:1.03rem;font-weight:900;color:var(--secondary)}.chat-shell{display:grid;grid-template-columns:320px 1fr;gap:16px}.chat-box{height:430px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}.msg{max-width:78%;padding:10px 12px;border-radius:14px;background:#eef4ef}.msg.me{align-self:flex-end;background:#fff1c6}.msg b{display:block;font-size:12px;color:var(--secondary);margin-bottom:3px}.online-dot{width:10px;height:10px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px}.profile-card{display:flex;gap:12px;align-items:center}.avatar{width:48px;height:48px;border-radius:16px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000}.group-card{background:linear-gradient(135deg,#fff,#f4faf6);border:1px solid var(--line);border-radius:18px;padding:18px}.group-card h3{margin:0 0 8px;color:var(--secondary)}.mini-logo{height:28px;width:28px;object-fit:contain;border-radius:8px;background:#fff}.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;z-index:70;padding:18px}.modal-card{background:#fff;border-radius:20px;max-width:720px;width:100%;max-height:80vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow)}.collab-card{background:#f8f9fa;border-radius:12px;padding:12px;margin-bottom:12px}.collab-card h4{margin:0 0 5px;color:var(--secondary)}.progress-bar-small{height:6px;border-radius:3px;background:#e9ecef;margin:8px 0}.progress-bar-small .fill{height:100%;border-radius:3px;background:var(--primary);width:0%}.password-reveal{display:flex;gap:8px;align-items:center}.password-reveal input{flex:1;font-family:monospace}.password-reveal button{padding:8px 12px;width:auto}.image-upload-preview{max-width:100%;max-height:150px;object-fit:contain;margin-top:8px;border-radius:8px;border:1px solid var(--line)}.partner-detail-card{background:#fef9e6;border-left:4px solid var(--primary);margin-top:12px;padding:12px;border-radius:12px}.partner-detail-card p{margin:6px 0;font-size:13px}.partner-detail-card strong{color:var(--secondary)}.points-control{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:12px;padding:15px;margin-top:15px}.points-control h4{color:var(--secondary);margin:0 0 12px 0}.points-input-group{display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap}.points-input-group input{width:120px;text-align:center;font-size:18px;font-weight:bold;padding:8px;border-radius:8px;border:1px solid var(--line)}.points-input-group button{padding:8px 16px;width:auto}.points-history{font-size:12px;color:var(--muted);margin-top:10px;border-top:1px solid #c8e6c9;padding-top:8px;max-height:100px;overflow-y:auto}.cert-download-card{background:linear-gradient(135deg,#fff,#f0f9f0);border:2px solid var(--primary);border-radius:20px;padding:20px;text-align:center}.cert-download-card h3{color:var(--secondary);margin:0 0 10px}.cert-unlock-badge{background:var(--ok);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;display:inline-block;margin-bottom:12px}.cert-locked-badge{background:var(--muted);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;display:inline-block;margin-bottom:12px}@media(max-width:900px){.chat-shell{grid-template-columns:1fr}.lesson-path{grid-template-columns:1fr}.training-hero{grid-template-columns:1fr}.professor{width:76px;height:76px;font-size:42px}}@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.module-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:760px){.hamb{display:inline-flex}.sidebar{transform:translateX(-105%)}.sidebar.open{transform:none}.main{margin-left:0;padding:18px}.grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar h1{font-size:22px}.module-grid{grid-template-columns:1fr}.item-head{display:block}.table{font-size:14px}}
+    :root{--primary:#F5B81B;--secondary:#1E3A2F;--bg:#F9F9F9;--card:#fff;--ink:#243029;--muted:#66736c;--line:#e7ebe8;--ok:#198754;--bad:#c0392b;--info:#1769aa;--warn:#b77900;--shadow:0 12px 30px rgba(30,58,47,.1);--r:16px}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--secondary);color:#fff}button:hover{filter:brightness(1.05)}button.secondary{background:var(--primary);color:var(--secondary)}button.ghost{background:#edf1ee;color:var(--secondary)}button.danger{background:var(--bad)}button.ok{background:var(--ok)}button:disabled{opacity:.5;cursor:not-allowed}.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top left,rgba(245,184,27,.28),transparent 35%),linear-gradient(135deg,#f9f9f9,#eef5f0)}.login-card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.mark{width:56px;height:56px;border-radius:18px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000;font-size:26px}.brand h1{font-size:24px;margin:0;color:var(--secondary)}.brand p{margin:2px 0 0;color:var(--muted)}label{display:block;font-weight:800;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--ink)}textarea{min-height:120px;resize:vertical}.hint{font-size:13px;color:var(--muted);line-height:1.45}.app{display:none;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:286px;background:var(--secondary);color:#fff;z-index:5;overflow:auto;transition:.25s;box-shadow:8px 0 24px rgba(0,0,0,.16)}.side-head{padding:22px;border-bottom:1px solid rgba(255,255,255,.12)}.side-head h2{margin:0;font-size:21px}.side-head small{color:var(--primary);font-weight:800}.userbox{margin:16px;padding:14px;border-radius:16px;background:rgba(255,255,255,.09)}.userbox b{display:block}.nav{padding:8px}.nav button{width:100%;margin:4px 0;text-align:left;background:transparent;color:#e8f1ec;display:flex;gap:10px;align-items:center}.nav button.active,.nav button:hover{background:var(--primary);color:var(--secondary)}.logout{margin:16px;width:calc(100% - 32px);background:rgba(255,255,255,.12)}.main{margin-left:286px;padding:26px 30px 60px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.topbar h1{margin:0;color:var(--secondary);font-size:28px}.hamb{display:none}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 4px 18px rgba(0,0,0,.035);padding:18px}.stat b{display:block;color:var(--secondary);font-size:28px;margin-top:4px}.stat span{color:var(--muted);font-weight:800;font-size:13px}.bar{height:12px;border-radius:99px;background:#e9eee9;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),#ffd76b);width:0}.section{display:none}.section.active{display:block}.section h2{margin:4px 0 14px;color:var(--secondary)}.split{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.list{display:grid;gap:12px}.item{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px}.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.pill{display:inline-flex;align-items:center;border-radius:99px;padding:4px 9px;font-size:12px;font-weight:900;background:#eef4ef;color:var(--secondary)}.pill.gold{background:#fff1c6}.pill.ok{background:#e7f7ee;color:var(--ok)}.pill.bad{background:#feeceb;color:var(--bad)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.module-btn{background:#fff;color:var(--secondary);border:1px solid var(--line);padding:12px;text-align:left}.module-btn.active{background:var(--secondary);color:#fff}.quiz-tools{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;margin:12px 0}.q-card{margin-bottom:12px}.alts{display:grid;gap:8px;margin-top:10px}.alt{display:block;text-align:left;background:#f5f7f5;color:var(--ink);border:1px solid var(--line);font-weight:700}.alt.correct{background:#dff4e8;border-color:#6bc58f}.alt.wrong{background:#fde7e5;border-color:#ec8f86}.explain{margin-top:8px;color:var(--muted);font-size:14px}.table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;background:#fff}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left}.table th{background:#eef4ef;color:var(--secondary)}.me{background:#fff8df!important;font-weight:900}.toastbox{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:50}.toast{background:var(--secondary);color:#fff;padding:12px 14px;border-radius:14px;box-shadow:var(--shadow);max-width:360px}.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}.confetti span{position:absolute;top:-20px;width:10px;height:16px;background:var(--primary);animation:fall 1.9s linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}.blog-hero{background:linear-gradient(135deg,var(--secondary),#284f41);color:#fff;border-radius:18px;padding:22px}.blog-hero a{color:var(--primary);font-weight:1000}.empty{color:var(--muted);padding:12px}.admin-only{display:none!important}.is-admin .admin-only{display:flex!important}.gallery-preview{display:grid;gap:10px;margin-top:10px}.gallery-preview img{width:100%;height:120px;object-fit:cover;border-radius:8px}.gallery-preview.cols-2{grid-template-columns:repeat(2,1fr)}.gallery-preview.cols-3{grid-template-columns:repeat(3,1fr)}.gallery-preview.cols-4{grid-template-columns:repeat(4,1fr)}.gallery-url-input{margin-bottom:8px;display:flex;gap:8px;align-items:center}.gallery-url-input input{flex:1}.gallery-url-input button{padding:8px 12px;width:auto}.comission-badge{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:800;display:inline-block;margin-bottom:12px}.brand-logo{width:64px;height:64px;border-radius:18px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:6px}.side-logo{width:74px;height:74px;border-radius:22px;object-fit:contain;background:#fff;border:2px solid var(--primary);padding:7px;margin-bottom:10px}.training-hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,var(--secondary),#2f604e);color:#fff;border-radius:22px;padding:22px;margin-bottom:16px;overflow:hidden;position:relative}.training-hero:after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(245,184,27,.22)}.professor{width:98px;height:98px;border-radius:28px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-size:58px;box-shadow:0 14px 30px rgba(0,0,0,.18)}.lesson-path{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}.lesson-node{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--secondary);position:relative}.lesson-node.active{background:var(--primary)}.lesson-node.done:before{content:"✓";position:absolute;right:10px;top:8px;font-weight:1000}.quiz-question{font-size:1.03rem;font-weight:900;color:var(--secondary)}.chat-shell{display:grid;grid-template-columns:320px 1fr;gap:16px}.chat-box{height:430px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}.msg{max-width:78%;padding:10px 12px;border-radius:14px;background:#eef4ef}.msg.me{align-self:flex-end;background:#fff1c6}.msg b{display:block;font-size:12px;color:var(--secondary);margin-bottom:3px}.online-dot{width:10px;height:10px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px}.profile-card{display:flex;gap:12px;align-items:center}.avatar{width:48px;height:48px;border-radius:16px;background:var(--primary);display:grid;place-items:center;color:var(--secondary);font-weight:1000}.group-card{background:linear-gradient(135deg,#fff,#f4faf6);border:1px solid var(--line);border-radius:18px;padding:18px}.group-card h3{margin:0 0 8px;color:var(--secondary)}.mini-logo{height:28px;width:28px;object-fit:contain;border-radius:8px;background:#fff}.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;z-index:70;padding:18px}.modal-card{background:#fff;border-radius:20px;max-width:720px;width:100%;max-height:80vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow)}.collab-card{background:#f8f9fa;border-radius:12px;padding:12px;margin-bottom:12px}.collab-card h4{margin:0 0 5px;color:var(--secondary)}.progress-bar-small{height:6px;border-radius:3px;background:#e9ecef;margin:8px 0}.progress-bar-small .fill{height:100%;border-radius:3px;background:var(--primary);width:0%}.password-reveal{display:flex;gap:8px;align-items:center}.password-reveal input{flex:1;font-family:monospace}.password-reveal button{padding:8px 12px;width:auto}.image-upload-preview{max-width:100%;max-height:150px;object-fit:contain;margin-top:8px;border-radius:8px;border:1px solid var(--line)}.partner-detail-card{background:#fef9e6;border-left:4px solid var(--primary);margin-top:12px;padding:12px;border-radius:12px}.partner-detail-card p{margin:6px 0;font-size:13px}.partner-detail-card strong{color:var(--secondary)}.points-control{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:12px;padding:15px;margin-top:15px}.points-control h4{color:var(--secondary);margin:0 0 12px 0}.points-input-group{display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap}.points-input-group input{width:120px;text-align:center;font-size:18px;font-weight:bold;padding:8px;border-radius:8px;border:1px solid var(--line)}.points-input-group button{padding:8px 16px;width:auto}.points-history{font-size:12px;color:var(--muted);margin-top:10px;border-top:1px solid #c8e6c9;padding-top:8px;max-height:100px;overflow-y:auto}.cert-download-card{background:linear-gradient(135deg,#fff,#f0f9f0);border:2px solid var(--primary);border-radius:20px;padding:20px;text-align:center;transition:transform .2s}.cert-download-card:hover{transform:translateY(-3px)}.cert-download-card h3{color:var(--secondary);margin:0 0 10px}.cert-unlock-badge{background:var(--ok);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;display:inline-block;margin-bottom:12px}.cert-locked-badge{background:var(--muted);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;display:inline-block;margin-bottom:12px}@media(max-width:900px){.chat-shell{grid-template-columns:1fr}.lesson-path{grid-template-columns:1fr}.training-hero{grid-template-columns:1fr}.professor{width:76px;height:76px;font-size:42px}}@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.module-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:760px){.hamb{display:inline-flex}.sidebar{transform:translateX(-105%)}.sidebar.open{transform:none}.main{margin-left:0;padding:18px}.grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar h1{font-size:22px}.module-grid{grid-template-columns:1fr}.item-head{display:block}.table{font-size:14px}}
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
@@ -235,6 +235,7 @@ let firebaseCertConfig = { certificates: [] };
 let messagesUnsubscribe = null;
 let currentUserData = null;
 
+// ==================== NÍVEIS UNIFICADOS ====================
 const LEVELS = [
   ['Iniciante', 0],
   ['Explorador', 1500],
@@ -257,6 +258,7 @@ const defaultTasks = [
   {id:8,titulo:'⏱️ Ficar 3 horas online',descricao:'Acumule 3 horas de tempo ativo na plataforma.',pontos:100,done:false,tipo:'especial'}
 ];
 
+const seedRanking=[];
 const defaultMaterials = [
   {id:'1',titulo:'Portfólio Caminhos do Peruaçu',descricao:'PDF de 24 páginas com destino, atrativos, segurança, preparação e contato.',link:'',ativo:true},
   {id:'2',titulo:'Cartão de Visita Caminhos do Peruaçu',descricao:'Material com agência, ICMBio, trilhas guiadas, cavernas e turismo sustentável.',link:'',ativo:true},
@@ -265,35 +267,7 @@ const defaultMaterials = [
   {id:'5',titulo:'Panfleto Caminhos do Peruaçu',descricao:'Material promocional para captação de parceiros e visitantes.',link:'',ativo:true}
 ];
 
-function level(points=currentUserData?.points || 0){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}
-
-async function syncCertConfigFromFirebase() {
-  if(!window.cpBlogApi) return;
-  try {
-    firebaseCertConfig = await window.cpBlogApi.loadCertConfig();
-    if(!firebaseCertConfig.certificates || firebaseCertConfig.certificates.length === 0) {
-      firebaseCertConfig.certificates = [
-        { nome: 'Iniciante', pontos: 1500, link: '' },
-        { nome: 'Explorador', pontos: 3000, link: '' },
-        { nome: 'Colaborador', pontos: 4500, link: '' },
-        { nome: 'Embaixador', pontos: 6000, link: '' },
-        { nome: 'Especialista', pontos: 7500, link: '' }
-      ];
-      await window.cpBlogApi.saveCertConfig(firebaseCertConfig);
-    }
-    if(currentTab === 'certificados') renderCerts();
-    if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin();
-  } catch(e) { console.error('Erro sync cert config:', e); }
-}
-
-async function saveCertConfigToFirebase(config) {
-  if(!window.cpBlogApi) return;
-  try {
-    await window.cpBlogApi.saveCertConfig(config);
-    await syncCertConfigFromFirebase();
-  } catch(e) { console.error('Erro save cert config:', e); }
-}
-
+// ==================== FUNÇÕES DO FIREBASE ====================
 async function syncSettingsFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
@@ -404,6 +378,67 @@ async function syncPartnersFromFirebase() {
   } catch(e) { console.error('Erro sync partners:', e); }
 }
 
+async function syncCertConfigFromFirebase() {
+  if(!window.cpBlogApi) return;
+  try {
+    firebaseCertConfig = await window.cpBlogApi.loadCertConfig();
+    if(!firebaseCertConfig.certificates || firebaseCertConfig.certificates.length === 0) {
+      firebaseCertConfig.certificates = [
+        { nome: 'Iniciante', pontos: 1500, link: '' },
+        { nome: 'Explorador', pontos: 3000, link: '' },
+        { nome: 'Colaborador', pontos: 4500, link: '' },
+        { nome: 'Embaixador', pontos: 6000, link: '' },
+        { nome: 'Especialista', pontos: 7500, link: '' }
+      ];
+      await window.cpBlogApi.saveCertConfig(firebaseCertConfig);
+    }
+    if(currentTab === 'certificados') renderCerts();
+    if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin();
+  } catch(e) { console.error('Erro sync cert config:', e); }
+}
+
+async function saveCertConfigToFirebase(config) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.saveCertConfig(config);
+    await syncCertConfigFromFirebase();
+  } catch(e) { console.error('Erro save cert config:', e); }
+}
+
+// ==================== FUNÇÕES AUXILIARES ====================
+async function compressImage(dataUrl, maxSizeKB = 400) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      const maxDimension = 1000;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = (height * maxDimension) / width;
+          width = maxDimension;
+        } else {
+          width = (width * maxDimension) / height;
+          height = maxDimension;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      let quality = 0.7;
+      let result = canvas.toDataURL('image/jpeg', quality);
+      while (result.length > maxSizeKB * 1024 && quality > 0.2) {
+        quality -= 0.1;
+        result = canvas.toDataURL('image/jpeg', quality);
+      }
+      resolve(result);
+    };
+    img.src = dataUrl;
+  });
+}
+
 async function processFile(file, maxSizeKB = 400) {
   if (!file) return '';
   if (!file.type.startsWith('image/')) {
@@ -416,303 +451,106 @@ async function processFile(file, maxSizeKB = 400) {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width, height = img.height;
-        const maxDimension = 1000;
-        if (width > maxDimension || height > maxDimension) {
-          if (width > height) { height = (height * maxDimension) / width; width = maxDimension; }
-          else { width = (width * maxDimension) / height; height = maxDimension; }
-        }
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        let quality = 0.7;
-        let result = canvas.toDataURL('image/jpeg', quality);
-        while (result.length > maxSizeKB * 1024 && quality > 0.2) { quality -= 0.1; result = canvas.toDataURL('image/jpeg', quality); }
-        resolve(result);
-      };
-      img.src = e.target.result;
+      const compressed = await compressImage(e.target.result, maxSizeKB);
+      resolve(compressed);
     };
     reader.readAsDataURL(file);
   });
 }
+
+function level(points=currentUserData?.points || 0){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}
+function nextLevel(){return LEVELS.find(x=>(currentUserData?.points || 0)<x[1])||LEVELS[LEVELS.length-1]}
+function totalAnswered(){return Object.keys(currentUserData?.training?.answered || {}).length}
+function u(){return currentUserData}
 
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toastbox').appendChild(t);setTimeout(()=>t.remove(),3300)}
 function confetti(){const c=document.getElementById('confetti');for(let i=0;i<90;i++){let s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];s.style.animationDelay=Math.random()*.35+'s';c.appendChild(s);setTimeout(()=>s.remove(),2300)}}
 
 function makeQuestions(){
  const modulesBase=[
-  {title:'Conhecendo o Projeto',themes:['missão do projeto','Vale do Peruaçu/MG','Cerrado','Parque Nacional Cavernas do Peruaçu','turismo sustentável'],correct:['valorizar conservação, educação e renda local','apresentar o destino com responsabilidade ambiental','respeitar regras do parque e comunidades','conectar visitantes a serviços locais qualificados','promover turismo sustentável no Vale do Peruaçu'],wrong:['prometer acesso sem regras ambientais','ignorar guias e comunidades locais','tratar o parque apenas como cenário de fotos','estimular visita sem planejamento','deixar lixo na trilha']},
-  {title:'Vendas e Captação de Parceiros',themes:['abordagem inicial','escuta ativa','objeção de preço','benefícios para parceiros','follow-up comercial'],correct:['ouvir a necessidade e apresentar benefícios concretos','registrar contato, próximo passo e objeções','explicar a vitrine online e os planos com clareza','confirmar ordem de serviço e comprovante Pix','manter relacionamento depois do fechamento'],wrong:['pressionar sem entender o cliente','prometer resultado impossível','deixar o contato sem registro','falar apenas da própria pontuação','ignorar dúvidas do parceiro']},
-  {title:'Níveis e Pontuação',themes:['nível Iniciante','nível Explorador','nível Colaborador','nível Embaixador','nível Especialista'],correct:['os pontos atualizam nível, ranking e certificados','cada questão correta soma 5 pontos','conteúdo aprovado soma 50 pontos','parceiro aprovado soma 100 pontos','módulo completo soma bônus de 500 pontos'],wrong:['questões corretas não contam pontos','conteúdo aprovado tira pontos','parceiro vale menos que uma questão','certificado não depende de pontuação','nível não muda com pontos']},
-  {title:'Dúvidas Frequentes',themes:['certificados','conteúdos pendentes','tarefas','parceiros','blog'],correct:['solicitar e aguardar análise administrativa','enviar dados completos para evitar rejeição','acompanhar status dentro da plataforma','revisar explicações e corrigir próximos envios','usar o fórum e o chat para tirar dúvidas'],wrong:['aprovar o próprio pedido','enviar cadastro sem contato','ignorar status pendente','duplicar solicitação sem necessidade','enviar conteúdo igual já rejeitado']},
-  {title:'Cavernas do Peruaçu',themes:['criação do parque','área do parque','Patrimônio Mundial','Gruta do Janelão','arte rupestre'],correct:['O Parque Nacional Cavernas do Peruaçu foi criado em 21 de setembro de 1999','O parque possui área de 56.448 hectares','Em 2025 foi reconhecido como Patrimônio Mundial Natural da UNESCO','A Gruta do Janelão é o principal atrativo do parque','As pinturas rupestres do Peruaçu têm até 12 mil anos'],wrong:['O parque foi criado em 1985','A área do parque é de 10.000 hectares','O parque foi reconhecido pela UNESCO em 2010','A Gruta do Janelão fica fechada para visitação','As pinturas rupestres têm apenas 500 anos']}
+  {title:'Conhecendo o Projeto',themes:['missão do projeto','Vale do Peruaçu/MG','Cerrado','Parque Nacional Cavernas do Peruaçu','turismo sustentável','comunidades locais','condutores credenciados','patrimônio natural','arte rupestre','experiência do visitante'],correct:['valorizar conservação, educação e renda local','apresentar o destino com responsabilidade ambiental','respeitar regras do parque e comunidades','conectar visitantes a serviços locais qualificados','promover turismo sustentável no Vale do Peruaçu','guias credenciados garantem segurança','preservar pinturas rupestres','evitar contato direto com espeleotemas','respeitar limite de visitação','valorizar cultura local'],wrong:['prometer acesso sem regras ambientais','ignorar guias e comunidades locais','tratar o parque apenas como cenário de fotos','estimular visita sem planejamento','deixar lixo na trilha','tocar formações rochosas','usar flash dentro de cavernas','ignorar horário de funcionamento','entrar sem autorização','divulgar localizações exatas sem critério']},
+  {title:'Vendas e Captação de Parceiros',themes:['abordagem inicial','escuta ativa','objeção de preço','benefícios para parceiros','follow-up comercial','proposta de valor','fechamento de parceria','indicação de novos contatos','registro no funil','pagamento e ordem de serviço'],correct:['ouvir a necessidade e apresentar benefícios concretos','registrar contato, próximo passo e objeções','explicar a vitrine online e os planos com clareza','confirmar ordem de serviço e comprovante Pix','manter relacionamento depois do fechamento','destacar visibilidade para o negócio','mostrar cases de sucesso','oferecer material de apoio','ser transparente sobre prazos','valorizar indicações'],wrong:['pressionar sem entender o cliente','prometer resultado impossível','deixar o contato sem registro','falar apenas da própria pontuação','ignorar dúvidas do parceiro','fornecer informações incompletas','tratar todos parceiros igualmente sem personalização','esquecer de fazer follow-up','não explicar contrato claramente','desconsiderar feedback']},
+  {title:'Níveis e Pontuação',themes:['nível Iniciante','nível Explorador','nível Colaborador','nível Embaixador','nível Especialista','nível Mestre','pontos por conteúdo','pontos por parceiro','pontos por questão','bônus de módulo'],correct:['os pontos atualizam nível, ranking e certificados','cada questão correta soma 5 pontos','conteúdo aprovado soma 50 pontos','parceiro aprovado soma 100 pontos','módulo completo soma bônus de 500 pontos','nível superior exige mais pontos','certificados requerem pontuação mínima','tarefas concedem bônus especiais','ranking ordena por pontuação','colaborador ativo acumula mais pontos'],wrong:['questões corretas não contam pontos','conteúdo aprovado tira pontos','parceiro vale menos que uma questão','certificado não depende de pontuação','nível não muda com pontos','pontos não servem para nada','qualquer um pode ser líder regional sem pontos','tarefas não dão pontos','ranking é aleatório','certificados são automáticos']},
+  {title:'Dúvidas Frequentes',themes:['certificados','conteúdos pendentes','tarefas','parceiros','blog','materiais','perfil','ranking','aprovação admin','suporte ao colaborador'],correct:['solicitar e aguardar análise administrativa','enviar dados completos para evitar rejeição','acompanhar status dentro da plataforma','revisar explicações e corrigir próximos envios','usar o fórum e o chat para tirar dúvidas','certificados são enviados em PDF','conteúdos pendentes precisam de correção','tarefas especiais exigem critérios','perfil atualizado evita problemas','admin analisa em até 48h'],wrong:['aprovar o próprio pedido','enviar cadastro sem contato','ignorar status pendente','duplicar solicitação sem necessidade','enviar conteúdo igual já rejeitado','não ler feedback do admin','cadastrar parceiro sem documentação','ignorar prazos','deixar perfil incompleto','enviar reclamação sem contexto']},
+  {title:'Cavernas do Peruaçu',themes:['criação do parque','área do parque','Patrimônio Mundial','maior estalactite do mundo','Gruta do Janelão','visitação e condutores','arte rupestre','Lapa dos Desenhos','Lapa do Rezar','Trilha do Arco do André'],correct:['O Parque Nacional Cavernas do Peruaçu foi criado em 21 de setembro de 1999','O parque possui área de 56.448 hectares (564 km²)','Em 2025 foi reconhecido como Patrimônio Mundial Natural da UNESCO','A Perna da Bailarina é a maior estalactite do mundo com 28 metros de comprimento','A Gruta do Janelão é o principal atrativo do parque, com galerias de mais de 100m de altura','A visitação é obrigatoriamente acompanhada por condutor credenciado pelo ICMBio','As pinturas rupestres do Peruaçu têm até 12 mil anos','A Lapa dos Desenhos possui mais de 3.600 figuras rupestres','A Lapa do Rezar tem mais de 500 degraus e um salão de 90m de largura','A trilha do Arco do André tem 8km (ida e volta) e nível semipesado'],wrong:['O parque foi criado em 1985','A área do parque é de 10.000 hectares','O parque foi reconhecido pela UNESCO em 2010','A estalactite Perna da Bailarina tem 15 metros','A Gruta do Janelão fica fechada para visitação','Não é necessário agendamento para visitar','As pinturas rupestres têm apenas 500 anos','A Lapa dos Desenhos não tem pinturas preservadas','A Lapa do Rezar tem trilha plana sem esforço','A trilha do Arco do André é nível leve e curta']}
  ];
+ 
  return modulesBase.map((m,mi) => {
    const questions = [];
-   for(let i = 0; i < 5; i++) {
+   for(let i = 0; i < 10; i++) {
      const theme = m.themes[i % m.themes.length];
      const correct = m.correct[i % m.correct.length];
      const wrongs = [m.wrong[(i) % m.wrong.length], m.wrong[(i+1) % m.wrong.length], m.wrong[(i+2) % m.wrong.length]];
      const alternativas = [...wrongs];
      const posCorreta = Math.floor(Math.random() * 4);
      alternativas.splice(posCorreta, 0, correct);
-     questions.push({ pergunta: `Questão ${i+1}: Sobre "${theme}", qual a informação correta?`, alternativas: alternativas, correta: posCorreta, explicacao: `Resposta correta: ${correct}.` });
+     
+     questions.push({
+       pergunta: `Questão ${i+1}: Sobre "${theme}", qual a informação correta sobre o Parque Nacional Cavernas do Peruaçu?`,
+       alternativas: alternativas,
+       correta: posCorreta,
+       explicacao: `Resposta correta: ${correct}. Esta informação está alinhada com os dados oficiais do ICMBio e da UNESCO sobre o Parque Nacional Cavernas do Peruaçu.`
+     });
    }
    return {id:mi+1, title:m.title, questions: questions};
  });
 }
 const modules=makeQuestions();
-const MODULE_POINTS=[40,60,80,100,120];
-const RETAKE_MS=48*60*60*1000;
+const MODULE_POINTS=[40,60,80,100,120],RETAKE_MS=48*60*60*1000;
 
-function canRetakeModule(id){const t=currentUserData?.training?.completedAt?.[id];return t&&Date.now()-new Date(t).getTime()>=RETAKE_MS}
-window.retakeModule=async function(id){if(!canRetakeModule(id))return toast('Este módulo poderá ser refeito 48h após a conclusão.');Object.keys(currentUserData.training.answered).forEach(k=>{if(k.startsWith(id+'-'))delete currentUserData.training.answered[k]});delete currentUserData.training.completedAt[id];currentModule=id;currentPage=0;await saveUserToFirebase(currentUserData);toast('Módulo liberado para refazer e pontuar novamente.');renderAll()};
-
-function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.questions.filter((_,i)=>currentUserData?.training?.answered[currentModule+'-'+i]?.correct).length,start=currentPage*5,qs=m.questions.slice(start,start+5);document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">Complete os módulos para evoluir.</p></div></div><div class="lesson-path">${modules.map(mm=>{const done=mm.questions.filter((_,i)=>currentUserData?.training?.answered[mm.id+'-'+i]?.correct).length;return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===5?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/5 · ${MODULE_POINTS[mm.id-1]} pts</small><div class="bar" style="margin-top:8px"><i style="width:${(done/5)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b></div><span class="pill gold">${prog}/5</span></div><div class="bar"><i style="width:${(prog/5)*100}%"></i></div>${canRetakeModule(currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Anterior</button><strong>Questões ${start+1}-${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximo →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx)).join('')}`}
-function renderQ(q,idx){const key=currentModule+'-'+idx,answered=currentUserData?.training?.answered[key];return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Q${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${answered?.correct?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'✓ Correta!':'✗ Incorreta. Resposta: '+('ABCD'[q.correta])}</b> ${q.explicacao}</div>`:''}</div>`}
-window.answerQ=async function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(currentUserData?.training?.answered[key]?.correct)return;const ok=choice===q.correta;if(!currentUserData.training.answered) currentUserData.training.answered={};currentUserData.training.answered[key]={choice,correct:ok};if(ok){currentUserData.points = (currentUserData.points || 0) + 5;toast('Correta! +5 pontos');}else toast('Incorreta.');const completed=modules[currentModule-1].questions.every((_,i)=>currentUserData.training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!currentUserData.training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1];currentUserData.training.completedAt[currentModule]=new Date().toISOString();currentUserData.points = (currentUserData.points || 0) + pts;await saveUserToFirebase(currentUserData);toast(`🏆 Módulo completo! +${pts} pontos!`);confetti();}else{await saveUserToFirebase(currentUserData);}renderAll()};
-
-function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais</h2><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')}</div>`}
-function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(currentUserData?.tasks || []).map(t=>`<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pts</span></div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`).join('')}</div>`}
-window.doneTask=async function(id){let t=currentUserData.tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = currentUserData.profile.nome && currentUserData.profile.cidade && currentUserData.profile.telefone;if(!perfilCompleto){toast('Complete seu perfil primeiro!');return;}}t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos!`);renderAll()}
-
-function renderPartners(){const partnersToShow = (currentUser?.role === 'admin') ? firebasePartners : firebasePartners.filter(p => p.userUid === currentUser?.uid);document.getElementById('parceiros').innerHTML=`<div class="blog-hero"><h2>Parceiros</h2><div class="comission-badge">💰 30% de comissão!</div></div><div class="split"><form class="card" onsubmit="window.addPartner(event)"><h2>${currentUser?.role==='admin'?'Admin':'Cadastrar'}</h2><label>Nome</label><input id="pnome" required><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option></select><label>Cidade</label><input id="pcidade"><label>Contato</label><input id="pcontato"><label>Plano</label><select id="pplano"><option value="Comum|69.90">Comum - R$69,90</option><option value="Premium|149.90">Premium - R$149,90</option></select><label>Observações</label><textarea id="pobs"></textarea><button class="secondary">Salvar</button></form><div><h2>Lista</h2><div class="list">${partnersToShow.map(p=>`<div class="item"><div><b>${p.nome}</b><p class="hint">${p.categoria} · ${p.status}</p></div></div>`).join('')}</div></div></div>`}
-window.addPartner=async function(e){e.preventDefault();const [plano,valor]=document.getElementById('pplano').value.split('|');const partnerData={nome:pnome.value,categoria:pcat.value,cidade:pcidade.value,contato:pcontato.value,plano,valor:Number(valor),obs:pobs.value,status:currentUser?.role==='admin'?'Aprovado':'Pendente',colaboradorEmail:currentUser?.email,userUid:currentUser?.uid,createdAt:new Date().toISOString()};await window.cpBlogApi.savePartner(partnerData);await syncPartnersFromFirebase();toast('Parceiro salvo!');renderPartners()}
-function renderRanking(){const rows=[...firebaseUsers.map(u=>({nome:u.profile?.nome||u.email,cidade:u.profile?.cidade||'',pontos:u.points||0,me:u.uid===currentUser?.uid}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
-
-function renderCerts(){
-  const userPoints = currentUserData?.points || 0;
-  const certs = firebaseCertConfig.certificates || [];
-  document.getElementById('certificados').innerHTML = `
-    <h2>🎓 Certificados por Pontuação</h2>
-    <div class="grid">
-      ${certs.map(cert => {
-        const unlocked = userPoints >= cert.pontos;
-        const hasLink = cert.link && cert.link.trim() !== '';
-        return `
-          <div class="cert-download-card">
-            <div class="${unlocked ? 'cert-unlock-badge' : 'cert-locked-badge'}">
-              ${unlocked ? '🔓 DESBLOQUEADO' : '🔒 BLOQUEADO'}
-            </div>
-            <h3>${cert.nome}</h3>
-            <p class="hint">🎯 ${cert.pontos} pontos necessários</p>
-            <p class="hint">📊 Seus pontos: ${userPoints}</p>
-            ${unlocked ? 
-              (hasLink ? 
-                `<button class="secondary" onclick="window.downloadCertificate('${cert.link}')">📄 BAIXAR CERTIFICADO</button>` :
-                `<button class="ghost" disabled>⚠️ Link não disponível</button><p class="hint">Em breve, certificado estará disponível</p>`
-              ) :
-              `<button class="ghost" disabled>📌 Atinga ${cert.pontos} pontos para desbloquear</button>`
-            }
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
+// ==================== FUNÇÕES PRINCIPAIS ====================
+function startOnlineTracking(){
+  if(onlineInterval) clearInterval(onlineInterval);
+  onlineInterval = setInterval(async () => {
+    if(currentUser && currentUser.role !== 'admin' && document.hasFocus() && currentUserData){
+      const task = currentUserData.tasks?.find(t => t.id === 8);
+      if(task && !task.done){
+        currentUserData.onlineTime = (currentUserData.onlineTime || 0) + 1;
+        if(currentUserData.onlineTime >= 10800){
+          task.done = true;
+          currentUserData.points = (currentUserData.points || 0) + task.pontos;
+          await saveUserToFirebase(currentUserData);
+          toast(`🎉 Tarefa "${task.titulo}" concluída! +${task.pontos} pontos!`);
+          confetti();
+          if(currentTab === 'tarefas') renderTasks();
+        }
+        await saveUserToFirebase(currentUserData);
+        if(currentTab === 'tarefas') renderTasks();
+      }
+    }
+  }, 1000);
 }
 
-window.downloadCertificate = function(link) {
-  if(link && link.trim()) {
-    window.open(link, '_blank');
-    toast('Abrindo certificado...');
-  } else {
-    toast('Link do certificado não disponível.');
+async function checkSpecialTasks(){
+  if(!currentUserData) return;
+  const task6 = currentUserData.tasks?.find(t => t.id === 6);
+  if(task6 && !task6.done){
+    const approvedContents = (currentUserData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
+    if(approvedContents >= 3){
+      task6.done = true;
+      currentUserData.points = (currentUserData.points || 0) + task6.pontos;
+      await saveUserToFirebase(currentUserData);
+      toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
+      confetti();
+      if(currentTab === 'tarefas') renderTasks();
+    }
   }
-};
-
-function renderCommunity(){const onlineUsers = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);document.getElementById('comunidade').innerHTML=`<div class="blog-hero"><h2>Comunidade</h2><div class="actions"><span class="pill gold">${onlineUsers.length} online</span></div></div><div class="chat-shell"><div class="card"><h2>Chat</h2><div class="chat-box" id="chatBox">${firebaseMessages.slice(-50).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user}</b> ${m.text}<br><small>${new Date(m.time).toLocaleTimeString()}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Mensagem..." required><button class="secondary">Enviar</button></form></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
-window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');chatText.value='';renderCommunity()};
-async function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar</button></form>`}
-window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.profile) currentUserData.profile={};currentUserData.profile.nome=profNome.value;currentUserData.profile.cidade=profCidade.value;currentUserData.profile.telefone=profTel.value;currentUserData.profile.bio=profBio.value;await saveUserToFirebase(currentUserData);toast('Perfil atualizado.');const profileTask=currentUserData.tasks?.find(t=>t.id===1);if(profileTask&&!profileTask.done&&currentUserData.profile.nome&&currentUserData.profile.cidade&&currentUserData.profile.telefone){profileTask.done=true;currentUserData.points = (currentUserData.points || 0) + profileTask.pontos;await saveUserToFirebase(currentUserData);toast(`+${profileTask.pontos} pontos!`);}renderAll()};
-function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog</h2><iframe id="blogFrame" src="blog.html" style="width:100%;height:600px;border:0"></iframe></div>`}
-
-async function renderAdmin(){
-  if(currentUser?.uid !== ADMIN_UID){
-    document.getElementById('admin').innerHTML='<div class="card">Acesso restrito.</div>';
-    return;
+  
+  const task7 = currentUserData.tasks?.find(t => t.id === 7);
+  if(task7 && !task7.done){
+    const approvedPartners = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
+    if(approvedPartners >= 2){
+      task7.done = true;
+      currentUserData.points = (currentUserData.points || 0) + task7.pontos;
+      await saveUserToFirebase(currentUserData);
+      toast(`🎉 Tarefa "${task7.titulo}" concluída! +${task7.pontos} pontos!`);
+      confetti();
+      if(currentTab === 'tarefas') renderTasks();
+    }
   }
-  const certs = firebaseCertConfig.certificates || [];
-  document.getElementById('admin').innerHTML = `
-    <h2>👑 Admin - Certificados</h2>
-    <div class="card">
-      <h3>📜 Configurar Links dos Certificados</h3>
-      <p class="hint">Insira os links (Google Drive, Dropbox, etc) para cada certificado. Colaboradores poderão baixar diretamente ao atingir a pontuação.</p>
-      <div id="certsConfigList">
-        ${certs.map((cert, idx) => `
-          <div class="item" style="margin-bottom:12px">
-            <label><strong>${cert.nome}</strong> (${cert.pontos} pontos)</label>
-            <div class="password-reveal">
-              <input type="text" id="certLink_${idx}" value="${cert.link || ''}" placeholder="Link do certificado (URL)" style="flex:1">
-              <button class="ghost" onclick="window.testCertLink('${idx}')">🔗 Testar</button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <button class="secondary" onclick="window.saveCertLinks()">💾 Salvar Links dos Certificados</button>
-    </div>
-    
-    <div class="card" style="margin-top:20px">
-      <h3>➕ Criar Colaborador</h3>
-      <div class="split">
-        <div><label>Nome</label><input id="newCollabNome" placeholder="Nome"><label>E-mail</label><input id="newCollabEmail" placeholder="email@exemplo.com"></div>
-        <div><label>Senha</label><input id="newCollabSenha" type="password" placeholder="******"><label>Cidade</label><input id="newCollabCidade" placeholder="Cidade"></div>
-      </div>
-      <button class="secondary" onclick="window.createCollaboratorAccount()">➕ Criar Conta</button>
-    </div>
-    
-    <div class="card" style="margin-top:20px">
-      <h3>👥 Colaboradores (${firebaseUsers.length})</h3>
-      <div class="list" style="max-height:300px;overflow-y:auto">
-        ${firebaseUsers.map(c => `
-          <div class="item">
-            <div class="item-head">
-              <div><b>${c.profile?.nome || c.email}</b><p class="hint">${c.email} · ${c.points || 0} pts</p></div>
-              <div class="actions">
-                <button class="ghost" onclick="window.verPerfilColaborador('${c.uid}')">👁️ Ver</button>
-                <button class="danger" onclick="window.deleteCollaborator('${c.uid}')">🗑️ Excluir</button>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
 }
 
-window.saveCertLinks = async function() {
-  const certs = firebaseCertConfig.certificates || [];
-  const updatedCerts = certs.map((cert, idx) => {
-    const linkInput = document.getElementById(`certLink_${idx}`);
-    return { ...cert, link: linkInput ? linkInput.value.trim() : '' };
-  });
-  firebaseCertConfig.certificates = updatedCerts;
-  await saveCertConfigToFirebase(firebaseCertConfig);
-  toast('✅ Links dos certificados salvos!');
-  renderCerts();
-};
-
-window.testCertLink = function(idx) {
-  const linkInput = document.getElementById(`certLink_${idx}`);
-  if(linkInput && linkInput.value.trim()) {
-    window.open(linkInput.value.trim(), '_blank');
-  } else {
-    toast('Link vazio. Insira um link primeiro.');
-  }
-};
-
-window.verPerfilColaborador = function(uid) {
-  const user = firebaseUsers.find(u => u.uid === uid);
-  if(!user) { toast('Colaborador não encontrado'); return; }
-  const history = pointsAdjustmentHistory[uid] || [];
-  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
-  let modal = document.getElementById('profileModalGlobal');
-  if(!modal) {
-    modal = document.createElement('div');
-    modal.id = 'profileModalGlobal';
-    modal.className = 'modal-back';
-    modal.style.display = 'flex';
-    modal.onclick = function(e) { if(e.target === modal) modal.style.display = 'none'; };
-    document.body.appendChild(modal);
-  }
-  modal.innerHTML = `
-    <div class="modal-card">
-      <h2>👤 ${user.profile?.nome || user.email}</h2>
-      <p><strong>📧 E-mail:</strong> ${user.email}</p>
-      <p><strong>⭐ Pontos:</strong> <span style="font-size:28px;font-weight:900;color:var(--primary)">${user.points || 0}</span></p>
-      <div class="points-control">
-        <h4>🎮 Controle de Pontos</h4>
-        <div class="points-input-group">
-          <input type="number" id="pointsValue_${safeId}" placeholder="Quantidade" value="10">
-          <button class="ok" onclick="window.adjustPoints('${uid}', 'add')">➕ Adicionar</button>
-          <button class="danger" onclick="window.adjustPoints('${uid}', 'remove')">➖ Remover</button>
-        </div>
-      </div>
-      <div class="actions"><button class="secondary" onclick="document.getElementById('profileModalGlobal').style.display='none'">Fechar</button></div>
-    </div>
-  `;
-  modal.style.display = 'flex';
-};
-
-window.adjustPoints = async function(uid, operation) {
-  const user = firebaseUsers.find(u => u.uid === uid);
-  if(!user) return;
-  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
-  const pointsInput = document.getElementById(`pointsValue_${safeId}`);
-  let points = parseInt(pointsInput?.value);
-  if(isNaN(points) || points <= 0) { toast('Valor válido'); return; }
-  const oldPoints = user.points || 0;
-  let newPoints = operation === 'add' ? oldPoints + points : Math.max(0, oldPoints - points);
-  user.points = newPoints;
-  await window.cpBlogApi.saveUser(user);
-  await syncUsersFromFirebase();
-  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
-  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints, newPoints });
-  toast(`Pontos alterados: ${oldPoints} → ${newPoints}`);
-  renderAll();
-  const modal = document.getElementById('profileModalGlobal');
-  if(modal && modal.style.display === 'flex') window.verPerfilColaborador(uid);
-};
-
-window.createCollaboratorAccount = async function() {
-  const email = document.getElementById('newCollabEmail')?.value.trim();
-  const nome = document.getElementById('newCollabNome')?.value.trim();
-  const senha = document.getElementById('newCollabSenha')?.value;
-  const cidade = document.getElementById('newCollabCidade')?.value.trim() || 'Itacarambi';
-  if(!email || !nome || !senha) return toast('Preencha todos os campos');
-  if(senha.length < 6) return toast('Senha mínimo 6 caracteres');
-  try {
-    const userCredential = await window.cpBlogApi.createFirebaseUser(email, senha, nome);
-    const newUserData = {
-      uid: userCredential.uid,
-      email: email,
-      points: 0,
-      profile: { nome: nome, cidade: cidade, telefone: '', bio: 'Colaborador' },
-      training: { answered: {}, bonus: [], completedAt: {} },
-      tasks: JSON.parse(JSON.stringify(defaultTasks)),
-      contents: [],
-      onlineTime: 0,
-      createdAt: new Date().toISOString()
-    };
-    await window.cpBlogApi.saveUser(newUserData);
-    await syncUsersFromFirebase();
-    toast(`✅ Colaborador "${nome}" criado!`);
-    renderAdmin();
-  } catch(error) { toast('Erro: ' + error.message); }
-};
-
-window.deleteCollaborator = async function(uid) {
-  if(!confirm('Excluir permanentemente?')) return;
-  try {
-    await window.cpBlogApi.deleteUserFirebase(uid);
-    await syncUsersFromFirebase();
-    toast('Removido!');
-    renderAdmin();
-  } catch(e) { toast('Erro: ' + e.message); }
-};
-
-function renderDashboard(){const doneTasks=currentUserData?.tasks?.filter(t=>t.done).length||0,closed=firebasePartners.filter(p=>p.status==='Aprovado' && p.userUid===currentUser?.uid).length;document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${currentUserData?.points||0}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Tarefas</span><b>${doneTasks}/${currentUserData?.tasks?.length||8}</b></div><div class="card stat"><span>Parceiros</span><b>${closed}</b></div></div>`}
-function renderNav(){const isAdmin = (currentUser?.uid === ADMIN_UID);document.getElementById('nav').innerHTML=navItems.map(x=>`<button class="${x[0]===currentTab?'active':''} ${x[0]==='admin' && !isAdmin?'admin-only':''}" onclick="window.showTab('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}
-window.showTab=function(id){currentTab=id;document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];document.getElementById('sidebar').classList.remove('open');renderNav();renderAll()};
-async function renderAll(){
-  if(!currentUser)return;
-  document.getElementById('sideName').textContent=currentUser.role==='admin'?'Admin':currentUserData?.profile?.nome||'Colaborador';
-  document.getElementById('sideLevel').textContent=currentUser.role==='admin'?'Admin':level();
-  document.getElementById('sidePoints').textContent=currentUser.role==='admin'?'Admin':(currentUserData?.points||0)+' pts';
-  renderDashboard();
-  renderTraining();
-  renderMaterials();
-  renderTasks();
-  renderPartners();
-  renderRanking();
-  renderCerts();
-  renderCommunity();
-  renderProfile();
-  renderBlog();
-  renderAdmin();
-}
+function getAllPartners(){ return firebasePartners; }
 
 async function startApp(){
   document.getElementById('login').style.display='none';
@@ -728,10 +566,525 @@ async function startApp(){
   renderNav();
   renderAll();
   showTab('dashboard');
+  if(currentUser.role !== 'admin') startOnlineTracking();
+  await checkSpecialTasks();
 }
 
-window.logout=async function(){if(onlineInterval)clearInterval(onlineInterval);if(messagesUnsubscribe)messagesUnsubscribe();localStorage.removeItem('cpSession');location.reload();};
+window.logout=async function(){
+  if(onlineInterval) clearInterval(onlineInterval);
+  if(messagesUnsubscribe) messagesUnsubscribe();
+  localStorage.removeItem('cpSession');
+  location.reload();
+};
 function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
+function renderNav(){const isAdmin = (currentUser?.uid === ADMIN_UID);document.getElementById('nav').innerHTML=navItems.map(x=>`<button class="${x[0]===currentTab?'active':''} ${x[0]==='admin' && !isAdmin?'admin-only':''}" onclick="window.showTab('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}
+window.showTab=function(id){currentTab=id;document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=navItems.find(x=>x[0]===id)[2];document.getElementById('sidebar').classList.remove('open');renderNav();renderAll()};
+async function renderAll(){
+  if(!currentUser)return;
+  document.getElementById('sideName').textContent=currentUser.role==='admin'?'Administrador':currentUserData?.profile?.nome || 'Colaborador';
+  document.getElementById('sideLevel').textContent=currentUser.role==='admin'?'Painel administrativo':level();
+  document.getElementById('sidePoints').textContent=currentUser.role==='admin'?'Admin':(currentUserData?.points || 0)+' pontos';
+  renderDashboard();
+  renderTraining();
+  renderMaterials();
+  renderTasks();
+  renderPartners();
+  renderRanking();
+  renderCerts();
+  renderCommunity();
+  renderProfile();
+  renderBlog();
+  renderAdmin();
+}
+function renderDashboard(){const doneTasks=currentUserData?.tasks?.filter(t=>t.done).length || 0,closed=firebasePartners.filter(p=>p.status==='Aprovado' && p.userUid === currentUser?.uid).length,ans=totalAnswered(),nl=nextLevel(),pct=nl[1]===0?100:Math.min(100,Math.round((currentUserData?.points||0)/nl[1]*100));document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${currentUserData?.points || 0}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${currentUserData?.tasks?.length || 8} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
+function canRetakeModule(id){const t=currentUserData?.training?.completedAt?.[id];return t&&Date.now()-new Date(t).getTime()>=RETAKE_MS}
+window.retakeModule=async function(id){if(!canRetakeModule(id))return toast('Este módulo poderá ser refeito 48h após a conclusão.');Object.keys(currentUserData.training.answered).forEach(k=>{if(k.startsWith(id+'-'))delete currentUserData.training.answered[k]});delete currentUserData.training.completedAt[id];currentModule=id;currentPage=0;await saveUserToFirebase(currentUserData);toast('Módulo liberado para refazer e pontuar novamente.');renderAll()};
+function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.questions.filter((_,i)=>currentUserData?.training?.answered[currentModule+'-'+i]?.correct).length,start=currentPage*10,qs=m.questions.slice(start,start+10),total=totalAnswered(),phrase=prog<10?'Vamos construir a base com calma.':'Ótimo ritmo. Agora transforme conhecimento em segurança para orientar visitantes e parceiros.',completedAt=currentUserData?.training?.completedAt?.[currentModule],next=completedAt?new Date(new Date(completedAt).getTime()+RETAKE_MS):null;document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">${phrase} Sua missão atual é concluir todas as 10 questões do módulo, revisar as explicações e avançar no mapa de aprendizagem.</p><div class="actions"><span class="pill gold">${total}/50 questões</span><span class="pill gold">Módulo ${currentModule}: ${prog}/10</span><span class="pill gold">Módulo completo: ${MODULE_POINTS[currentModule-1]} pontos</span>${completedAt?`<span class="pill gold">Refazer após ${next.toLocaleString('pt-BR')}</span>`:''}</div></div></div><div class="lesson-path">${modules.map(mm=>{const done=mm.questions.filter((_,i)=>currentUserData?.training?.answered[mm.id+'-'+i]?.correct).length,ready=canRetakeModule(mm.id);return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===10?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/10 concluídas · ${MODULE_POINTS[mm.id-1]} pts</small>${ready?'<br><small>Disponível para refazer</small>':''}<div class="bar" style="margin-top:8px"><i style="width:${(done/10)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b><p class="hint">Responda todas as 10 questões corretamente para concluir o módulo e ganhar ${MODULE_POINTS[currentModule-1]} pontos.</p></div><span class="pill gold">${prog}% do módulo</span></div><div class="bar"><i style="width:${(prog/10)*100}%"></i></div>${canRetakeModule(currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo e pontuar novamente</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Questões anteriores</button><strong>Questões ${start+1} a ${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximas questões →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx)).join('')}`}
+function renderQ(q,idx){const key=currentModule+'-'+idx,answered=currentUserData?.training?.answered[key],locked=answered?.correct;return `<div class="card q-card"><div class="quiz-question"><span class="pill gold">Questão ${idx+1}</span><br>${q.pergunta}</div><div class="alts">${q.alternativas.map((a,i)=>`<button class="alt ${answered?(i===q.correta?'correct':(i===answered.choice?'wrong':'')):''}" ${locked?'disabled':''} onclick="window.answerQ(${idx},${i})">${'ABCD'[i]}) ${a}</button>`).join('')}</div>${answered?`<div class="explain"><b>${answered.correct?'Resposta perfeita! ✓':'Quase lá. Resposta correta: '+('ABCD'[q.correta])+'.'}</b> ${q.explicacao}</div>`:''}</div>`}
+window.answerQ=async function(idx,choice){const q=modules[currentModule-1].questions[idx],key=currentModule+'-'+idx;if(currentUserData?.training?.answered[key]?.correct)return;const ok=choice===q.correta;if(!currentUserData.training.answered) currentUserData.training.answered={};currentUserData.training.answered[key]={choice,correct:ok};if(ok){currentUserData.points = (currentUserData.points || 0) + 5;toast('Resposta correta! +5 pontos');}else toast('Resposta incorreta. Leia a explicação e tente novamente.');const completed=modules[currentModule-1].questions.every((_,i)=>currentUserData.training.answered[currentModule+'-'+i]?.correct===true);if(completed&&!currentUserData.training.completedAt[currentModule]){const pts=MODULE_POINTS[currentModule-1]||40;currentUserData.training.completedAt[currentModule]=new Date().toISOString();currentUserData.points = (currentUserData.points || 0) + pts;await saveUserToFirebase(currentUserData);toast(`🏆 Módulo ${currentModule} completo! +${pts} pontos! Poderá refazer em 48h.`);confetti();}else{await saveUserToFirebase(currentUserData);}renderAll()};
+function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
+async function saveMaterial(e){e.preventDefault();const id = matId.value ? matId.value.toString() : Date.now().toString();const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast('Material salvo com sucesso!');matId.value='';matTitulo.value='';matDesc.value='';matLink.value='';matAtivo.checked=true;renderAdmin();renderMaterials()}
+function editMaterial(id){const m = firebaseMaterials.find(x => x.id == id || x.id === id.toString());if(!m){toast('Material não encontrado');return;}matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
+async function deleteMaterial(id){if(!confirm('Remover este material permanentemente?'))return;await deleteMaterialFromFirebase(id);toast('Material removido com sucesso.');renderAdmin();renderMaterials()}
+function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(currentUserData?.tasks || []).map(t=>{
+  let progresso = '';
+  if(t.id === 6 && !t.done){
+    const aprovados = (currentUserData?.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
+    progresso = `<p class="hint">📊 Progresso: ${aprovados}/3 conteúdos aprovados</p>`;
+  }
+  if(t.id === 7 && !t.done){
+    const aprovados = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
+    progresso = `<p class="hint">📊 Progresso: ${aprovados}/2 parceiros aprovados</p>`;
+  }
+  if(t.id === 8 && !t.done){
+    const horas = Math.floor((currentUserData?.onlineTime || 0) / 3600);
+    const minutos = Math.floor(((currentUserData?.onlineTime || 0) % 3600) / 60);
+    progresso = `<p class="hint">⏱️ Progresso: ${horas}h ${minutos}m / 3h online</p>`;
+  }
+  return `<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pontos</span>${progresso}</div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`;
+}).join('')}</div>`}
+window.doneTask=async function(id){let t=currentUserData.tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = currentUserData.profile.nome && currentUserData.profile.cidade && currentUserData.profile.telefone;if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}
+else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e baixando o conteúdo!');}
+else if(t.id===3){toast('Conclua esta tarefa cadastrando 3 parceiros na aba Parceiros!');}
+else if(t.id===4){toast('Conclua esta tarefa enviando um conteúdo que seja aprovado pelo admin!');}
+else if(t.id===5){toast('Conclua esta tarefa mantendo parceiros atualizados!');}
+else if(t.id===6){toast('Esta tarefa será concluída automaticamente ao ter 3 conteúdos aprovados!');}
+else if(t.id===7){toast('Esta tarefa será concluída automaticamente ao ter 2 parceiros aprovados!');}
+else if(t.id===8){toast('Esta tarefa será concluída automaticamente ao acumular 3 horas online!');}
+else{t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}await saveUserToFirebase(currentUserData);renderAll()}
+function helpPartners(){return `<button style="position:fixed;right:22px;bottom:88px;border-radius:999px;width:56px;height:56px;font-size:24px;z-index:45" class="secondary" onclick="window.showPartnerHelp()">?</button>`}
+window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• Plano Comum (R$ 69,90) → Você recebe R$ 20,97 (30%)\n• Plano Premium (R$ 149,90) → Você recebe R$ 44,97 (30%)\n\n✅ Você recebe a comissão APENAS UMA VEZ por plano fechado (não é recorrente mensal).\n\n📋 Fluxo do parceiro:\n1. Você capta o cliente para o app Peruaçu\n2. Cliente assina ordem de serviço e paga o plano\n3. Você envia os comprovantes\n4. Admin aprova e você recebe sua comissão + 100 pontos')}
+
+window.editPartner = function(partnerId){
+  const partner = getAllPartners().find(p => p.id == partnerId);
+  if(!partner) return toast('Parceiro não encontrado');
+  if(currentUser?.role !== 'admin' && partner.userUid !== currentUser?.uid) {
+    return toast('Você só pode editar seus próprios parceiros');
+  }
+  window.editingPartnerId = partnerId;
+  window.editingPartnerData = partner;
+  renderPartners();
+  setTimeout(() => {
+    document.getElementById('pnome').value = partner.nome;
+    document.getElementById('pcat').value = partner.categoria;
+    document.getElementById('pcidade').value = partner.cidade;
+    document.getElementById('pcontato').value = partner.contato;
+    document.getElementById('pobs').value = partner.obs || '';
+    const planoOption = partner.plano === 'Comum' ? 'Comum|69.90' : 'Premium|149.90';
+    document.getElementById('pplano').value = planoOption;
+  }, 100);
+}
+
+window.cancelEditPartner = function(){
+  window.editingPartnerId = null;
+  window.editingPartnerData = null;
+  renderPartners();
+}
+
+window.openPartnerAttachment = function(partnerId, field){
+  const partner = getAllPartners().find(p => p.id == partnerId);
+  if(!partner || !partner[field]) return toast('Anexo não encontrado.');
+  const w = window.open('','_blank');
+  if(partner[field].startsWith('data:application/pdf')) w.document.write(`<iframe src="${partner[field]}" style="width:100%;height:100vh;border:0"></iframe>`);
+  else w.document.write(`<img src="${partner[field]}" style="max-width:100%;height:auto">`);
+  w.document.close();
+}
+
+function renderPartners(){
+  let partnersToShow = getAllPartners();
+  let isAdminView = (currentUser?.role === 'admin');
+  if(!isAdminView) partnersToShow = partnersToShow.filter(p => p.userUid === currentUser?.uid);
+  const pendingPartners = partnersToShow.filter(p => p.status === 'Pendente');
+  const approvedPartners = partnersToShow.filter(p => p.status === 'Aprovado');
+  const rejectedPartners = partnersToShow.filter(p => p.status === 'Rejeitado');
+  document.getElementById('parceiros').innerHTML = `
+    ${helpPartners()}
+    <div class="blog-hero">
+      <h2>${isAdminView ? ' GESTÃO DE PARCEIROS - ADMIN' : 'Captação de parceiros para o app Peruaçu'}</h2>
+      <div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div>
+      <p>${isAdminView ? 'Aqui você pode adicionar, editar e excluir parceiros diretamente. Parceiros adicionados pelo admin já são salvos como APROVADOS automaticamente.' : 'Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.'}</p>
+      <div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span>${isAdminView ? `<span class="pill gold">📊 Total: ${partnersToShow.length} parceiros</span>` : ''}</div>
+    </div>
+    <div class="split" style="margin-top:16px">
+      <form class="card" onsubmit="window.addPartner(event)">
+        <h2>${window.editingPartnerId ? '✏️ Editar parceiro' : (isAdminView ? '➕ ADICIONAR PARCEIRO (Admin)' : '📝 Cadastrar parceiro captado')}</h2>
+        <label>Nome do parceiro/cliente</label><input id="pnome" required value="${window.editingPartnerData?.nome || ''}">
+        <label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select>
+        <label>Cidade</label><input id="pcidade" required value="${window.editingPartnerData?.cidade || ''}">
+        <label>Contato</label><input id="pcontato" required value="${window.editingPartnerData?.contato || ''}">
+        <label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (comissão: R$ 44,97)</option></select>
+        ${!isAdminView || window.editingPartnerId ? `<label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf">` : `<p class="hint" style="background:#eef4ef;padding:8px;border-radius:8px">⚡ Como ADMIN, parceiros são salvos diretamente como APROVADOS. Anexos são opcionais.</p><label>Ordem de serviço (opcional)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (opcional)</label><input id="ppix" type="file" accept="image/*,.pdf">`}
+        <label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram...">${window.editingPartnerData?.obs || ''}</textarea>
+        <button class="secondary">${window.editingPartnerId ? '💾 Salvar alterações' : (isAdminView ? '✅ Adicionar Parceiro (Aprovado)' : '📤 Enviar para aprovação')}</button>
+        ${window.editingPartnerId ? `<button class="ghost" onclick="window.cancelEditPartner()">Cancelar</button>` : ''}
+      </form>
+      <div>
+        <h2>⏳ PARCEIROS PENDENTES (${pendingPartners.length})</h2><div class="list">${pendingPartners.length ? pendingPartners.map(p => `<div class="item"><div class="item-head"><div><b>📌 ${p.nome}</b><p class="hint">👤 ${p.colaboradorNome || p.colaboradorEmail} · ${p.categoria} · ${p.cidade}</p></div><span class="pill gold">📅 ${new Date(p.createdAt).toLocaleDateString('pt-BR')}</span></div><div class="partner-detail-card"><p><strong>📞 Contato:</strong> ${p.contato || 'Não informado'}</p><p><strong>💰 Plano:</strong> ${p.plano} - R$ ${Number(p.valor).toFixed(2)} (Comissão: R$ ${(p.valor * 0.3).toFixed(2)})</p><p><strong>📝 Observações:</strong> ${p.obs || 'Nenhuma'}</p></div><div class="actions">${p.osData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','osData')">📄 Ver Ordem</button>` : '<span class="hint">⚠️ Sem ordem</span>'}${p.pixData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','pixData')">💰 Ver Pix</button>` : '<span class="hint">⚠️ Sem Pix</span>'}${isAdminView ? `<button class="ok" onclick="window.approvePartner('${p.id}', true, '${p.colaboradorEmail}')">✅ APROVAR</button><button class="danger" onclick="window.approvePartner('${p.id}', false, '${p.colaboradorEmail}')">❌ REJEITAR</button><button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">🗑️ Excluir</button>` : `<button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">Excluir</button>`}</div></div>`).join('') : '<div class="empty">🎉 Nenhum parceiro pendente!</div>'}</div>
+        <h2 style="margin-top:18px">✅ PARCEIROS APROVADOS (${approvedPartners.length})</h2><div class="list">${approvedPartners.length ? approvedPartners.map(p => `<div class="item"><div class="item-head"><div><b>📌 ${p.nome}</b><p class="hint">👤 ${p.colaboradorNome || p.colaboradorEmail} · ${p.categoria} · ${p.cidade}</p><p class="hint">📞 ${p.contato} · ${p.plano} - R$ ${Number(p.valor).toFixed(2)}</p>${p.obs ? `<p class="hint">📝 Obs: ${p.obs}</p>` : ''}</div><span class="pill ok">✅ Aprovado</span></div><p class="hint">💰 Comissão: R$ ${(p.valor * 0.3).toFixed(2)} · ${p.userUid === currentUser?.uid ? 'Você recebeu +100 pontos' : 'Colaborador recebeu +100 pontos'}</p><div class="actions">${p.osData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','osData')">📄 Ver Ordem</button>` : ''}${p.pixData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','pixData')">💰 Ver Pix</button>` : ''}<button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">🗑️ Excluir</button></div></div>`).join('') : '<div class="empty">Nenhum parceiro aprovado ainda.</div>'}</div>
+        <h2 style="margin-top:18px">❌ PARCEIROS REJEITADOS (${rejectedPartners.length})</h2><div class="list">${rejectedPartners.length ? rejectedPartners.map(p => `<div class="item"><div class="item-head"><div><b>📌 ${p.nome}</b><p class="hint">👤 ${p.colaboradorNome || p.colaboradorEmail} · ${p.categoria} · ${p.cidade}</p></div><span class="pill bad">❌ Rejeitado</span></div><div class="actions">${p.osData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','osData')">📄 Ver Ordem</button>` : ''}${p.pixData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','pixData')">💰 Ver Pix</button>` : ''}<button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">🗑️ Excluir</button></div></div>`).join('') : '<div class="empty">Nenhum parceiro rejeitado.</div>'}</div>
+      </div>
+    </div>
+  `;
+  window.editingPartnerId = null;
+  window.editingPartnerData = null;
+}
+
+window.addPartner = async function(e){
+  e.preventDefault();
+  if(!currentUser || !currentUser.uid) { toast('Usuário não autenticado. Faça login novamente.'); return; }
+  const [plano, valor] = document.getElementById('pplano').value.split('|');
+  const posFile = document.getElementById('pos').files[0];
+  const pixFile = document.getElementById('ppix').files[0];
+  const isAdminUser = (currentUser?.role === 'admin');
+  let osData = window.editingPartnerData?.osData || '';
+  let pixData = window.editingPartnerData?.pixData || '';
+  if(posFile) { toast('Processando imagem da Ordem de Serviço...'); osData = await processFile(posFile, 400); }
+  if(pixFile) { toast('Processando imagem do Comprovante Pix...'); pixData = await processFile(pixFile, 400); }
+  let partnerStatus = window.editingPartnerId ? (window.editingPartnerData?.status || 'Pendente') : 'Pendente';
+  let partnerAwarded = window.editingPartnerId ? (window.editingPartnerData?.awarded || false) : false;
+  let partnerComissaoPaga = window.editingPartnerId ? (window.editingPartnerData?.comissaoPaga || false) : false;
+  if(isAdminUser && !window.editingPartnerId) { partnerStatus = 'Aprovado'; partnerAwarded = true; partnerComissaoPaga = true; }
+  const partnerData = { nome: document.getElementById('pnome').value || '', categoria: document.getElementById('pcat').value || '', cidade: document.getElementById('pcidade').value || '', contato: document.getElementById('pcontato').value || '', plano: plano || 'Comum', valor: Number(valor) || 69.90, obs: document.getElementById('pobs').value || '', osData: osData || '', pixData: pixData || '', status: partnerStatus, awarded: partnerAwarded, comissaoPaga: partnerComissaoPaga, colaboradorEmail: currentUser?.email || '', colaboradorNome: isAdminUser ? 'Administrador' : (currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador'), userUid: currentUser?.uid || '', createdAt: window.editingPartnerId ? (window.editingPartnerData?.createdAt || new Date().toISOString()) : new Date().toISOString() };
+  if(window.editingPartnerId) partnerData.id = window.editingPartnerId;
+  try { const saved = await window.cpBlogApi.savePartner(partnerData); await syncPartnersFromFirebase(); toast(window.editingPartnerId ? '✏️ Parceiro atualizado com sucesso!' : (isAdminUser ? '✅ Parceiro adicionado diretamente como APROVADO!' : '🤝 Parceiro enviado para aprovação do admin!')); window.editingPartnerId = null; window.editingPartnerData = null; renderPartners(); document.getElementById('pos').value = ''; document.getElementById('ppix').value = ''; } catch(error) { console.error('Erro detalhado:', error); toast('Erro ao salvar parceiro: ' + error.message); }
+};
+
+window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
+window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
+function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
+
+// NOVO SISTEMA DE CERTIFICADOS - BAIXAR DIRETAMENTE SEM SOLICITAÇÃO
+function renderCerts(){
+  const userPoints = currentUserData?.points || 0;
+  const certs = firebaseCertConfig.certificates || [];
+  document.getElementById('certificados').innerHTML = `
+    <div class="blog-hero" style="margin-bottom:20px">
+      <h2>🎓 Certificados por Pontuação</h2>
+      <p>Ao atingir a pontuação necessária, o botão de download será liberado automaticamente. Os certificados são disponibilizados diretamente pelo administrador.</p>
+    </div>
+    <div class="grid">
+      ${certs.map(cert => {
+        const unlocked = userPoints >= cert.pontos;
+        const hasLink = cert.link && cert.link.trim() !== '';
+        return `
+          <div class="cert-download-card">
+            <div class="${unlocked ? 'cert-unlock-badge' : 'cert-locked-badge'}">
+              ${unlocked ? '🔓 DESBLOQUEADO' : '🔒 BLOQUEADO'}
+            </div>
+            <h3>${cert.nome}</h3>
+            <p class="hint">🎯 ${cert.pontos} pontos necessários</p>
+            <p class="hint">📊 Seus pontos: ${userPoints}</p>
+            ${unlocked ? 
+              (hasLink ? 
+                `<button class="secondary" onclick="window.downloadCertificate('${cert.link.replace(/'/g, "\\'")}')">📄 BAIXAR CERTIFICADO</button>` :
+                `<button class="ghost" disabled>⚠️ Link não disponível</button><p class="hint">Em breve, certificado estará disponível</p>`
+              ) :
+              `<button class="ghost" disabled>📌 Atinga ${cert.pontos} pontos para desbloquear</button>
+               <p class="hint">Falta ${cert.pontos - userPoints} pontos</p>`
+            }
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+window.downloadCertificate = function(link) {
+  if(link && link.trim()) {
+    window.open(link, '_blank');
+    toast('📄 Abrindo certificado...');
+  } else {
+    toast('Link do certificado não disponível. Aguarde o administrador configurar.');
+  }
+};
+
+function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
+function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',firebaseSettings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',firebaseSettings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat salvo no Firebase. Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real via Firebase!</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${firebaseSettings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${firebaseSettings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
+window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');chatText.value='';renderCommunity()};
+window.openProfile=function(uid){const p=firebaseUsers.find(x=>x.uid===uid);if(!p)return;const online=firebaseUsers.some(o=>o.uid===p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
+window.saveGroups=async function(e){e.preventDefault();const newSettings = { whatsappConteudos: waConteudos.value.trim(), whatsappForum: waForum.value.trim() };await saveSettingsToFirebase(newSettings);toast('Grupos de WhatsApp atualizados e salvos no Firebase!');renderCommunity()};
+async function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`}
+window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.profile) currentUserData.profile={};currentUserData.profile.nome=profNome.value;currentUserData.profile.cidade=profCidade.value;currentUserData.profile.telefone=profTel.value;currentUserData.profile.bio=profBio.value;await saveUserToFirebase(currentUserData);toast('Perfil atualizado.');const profileTask=currentUserData.tasks?.find(t=>t.id===1);if(profileTask&&!profileTask.done&&currentUserData.profile.nome&&currentUserData.profile.cidade&&currentUserData.profile.telefone){profileTask.done=true;currentUserData.points = (currentUserData.points || 0) + profileTask.pontos;await saveUserToFirebase(currentUserData);toast(`+${profileTask.pontos} pontos: Perfil completo!`);}renderAll()};
+function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: clique 2x e pressione V 2x para acessar. Atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
+window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
+
+// ==================== FUNÇÕES ADMIN ====================
+window.verPerfilColaborador = function(uid, nome) {
+  console.log('🔍 VER PERFIL CHAMADO:', uid, nome);
+  let modal = document.getElementById('profileModalGlobal');
+  if(!modal) {
+    modal = document.createElement('div');
+    modal.id = 'profileModalGlobal';
+    modal.className = 'modal-back';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.onclick = function(e) { 
+      if(e.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+    document.body.appendChild(modal);
+  }
+  
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { 
+    toast('Colaborador não encontrado'); 
+    modal.style.display = 'none';
+    return; 
+  }
+  
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const history = pointsAdjustmentHistory[uid] || [];
+  
+  modal.innerHTML = `
+    <div class="modal-card" style="max-width:700px;margin:20px;">
+      <h2>👤 Perfil do Colaborador - ${user.profile?.nome || nome}</h2>
+      <p><strong>📧 E-mail:</strong> ${user.email || ''}</p>
+      <div class="collab-card" style="text-align:center">
+        <p><strong>⭐ Pontos ATUAIS:</strong> <span style="font-size:32px;font-weight:900;color:var(--primary)">${user.points || 0}</span></p>
+        <p><strong>🏆 Nível:</strong> ${level(user.points || 0)}</p>
+        <p><strong>📍 Cidade:</strong> ${user.profile?.cidade || 'Não informado'}</p>
+        <p><strong>📞 Telefone:</strong> ${user.profile?.telefone || 'Não informado'}</p>
+        <p><strong>📝 Bio:</strong> ${user.profile?.bio || 'Colaborador do projeto'}</p>
+      </div>
+      
+      <div class="points-control">
+        <h4>🎮 CONTROLE DE PONTOS</h4>
+        <div class="points-input-group">
+          <input type="number" id="pointsValue_${safeId}" placeholder="Quantidade" value="10" min="1" step="1" style="width:100px">
+          <button class="ok" onclick="window.adjustPoints('${uid}', 'add')">➕ ADICIONAR</button>
+          <button class="danger" onclick="window.adjustPoints('${uid}', 'remove')">➖ REMOVER</button>
+        </div>
+        <div class="points-input-group" style="margin-top:10px">
+          <input type="number" id="exactPointsValue_${safeId}" placeholder="Definir valor exato" value="${user.points}" min="0" step="1" style="width:100px">
+          <button class="secondary" onclick="window.setExactPoints('${uid}')">🎯 DEFINIR VALOR EXATO</button>
+        </div>
+        ${history.length > 0 ? `<div class="points-history"><strong>📜 Últimos ajustes:</strong><br>${history.slice(-5).reverse().map(h => `<small>📅 ${new Date(h.date).toLocaleString('pt-BR')} - ${h.operation}: ${h.oldPoints} → ${h.newPoints} (por ${h.admin})</small><br>`).join('')}</div>` : '<div class="points-history"><small>Nenhum ajuste de pontos registrado ainda.</small></div>'}
+      </div>
+      
+      <div class="actions" style="margin-top:16px">
+        <button class="secondary" onclick="document.getElementById('profileModalGlobal').style.display='none'">Fechar</button>
+      </div>
+    </div>
+  `;
+  
+  modal.style.display = 'flex';
+};
+
+window.adjustPoints = async function(uid, operation) {
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { toast('Colaborador não encontrado'); return; }
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const pointsInput = document.getElementById(`pointsValue_${safeId}`);
+  let points = parseInt(pointsInput?.value);
+  if(isNaN(points) || points <= 0) { toast('Digite um valor válido (maior que 0)'); return; }
+  const oldPoints = user.points || 0;
+  let newPoints = oldPoints;
+  let operationText = '';
+  if(operation === 'add') { newPoints = oldPoints + points; operationText = `Adicionou +${points} pontos`; }
+  else if(operation === 'remove') { newPoints = Math.max(0, oldPoints - points); operationText = `Removeu ${points} pontos`; }
+  user.points = newPoints;
+  await window.cpBlogApi.saveUser(user);
+  await syncUsersFromFirebase();
+  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
+  toast(`✅ ${operationText}! Pontos alterados de ${oldPoints} para ${newPoints}`);
+  renderAdmin();
+  if(uid === currentUser?.uid) renderAll();
+  if(currentTab === 'certificados') renderCerts();
+  const modal = document.getElementById('profileModalGlobal');
+  if(modal && modal.style.display === 'flex') {
+    window.verPerfilColaborador(uid, user.profile?.nome || '');
+  }
+};
+
+window.setExactPoints = async function(uid) {
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { toast('Colaborador não encontrado'); return; }
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const pointsInput = document.getElementById(`exactPointsValue_${safeId}`);
+  let points = parseInt(pointsInput?.value);
+  if(isNaN(points) || points < 0) { toast('Digite um valor válido (maior ou igual a 0)'); return; }
+  const oldPoints = user.points || 0;
+  const difference = points - oldPoints;
+  user.points = points;
+  await window.cpBlogApi.saveUser(user);
+  await syncUsersFromFirebase();
+  if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+  pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `Definido para ${points} (${difference >= 0 ? '+' : ''}${difference})`, oldPoints: oldPoints, newPoints: points, admin: currentUser?.email || 'Admin' });
+  toast(`✅ Pontos alterados de ${oldPoints} para ${points}`);
+  renderAdmin();
+  if(uid === currentUser?.uid) renderAll();
+  if(currentTab === 'certificados') renderCerts();
+  const modal = document.getElementById('profileModalGlobal');
+  if(modal && modal.style.display === 'flex') {
+    window.verPerfilColaborador(uid, user.profile?.nome || '');
+  }
+};
+
+async function renderAdmin(){
+  if(currentUser?.uid !== ADMIN_UID){
+    document.getElementById('admin').innerHTML='<div class="card">Acesso restrito ao administrador.</div>';
+    return;
+  }
+  
+  const certs = firebaseCertConfig.certificates || [];
+  
+  document.getElementById('admin').innerHTML = `
+    <h2>👑 ADMIN - Configuração de Certificados</h2>
+    <div class="card" style="margin-bottom:20px">
+      <h3>📜 GERENCIAR LINKS DOS CERTIFICADOS</h3>
+      <p class="hint">Insira os links (Google Drive, Dropbox, OneDrive, etc) para cada certificado. Quando o colaborador atingir a pontuação, o botão de download será liberado automaticamente.</p>
+      <div id="certsConfigList">
+        ${certs.map((cert, idx) => `
+          <div class="item" style="margin-bottom:12px">
+            <label><strong>${cert.nome}</strong> (${cert.pontos} pontos necessários)</label>
+            <div class="password-reveal">
+              <input type="text" id="certLink_${idx}" value="${cert.link || ''}" placeholder="Link do certificado (URL do Google Drive, Dropbox, etc)" style="flex:1">
+              <button class="ghost" onclick="window.testCertLink('${idx}')">🔗 Testar Link</button>
+            </div>
+            <p class="hint" style="margin-top:5px">Exemplo: https://drive.google.com/file/d/.../view</p>
+          </div>
+        `).join('')}
+      </div>
+      <button class="secondary" onclick="window.saveCertLinks()">💾 SALVAR TODOS OS LINKS</button>
+    </div>
+    
+    <div class="card" style="margin-bottom:20px">
+      <h3>➕ Criar Novo Colaborador</h3>
+      <div class="split">
+        <div>
+          <label>Nome</label>
+          <input type="text" id="newCollabNome" placeholder="Nome completo">
+          <label>E-mail</label>
+          <input type="email" id="newCollabEmail" placeholder="colaborador@exemplo.com">
+        </div>
+        <div>
+          <label>Senha</label>
+          <input type="password" id="newCollabSenha" placeholder="********">
+          <label>Cidade</label>
+          <input type="text" id="newCollabCidade" placeholder="Itacarambi">
+        </div>
+      </div>
+      <button class="secondary" onclick="window.createCollaboratorAccount()">➕ Criar Conta</button>
+    </div>
+    
+    <div class="card">
+      <h3>📋 Colaboradores (${firebaseUsers.length})</h3>
+      <div class="list" style="max-height:300px;overflow-y:auto">
+        ${firebaseUsers.map(c => `
+          <div class="item">
+            <div class="item-head">
+              <div><b>${c.profile?.nome || c.email || 'Sem nome'}</b><p class="hint">${c.email || ''} · ${level(c.points || 0)} · ${c.points || 0} pts</p></div>
+              <div class="actions">
+                <button class="ok" onclick="window.verPerfilColaborador('${c.uid}', '${c.profile?.nome || c.email}')">👁️ VER</button>
+                <button class="ghost" onclick="window.resetCollaboratorPassword('${c.email}')">🔑 Senha</button>
+                <button class="danger" onclick="window.deleteCollaborator('${c.uid}')">🗑️ Excluir</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top:20px">
+      <h3>📚 Materiais de Download</h3>
+      <form class="card" style="margin-top:18px" onsubmit="window.saveMaterial(event)">
+        <input type="hidden" id="matId">
+        <label>Título</label><input id="matTitulo" required>
+        <label>Descrição</label><textarea id="matDesc" required></textarea>
+        <label>Link (URL)</label><input id="matLink" placeholder="https://...">
+        <label><input id="matAtivo" type="checkbox" checked> Ativo</label>
+        <button class="secondary">Salvar Material</button>
+      </form>
+      <div class="list">${firebaseMaterials.map(m => `
+        <div class="item">
+          <b>${m.titulo}</b>
+          <div class="actions">
+            <button class="ghost" onclick="window.editMaterial('${m.id}')">✏️ Editar</button>
+            <button class="danger" onclick="window.deleteMaterial('${m.id}')">🗑️ Excluir</button>
+          </div>
+        </div>
+      `).join('')}</div>
+    </div>
+  `;
+}
+
+window.saveCertLinks = async function() {
+  const certs = firebaseCertConfig.certificates || [];
+  const updatedCerts = certs.map((cert, idx) => {
+    const linkInput = document.getElementById(`certLink_${idx}`);
+    return { ...cert, link: linkInput ? linkInput.value.trim() : '' };
+  });
+  firebaseCertConfig.certificates = updatedCerts;
+  await saveCertConfigToFirebase(firebaseCertConfig);
+  toast('✅ Links dos certificados salvos com sucesso!');
+  renderCerts();
+};
+
+window.testCertLink = function(idx) {
+  const linkInput = document.getElementById(`certLink_${idx}`);
+  if(linkInput && linkInput.value.trim()) {
+    window.open(linkInput.value.trim(), '_blank');
+    toast('🔗 Testando link...');
+  } else {
+    toast('Link vazio. Insira um link primeiro.');
+  }
+};
+
+window.createCollaboratorAccount = async function() {
+  const email = document.getElementById('newCollabEmail')?.value.trim();
+  const nome = document.getElementById('newCollabNome')?.value.trim();
+  const senha = document.getElementById('newCollabSenha')?.value;
+  const cidade = document.getElementById('newCollabCidade')?.value.trim() || 'Itacarambi';
+  if(!email || !nome || !senha) return toast('Preencha todos os campos');
+  if(senha.length < 6) return toast('Senha deve ter no mínimo 6 caracteres');
+  
+  const existingUser = firebaseUsers.find(u => u.email === email);
+  if(existingUser) return toast('Este e-mail já está cadastrado');
+  
+  try {
+    const userCredential = await window.cpBlogApi.createFirebaseUser(email, senha, nome);
+    const firebaseUid = userCredential.uid;
+    const newUserData = {
+      uid: firebaseUid,
+      email: email,
+      points: 0,
+      profile: { nome: nome, cidade: cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
+      training: { answered: {}, bonus: [], completedAt: {} },
+      tasks: JSON.parse(JSON.stringify(defaultTasks)),
+      contents: [],
+      onlineTime: 0,
+      createdAt: new Date().toISOString()
+    };
+    await window.cpBlogApi.saveUser(newUserData);
+    await syncUsersFromFirebase();
+    toast(`✅ Colaborador "${nome}" criado com sucesso!`);
+    document.getElementById('newCollabEmail').value = '';
+    document.getElementById('newCollabNome').value = '';
+    document.getElementById('newCollabSenha').value = '';
+    document.getElementById('newCollabCidade').value = '';
+    renderAdmin();
+    renderCommunity();
+  } catch (error) {
+    if(error.code === 'auth/email-already-in-use') { toast('❌ Este e-mail já está em uso no Firebase.'); }
+    else { toast('❌ Erro: ' + error.message); }
+  }
+};
+
+window.deleteCollaborator = async function(uid) {
+  if(!confirm(`⚠️ Remover colaborador permanentemente? Esta ação é irreversível!`)) return;
+  try {
+    await window.cpBlogApi.deleteUserFirebase(uid);
+    await syncUsersFromFirebase();
+    toast('✅ Colaborador removido com sucesso!');
+    renderAdmin();
+    renderCommunity();
+  } catch(e) { 
+    console.error('Erro ao excluir:', e);
+    toast('Erro ao excluir: ' + e.message);
+  }
+};
+
+window.resetCollaboratorPassword = function(email) {
+  const newPassword = prompt(`Nova senha para ${email}:`, 'novaSenha123');
+  if(!newPassword || newPassword.length < 6) return toast('Mínimo 6 caracteres');
+  toast(`✅ Senha atualizada! (O usuário deve redefinir senha via Firebase "Esqueci minha senha")`);
+  renderAdmin();
+};
+
+window.saveMaterial = saveMaterial;
+window.editMaterial = editMaterial;
+window.deleteMaterial = deleteMaterial;
+
+// ==================== INICIALIZAÇÃO ====================
+let db = null;
+try {
+  const saved = localStorage.getItem('cpCentralDB');
+  if(saved) db = JSON.parse(saved);
+  else db = { settings: { whatsappConteudos: '', whatsappForum: '' } };
+} catch(e) { db = { settings: { whatsappConteudos: '', whatsappForum: '' } }; }
 
 document.getElementById('loginForm').onsubmit = async e => {
   e.preventDefault();
@@ -740,37 +1093,62 @@ document.getElementById('loginForm').onsubmit = async e => {
   try {
     const userCredential = await window.cpBlogApi.signIn(email, senha);
     const firebaseUser = userCredential.user;
-    let role = firebaseUser.uid === ADMIN_UID ? 'admin' : 'colaborador';
-    currentUser = { email: firebaseUser.email, role: role, uid: firebaseUser.uid };
+    let role = 'colaborador';
+    let isAdminUser = false;
+    if(firebaseUser.uid === ADMIN_UID) { role = 'admin'; isAdminUser = true; }
+    
+    currentUser = {
+      email: firebaseUser.email,
+      role: role,
+      nome: role === 'admin' ? 'Administrador' : 'Colaborador',
+      cidade: 'Itacarambi',
+      uid: firebaseUser.uid,
+      isAdmin: isAdminUser
+    };
+    
     if(role === 'colaborador') {
       let userFromFirebase = await window.cpBlogApi.loadUser(firebaseUser.uid);
       if(!userFromFirebase) {
-        currentUserData = {
+        const newUser = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           points: 0,
-          profile: { nome: 'Colaborador', cidade: 'Itacarambi', telefone: '', bio: 'Colaborador' },
+          profile: { nome: currentUser.nome, cidade: currentUser.cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
           training: { answered: {}, bonus: [], completedAt: {} },
           tasks: JSON.parse(JSON.stringify(defaultTasks)),
           contents: [],
           onlineTime: 0,
           createdAt: new Date().toISOString()
         };
-        await window.cpBlogApi.saveUser(currentUserData);
+        await window.cpBlogApi.saveUser(newUser);
+        currentUserData = newUser;
       } else {
         currentUserData = userFromFirebase;
       }
     }
+    
     localStorage.setItem('cpSession', JSON.stringify(currentUser));
+    await syncUsersFromFirebase();
+    await syncPartnersFromFirebase();
+    await syncMaterialsFromFirebase();
+    await syncSettingsFromFirebase();
+    await syncCertConfigFromFirebase();
+    await initMessagesListener();
     startApp();
-  } catch(error) { toast('Login inválido: ' + error.message); }
+  } catch(error) {
+    toast('Login inválido: ' + error.message);
+  }
 };
 
 const session = localStorage.getItem('cpSession');
 if(session){
   currentUser = JSON.parse(session);
-  if(currentUser.uid === ADMIN_UID) currentUser.role = 'admin';
-  else currentUser.role = 'colaborador';
+  if(currentUser.uid === ADMIN_UID){
+    currentUser.role = 'admin';
+    currentUser.isAdmin = true;
+  } else {
+    currentUser.role = 'colaborador';
+  }
   (async () => {
     await syncUsersFromFirebase();
     await syncPartnersFromFirebase();
@@ -785,7 +1163,7 @@ if(session){
           uid: currentUser.uid,
           email: currentUser.email,
           points: 0,
-          profile: { nome: 'Colaborador', cidade: 'Itacarambi', telefone: '', bio: 'Colaborador' },
+          profile: { nome: currentUser.nome, cidade: currentUser.cidade, telefone: '', bio: 'Colaborador do projeto Caminhos do Peruaçu.' },
           training: { answered: {}, bonus: [], completedAt: {} },
           tasks: JSON.parse(JSON.stringify(defaultTasks)),
           contents: [],
@@ -800,4 +1178,5 @@ if(session){
 }
 </script>
 </body>
+</html>
 </html>
