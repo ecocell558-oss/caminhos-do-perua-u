@@ -145,6 +145,11 @@
         const ref = await addDoc(certsCollection, certData);
         return { id: ref.id, ...certData };
       },
+      async deleteCertFirebase(certId) {
+        const certRef = doc(firestore, 'certificates', certId.toString());
+        await deleteDoc(certRef);
+        return true;
+      },
       async loadCerts(userUid) {
         const certsCollection = collection(firestore, 'certificates');
         let q = query(certsCollection, orderBy('requestDate', 'desc'));
@@ -173,7 +178,6 @@
         await deleteDoc(materialRef);
         return true;
       },
-      // CONFIGURAÇÕES (LINKS DOS GRUPOS) - AGORA NO FIREBASE!
       async saveSettings(settingsData) {
         const settingsRef = doc(firestore, 'settings', 'appSettings');
         await setDoc(settingsRef, settingsData, { merge: true });
@@ -364,6 +368,17 @@ async function saveCertToFirebase(certData) {
     await window.cpBlogApi.saveCert(certData);
     await syncCertsFromFirebase();
   } catch(e) { console.error('Erro save cert:', e); }
+}
+
+async function deleteCertFromFirebase(certId) {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.deleteCertFirebase(certId);
+    await syncCertsFromFirebase();
+    toast('✅ Certificado excluído com sucesso!');
+    if(currentTab === 'admin') renderAdmin();
+    if(currentTab === 'certificados') renderCerts();
+  } catch(e) { console.error('Erro delete cert:', e); toast('Erro ao excluir certificado'); }
 }
 
 async function syncMaterialsFromFirebase() {
@@ -948,6 +963,9 @@ async function renderAdmin(){
                 </div>
                 <span class="pill ok">✅ Aprovado</span>
               </div>
+              <div class="actions">
+                <button class="danger" onclick="window.deleteCertFromFirebase('${c.id}')">🗑️ EXCLUIR CERTIFICADO</button>
+              </div>
             </div>
           `).join('') : '<div class="empty">Nenhum certificado aprovado ainda.</div>'}
         </div>
@@ -963,6 +981,9 @@ async function renderAdmin(){
                   <p class="hint" style="color:#c0392b">Motivo: ${c.motivo || 'Não informado'}</p>
                 </div>
                 <span class="pill bad">❌ Rejeitado</span>
+              </div>
+              <div class="actions">
+                <button class="danger" onclick="window.deleteCertFromFirebase('${c.id}')">🗑️ EXCLUIR CERTIFICADO</button>
               </div>
             </div>
           `).join('') : '<div class="empty">Nenhum certificado rejeitado.</div>'}
@@ -993,6 +1014,11 @@ async function renderAdmin(){
     <div class="modal-back" id="certModal" onclick="if(event.target.id==='certModal')closeCertModal()"><div class="modal-card" id="certModalBody"></div></div>
   `;
 }
+
+window.deleteCertFromFirebase = async function(certId) {
+  if(!confirm('⚠️ Tem certeza que deseja excluir este certificado permanentemente? Esta ação não pode ser desfeita.')) return;
+  await deleteCertFromFirebase(certId);
+};
 
 window.openApproveCertModal = function(certId){
   const cert = firebaseCerts.find(c => c.id == certId);
