@@ -137,20 +137,23 @@
       },
       async saveCert(certData) {
         const certsCollection = collection(firestore, 'certificates');
-        if(certData.id) {
-          const certRef = doc(firestore, 'certificates', certData.id.toString());
-          await setDoc(certRef, certData, { merge: true });
-          return certData;
-        }
-        const ref = await addDoc(certsCollection, certData);
-        return { id: ref.id, ...certData };
+        // Garantir que o ID seja único e use o userUid corretamente
+        const certId = certData.id || Date.now().toString();
+        const certRef = doc(firestore, 'certificates', certId);
+        await setDoc(certRef, certData, { merge: true });
+        return { id: certId, ...certData };
       },
       async loadCertsByUser(userUid) {
+        if(!userUid) return [];
+        console.log('🔍 Buscando certificados para userUid:', userUid);
         const certsCollection = collection(firestore, 'certificates');
         const q = query(certsCollection, where('userUid', '==', userUid), orderBy('requestDate', 'desc'));
         const snap = await getDocs(q);
         const items = [];
-        snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+        snap.forEach(doc => {
+          console.log('📜 Certificado encontrado:', doc.id, doc.data());
+          items.push({ id: doc.id, ...doc.data() });
+        });
         return items;
       },
       async loadAllCerts() {
@@ -353,23 +356,33 @@ async function sendMessageToFirebase(text, userName, userCity) {
   await window.cpBlogApi.saveMessage(msg);
 }
 
-// FUNÇÃO CORRIGIDA: syncCertsFromFirebase - carrega certificados corretamente
+// FUNÇÃO CORRIGIDA DEFINITIVAMENTE
 async function syncCertsFromFirebase() {
-  if(!window.cpBlogApi || !currentUser) return;
+  if(!window.cpBlogApi || !currentUser) {
+    console.log('⚠️ syncCertsFromFirebase: sem currentUser ou API');
+    return;
+  }
   try {
-    if(currentUser.uid === ADMIN_UID) {
+    const userUid = currentUser.uid;
+    console.log('🔍 syncCertsFromFirebase - Buscando certificados para UID:', userUid);
+    
+    if(userUid === ADMIN_UID) {
       // Admin vê todos os certificados
       firebaseCerts = await window.cpBlogApi.loadAllCerts();
-      console.log('📜 Admin - Certificados carregados:', firebaseCerts.length);
+      console.log('📜 ADMIN - Total de certificados:', firebaseCerts.length);
     } else {
-      // Colaborador vê APENAS seus próprios certificados
-      firebaseCerts = await window.cpBlogApi.loadCertsByUser(currentUser.uid);
-      console.log('📜 Colaborador - Certificados carregados:', firebaseCerts.length, firebaseCerts);
+      // Colaborador vê apenas seus certificados
+      firebaseCerts = await window.cpBlogApi.loadCertsByUser(userUid);
+      console.log('📜 COLABORADOR - Certificados encontrados:', firebaseCerts.length);
+      if(firebaseCerts.length > 0) {
+        console.log('📜 Detalhes:', firebaseCerts);
+      }
     }
+    
     if(currentTab === 'certificados') renderCerts();
     if(currentTab === 'admin' && currentUser.uid === ADMIN_UID) renderAdmin();
   } catch(e) { 
-    console.error('Erro sync certs:', e); 
+    console.error('❌ Erro sync certs:', e); 
     firebaseCerts = [];
   }
 }
@@ -379,15 +392,13 @@ async function saveCertToFirebase(certData) {
   try {
     console.log('💾 Salvando certificado:', certData);
     const saved = await window.cpBlogApi.saveCert(certData);
-    console.log('✅ Certificado salvo:', saved);
-    // Recarregar os certificados imediatamente
+    console.log('✅ Certificado salvo com sucesso:', saved);
     await syncCertsFromFirebase();
     toast(`📜 Certificado "${certData.nome}" solicitado com sucesso! Aguarde aprovação do admin.`);
-    // Forçar re-render da aba certificados
     if(currentTab === 'certificados') renderCerts();
     renderAll();
   } catch(e) { 
-    console.error('Erro save cert:', e);
+    console.error('❌ Erro save cert:', e);
     toast('Erro ao solicitar certificado: ' + e.message);
   }
 }
@@ -586,7 +597,7 @@ async function startApp(){
   document.body.classList.toggle('is-admin',isAdmin);
   await syncUsersFromFirebase();
   await syncPartnersFromFirebase();
-  await syncCertsFromFirebase(); // Carrega certificados
+  await syncCertsFromFirebase();
   await syncMaterialsFromFirebase();
   await syncSettingsFromFirebase();
   await initMessagesListener();
@@ -758,18 +769,20 @@ window.addPartner = async function(e){
 
 window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
 window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
-function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
+function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody><table>`}
 
-// FUNÇÃO RENDER CERTS CORRIGIDA
+// FUNÇÃO RENDER CERTS CORRIGIDA DEFINITIVAMENTE
 async function renderCerts(){ 
   // Força recarregamento dos certificados para garantir dados atualizados
-  await syncCertsFromFirebase();
+  if(currentUser) {
+    await syncCertsFromFirebase();
+  }
   
   // firebaseCerts já contém os certificados do usuário logado (ou todos se admin)
   const userCerts = firebaseCerts;
-  const isAdmin = currentUser?.uid === ADMIN_UID;
   
-  console.log('📜 Renderizando certificados para usuário:', currentUser?.email, 'Total:', userCerts.length);
+  console.log('📜 RenderCerts - Certificados a mostrar:', userCerts.length);
+  console.log('📜 Detalhes:', userCerts);
   
   document.getElementById('certificados').innerHTML=`
     <h2>Certificados Disponíveis</h2>
@@ -783,15 +796,15 @@ async function renderCerts(){
       `).join('')}
     </div>
     
-    <h2>Minhas Solicitações</h2>
+    <h2>📋 Minhas Solicitações (${userCerts.length})</h2>
     <div class="list">
-      ${userCerts.length ? userCerts.map(c=>`
+      ${userCerts.length > 0 ? userCerts.map(c=>`
         <div class="item">
           <div class="item-head">
             <div>
-              <b>${c.nome || c.name || 'Certificado'}</b>
-              <p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>
-              ${c.motivo ? `<p class="hint" style="color:#c0392b">Motivo da rejeição: ${c.motivo}</p>` : ''}
+              <b>🏆 ${c.nome || c.name || 'Certificado'}</b>
+              <p class="hint">📅 Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>
+              ${c.motivo ? `<p class="hint" style="color:#c0392b">📝 Motivo da rejeição: ${c.motivo}</p>` : ''}
             </div>
             <span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status || 'Pendente'}</span>
           </div>
@@ -800,29 +813,43 @@ async function renderCerts(){
               <button class="secondary" onclick="window.open('${c.certificadoUrl}','_blank')">📄 BAIXAR CERTIFICADO</button>
             </div>
           ` : ''}
+          ${c.status === 'Pendente' ? '<p class="hint" style="color:var(--warn)">⏳ Aguardando análise do administrador...</p>' : ''}
+          ${c.status === 'Rejeitado' ? '<p class="hint" style="color:var(--bad)">❌ Você pode solicitar novamente se atingir os critérios.</p>' : ''}
         </div>
-      `).join('') : '<div class="empty">Nenhuma solicitação de certificado ainda.</div>'}
+      `).join('') : '<div class="empty">📭 Nenhuma solicitação de certificado ainda. Clique em "Solicitar" acima para começar!</div>'}
     </div>
   `; 
 }
 
 window.askCert = async function(nome, pts){ 
+  if(!currentUser || !currentUser.uid) {
+    toast('Usuário não autenticado. Faça login novamente.');
+    return;
+  }
+  
   // Verificar se já existe solicitação pendente ou aprovada para este certificado
   const existingRequest = firebaseCerts.find(c => 
-    c.userUid === currentUser?.uid && 
+    c.userUid === currentUser.uid && 
     (c.nome === nome || c.name === nome) && 
     c.status !== 'Rejeitado'
   );
   
   if(existingRequest){ 
-    toast(`Você já possui uma solicitação ${existingRequest.status.toLowerCase()} para este certificado.`); 
+    toast(`Você já possui uma solicitação ${existingRequest.status.toLowerCase()} para o certificado ${nome}.`); 
     return; 
   }
   
+  // Verificar pontos
+  if((currentUserData?.points || 0) < pts) {
+    toast(`Você precisa de ${pts} pontos para solicitar o certificado ${nome}. Seu saldo atual: ${currentUserData?.points || 0} pontos.`);
+    return;
+  }
+  
   const certData = { 
-    id: Date.now().toString(), 
-    userUid: currentUser?.uid, 
+    id: Date.now().toString() + '_' + currentUser.uid, 
+    userUid: currentUser.uid, 
     usuario: currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador', 
+    usuarioEmail: currentUser.email,
     nome: nome,
     name: nome,
     pts: pts, 
@@ -1027,7 +1054,7 @@ async function renderAdmin(){
               <div class="item-head">
                 <div>
                   <b>${c.nome || c.name || 'Certificado'}</b>
-                  <p class="hint">👤 ${c.usuario} · Requer ${c.pts} pontos</p>
+                  <p class="hint">👤 ${c.usuario} (${c.usuarioEmail || c.userUid}) · Requer ${c.pts} pontos</p>
                   <p class="hint">📅 Solicitado em: ${new Date(c.requestDate).toLocaleString('pt-BR')}</p>
                 </div>
                 <span class="pill gold">⏳ Pendente</span>
@@ -1237,6 +1264,8 @@ document.getElementById('loginForm').onsubmit = async e => {
       isAdmin: isAdminUser
     };
     
+    console.log('✅ Login realizado - User UID:', currentUser.uid);
+    
     if(role === 'colaborador') {
       let userFromFirebase = await window.cpBlogApi.loadUser(firebaseUser.uid);
       if(!userFromFirebase) {
@@ -1281,6 +1310,7 @@ if(session){
     currentUser.role = 'colaborador';
   }
   (async () => {
+    console.log('✅ Sessão recuperada - User UID:', currentUser.uid);
     await syncUsersFromFirebase();
     await syncPartnersFromFirebase();
     await syncCertsFromFirebase();
