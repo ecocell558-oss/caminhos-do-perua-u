@@ -135,12 +135,10 @@
         });
         return unsubscribe;
       },
-      // CONFIGURAÇÕES DOS CERTIFICADOS (links salvos no Firebase)
       async loadCertSettings() {
         const certSettingsRef = doc(firestore, 'settings', 'certificates');
         const snap = await getDoc(certSettingsRef);
         if(snap.exists()) return snap.data();
-        // Configuração padrão (todos inativos e sem link)
         return {
           Iniciante: { url: '', active: false },
           Explorador: { url: '', active: false },
@@ -234,7 +232,7 @@ let firebaseUsers = [];
 let firebaseMessages = [];
 let firebaseMaterials = [];
 let firebaseSettings = { whatsappConteudos: '', whatsappForum: '' };
-let firebaseCertSettings = {}; // Configurações dos certificados (links + ativo)
+let firebaseCertSettings = {};
 let messagesUnsubscribe = null;
 let currentUserData = null;
 
@@ -248,7 +246,6 @@ const LEVELS = [
   ['Mestre', 7500]
 ];
 
-// CERTIFICADOS: Nome e pontos necessários
 const CERTIFICADOS = [
   { nome: 'Iniciante', pontos: 1500 },
   { nome: 'Explorador', pontos: 3000 },
@@ -735,9 +732,8 @@ window.addPartner = async function(e){
 
 window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
 window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
-function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody><table>`}
+function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td>\n<td>${r.nome}${r.me?' (você)':''}</td>\n<td>${r.cidade}</td>\n<td>${r.pontos}</td>\n</tr>`).join('')}</tbody></table>`}
 
-// ==================== RENDER DOS CERTIFICADOS (NOVO SISTEMA - DOWNLOAD DIRETO) ====================
 async function renderCerts(){ 
   await syncCertSettingsFromFirebase();
   const userPoints = currentUserData?.points || 0;
@@ -790,7 +786,6 @@ async function renderCerts(){
   `;
 }
 
-// Função para download do certificado
 window.downloadCertificate = function(nome, url) {
   if(!url || url.trim() === '') {
     toast('❌ Link do certificado não disponível. Entre em contato com o administrador.');
@@ -810,7 +805,7 @@ window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.prof
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: clique 2x e pressione V 2x para acessar. Atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
-// ==================== FUNÇÕES ADMIN ====================
+// ==================== FUNÇÕES ADMIN CORRIGIDAS ====================
 window.verPerfilColaborador = function(uid, nome) {
   let modal = document.getElementById('profileModalGlobal');
   if(!modal) {
@@ -854,8 +849,8 @@ window.verPerfilColaborador = function(uid, nome) {
         <h4>🎮 CONTROLE DE PONTOS</h4>
         <div class="points-input-group">
           <input type="number" id="pointsValue_${safeId}" placeholder="Quantidade" value="10" min="1" step="1" style="width:100px">
-          <button class="ok" onclick="window.adjustPoints('${uid}', 'add')">➕ ADICIONAR</button>
-          <button class="danger" onclick="window.adjustPoints('${uid}', 'remove')">➖ REMOVER</button>
+          <button class="ok" onclick="window.adjustPoints('${uid}')">➕ ADICIONAR</button>
+          <button class="danger" onclick="window.removePoints('${uid}')">➖ REMOVER</button>
         </div>
         <div class="points-input-group" style="margin-top:10px">
           <input type="number" id="exactPointsValue_${safeId}" placeholder="Definir valor exato" value="${user.points}" min="0" step="1" style="width:100px">
@@ -874,7 +869,7 @@ window.verPerfilColaborador = function(uid, nome) {
 };
 
 // FUNÇÃO CORRIGIDA: ADICIONAR PONTOS
-window.adjustPoints = async function(uid, operation) {
+window.adjustPoints = async function(uid) {
   const user = firebaseUsers.find(u => u.uid === uid);
   if(!user) { toast('Colaborador não encontrado'); return; }
   const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
@@ -882,30 +877,67 @@ window.adjustPoints = async function(uid, operation) {
   let points = parseInt(pointsInput?.value);
   if(isNaN(points) || points <= 0) { toast('Digite um valor válido (maior que 0)'); return; }
   const oldPoints = user.points || 0;
-  let newPoints = oldPoints;
-  let operationText = '';
-  if(operation === 'add') { newPoints = oldPoints + points; operationText = `Adicionou +${points} pontos`; }
-  else if(operation === 'remove') { newPoints = Math.max(0, oldPoints - points); operationText = `Removeu ${points} pontos`; }
+  const newPoints = oldPoints + points;
   
-  // ATUALIZAR DIRETAMENTE NO FIREBASE
   user.points = newPoints;
   try {
     await window.cpBlogApi.saveUser(user);
     await syncUsersFromFirebase();
     
-    // Registrar no histórico
     if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
-    pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: operation === 'add' ? `+${points}` : `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
+    pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `+${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
     
-    toast(`✅ ${operationText}! Pontos alterados de ${oldPoints} para ${newPoints}`);
-    renderAdmin();
+    toast(`✅ +${points} pontos adicionados! Pontos alterados de ${oldPoints} para ${newPoints}`);
+    
     if(uid === currentUser?.uid) {
-      await syncUsersFromFirebase(); // Recarregar dados do usuário logado
+      currentUserData = await window.cpBlogApi.loadUser(uid);
       renderAll();
     }
-    if(currentTab === 'certificados') renderCerts();
     
-    // Atualizar o modal aberto
+    renderAdmin();
+    if(currentTab === 'certificados') renderCerts();
+    if(currentTab === 'ranking') renderRanking();
+    
+    const modal = document.getElementById('profileModalGlobal');
+    if(modal && modal.style.display === 'flex') {
+      window.verPerfilColaborador(uid, user.profile?.nome || '');
+    }
+  } catch(error) {
+    console.error('Erro ao salvar pontos:', error);
+    toast('❌ Erro ao salvar pontos: ' + error.message);
+  }
+};
+
+// FUNÇÃO CORRIGIDA: REMOVER PONTOS
+window.removePoints = async function(uid) {
+  const user = firebaseUsers.find(u => u.uid === uid);
+  if(!user) { toast('Colaborador não encontrado'); return; }
+  const safeId = uid.replace(/[^a-zA-Z0-9]/g, '_');
+  const pointsInput = document.getElementById(`pointsValue_${safeId}`);
+  let points = parseInt(pointsInput?.value);
+  if(isNaN(points) || points <= 0) { toast('Digite um valor válido (maior que 0)'); return; }
+  const oldPoints = user.points || 0;
+  const newPoints = Math.max(0, oldPoints - points);
+  
+  user.points = newPoints;
+  try {
+    await window.cpBlogApi.saveUser(user);
+    await syncUsersFromFirebase();
+    
+    if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
+    pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `-${points}`, oldPoints: oldPoints, newPoints: newPoints, admin: currentUser?.email || 'Admin' });
+    
+    toast(`✅ ${points} pontos removidos! Pontos alterados de ${oldPoints} para ${newPoints}`);
+    
+    if(uid === currentUser?.uid) {
+      currentUserData = await window.cpBlogApi.loadUser(uid);
+      renderAll();
+    }
+    
+    renderAdmin();
+    if(currentTab === 'certificados') renderCerts();
+    if(currentTab === 'ranking') renderRanking();
+    
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
       window.verPerfilColaborador(uid, user.profile?.nome || '');
@@ -927,25 +959,25 @@ window.setExactPoints = async function(uid) {
   const oldPoints = user.points || 0;
   const difference = points - oldPoints;
   
-  // ATUALIZAR DIRETAMENTE NO FIREBASE
   user.points = points;
   try {
     await window.cpBlogApi.saveUser(user);
     await syncUsersFromFirebase();
     
-    // Registrar no histórico
     if(!pointsAdjustmentHistory[uid]) pointsAdjustmentHistory[uid] = [];
     pointsAdjustmentHistory[uid].push({ date: new Date().toISOString(), operation: `Definido para ${points} (${difference >= 0 ? '+' : ''}${difference})`, oldPoints: oldPoints, newPoints: points, admin: currentUser?.email || 'Admin' });
     
     toast(`✅ Pontos alterados de ${oldPoints} para ${points}`);
-    renderAdmin();
+    
     if(uid === currentUser?.uid) {
-      await syncUsersFromFirebase(); // Recarregar dados do usuário logado
+      currentUserData = await window.cpBlogApi.loadUser(uid);
       renderAll();
     }
-    if(currentTab === 'certificados') renderCerts();
     
-    // Atualizar o modal aberto
+    renderAdmin();
+    if(currentTab === 'certificados') renderCerts();
+    if(currentTab === 'ranking') renderRanking();
+    
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
       window.verPerfilColaborador(uid, user.profile?.nome || '');
@@ -954,43 +986,6 @@ window.setExactPoints = async function(uid) {
     console.error('Erro ao salvar pontos:', error);
     toast('❌ Erro ao salvar pontos: ' + error.message);
   }
-};
-
-// ==================== ADMIN - GERENCIAR CERTIFICADOS ====================
-window.saveAllCertSettings = async function() {
-  const newSettings = {};
-  for(const cert of CERTIFICADOS) {
-    const safeName = cert.nome.replace(/[^a-zA-Z0-9]/g, '_');
-    const urlInput = document.getElementById(`certUrl_${safeName}`);
-    const activeCheckbox = document.getElementById(`certActive_${safeName}`);
-    if(urlInput) {
-      newSettings[cert.nome] = {
-        url: urlInput.value.trim(),
-        active: activeCheckbox ? activeCheckbox.checked : false
-      };
-    }
-  }
-  await saveCertSettingsToFirebase(newSettings);
-  toast('✅ Todos os certificados foram salvos!');
-  renderAdmin();
-  renderCerts();
-};
-
-window.saveSingleCertSetting = async function(certNome) {
-  const safeName = certNome.replace(/[^a-zA-Z0-9]/g, '_');
-  const urlInput = document.getElementById(`certUrl_${safeName}`);
-  const activeCheckbox = document.getElementById(`certActive_${safeName}`);
-  if(!urlInput) return;
-  
-  const newSettings = { ...firebaseCertSettings };
-  newSettings[certNome] = {
-    url: urlInput.value.trim(),
-    active: activeCheckbox ? activeCheckbox.checked : false
-  };
-  await saveCertSettingsToFirebase(newSettings);
-  toast(`✅ Certificado "${certNome}" salvo!`);
-  renderAdmin();
-  renderCerts();
 };
 
 async function renderAdmin(){
@@ -1094,6 +1089,42 @@ async function renderAdmin(){
     </div>
   `;
 }
+
+window.saveAllCertSettings = async function() {
+  const newSettings = {};
+  for(const cert of CERTIFICADOS) {
+    const safeName = cert.nome.replace(/[^a-zA-Z0-9]/g, '_');
+    const urlInput = document.getElementById(`certUrl_${safeName}`);
+    const activeCheckbox = document.getElementById(`certActive_${safeName}`);
+    if(urlInput) {
+      newSettings[cert.nome] = {
+        url: urlInput.value.trim(),
+        active: activeCheckbox ? activeCheckbox.checked : false
+      };
+    }
+  }
+  await saveCertSettingsToFirebase(newSettings);
+  toast('✅ Todos os certificados foram salvos!');
+  renderAdmin();
+  renderCerts();
+};
+
+window.saveSingleCertSetting = async function(certNome) {
+  const safeName = certNome.replace(/[^a-zA-Z0-9]/g, '_');
+  const urlInput = document.getElementById(`certUrl_${safeName}`);
+  const activeCheckbox = document.getElementById(`certActive_${safeName}`);
+  if(!urlInput) return;
+  
+  const newSettings = { ...firebaseCertSettings };
+  newSettings[certNome] = {
+    url: urlInput.value.trim(),
+    active: activeCheckbox ? activeCheckbox.checked : false
+  };
+  await saveCertSettingsToFirebase(newSettings);
+  toast(`✅ Certificado "${certNome}" salvo!`);
+  renderAdmin();
+  renderCerts();
+};
 
 window.createCollaboratorAccount = async function() {
   const email = document.getElementById('newCollabEmail')?.value.trim();
