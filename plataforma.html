@@ -898,8 +898,10 @@ window.adjustPoints = async function(uid) {
     if(currentTab === 'certificados') renderCerts();
     if(currentTab === 'ranking') renderRanking();
     
+    // Fechar e reabrir o modal para atualizar
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
+      modal.style.display = 'none';
       window.verPerfilColaborador(uid, user.profile?.nome || '');
     }
   } catch(error) {
@@ -938,8 +940,10 @@ window.removePoints = async function(uid) {
     if(currentTab === 'certificados') renderCerts();
     if(currentTab === 'ranking') renderRanking();
     
+    // Fechar e reabrir o modal para atualizar
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
+      modal.style.display = 'none';
       window.verPerfilColaborador(uid, user.profile?.nome || '');
     }
   } catch(error) {
@@ -978,8 +982,10 @@ window.setExactPoints = async function(uid) {
     if(currentTab === 'certificados') renderCerts();
     if(currentTab === 'ranking') renderRanking();
     
+    // Fechar e reabrir o modal para atualizar
     const modal = document.getElementById('profileModalGlobal');
     if(modal && modal.style.display === 'flex') {
+      modal.style.display = 'none';
       window.verPerfilColaborador(uid, user.profile?.nome || '');
     }
   } catch(error) {
