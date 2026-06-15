@@ -355,7 +355,6 @@ async function sendMessageToFirebase(text, userName, userCity) {
 async function syncCertsFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
-    // Se for admin, carrega TODOS os certificados. Se for colaborador, carrega apenas os dele
     const userUid = (currentUser?.uid === ADMIN_UID) ? null : currentUser?.uid;
     firebaseCerts = await window.cpBlogApi.loadCerts(userUid);
     if(currentTab === 'certificados') renderCerts();
@@ -366,6 +365,12 @@ async function syncCertsFromFirebase() {
 async function saveCertToFirebase(certData) {
   if(!window.cpBlogApi) return;
   try {
+    if (!certData.userUid && currentUser?.uid) {
+      certData.userUid = currentUser.uid;
+    }
+    if (!certData.usuario && currentUserData?.profile?.nome) {
+      certData.usuario = currentUserData.profile.nome;
+    }
     await window.cpBlogApi.saveCert(certData);
     await syncCertsFromFirebase();
   } catch(e) { console.error('Erro save cert:', e); }
@@ -373,7 +378,7 @@ async function saveCertToFirebase(certData) {
 
 async function deleteCertFromFirebase(certId) {
   if(!window.cpBlogApi) return;
-  if(!confirm('⚠️ Tem certeza que deseja excluir este certificado permanentemente? Esta ação não pode ser desfeita.')) return;
+  if(!confirm('⚠️ Tem certeza que deseja excluir este certificado permanentemente?')) return;
   try {
     await window.cpBlogApi.deleteCertFirebase(certId);
     await syncCertsFromFirebase();
@@ -479,7 +484,6 @@ async function processFile(file, maxSizeKB = 400) {
 function level(points=currentUserData?.points || 0){return LEVELS.slice().reverse().find(x=>points>=x[1])[0]}
 function nextLevel(){return LEVELS.find(x=>(currentUserData?.points || 0)<x[1])||LEVELS[LEVELS.length-1]}
 function totalAnswered(){return Object.keys(currentUserData?.training?.answered || {}).length}
-function u(){return currentUserData}
 
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toastbox').appendChild(t);setTimeout(()=>t.remove(),3300)}
 function confetti(){const c=document.getElementById('confetti');for(let i=0;i<90;i++){let s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=['#F5B81B','#1E3A2F','#fff','#39a66a'][i%4];s.style.animationDelay=Math.random()*.35+'s';c.appendChild(s);setTimeout(()=>s.remove(),2300)}}
@@ -750,42 +754,109 @@ window.addPartner = async function(e){
 window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
 window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
 function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
+
+// ==================== FUNÇÃO RENDER CERTS CORRIGIDA ====================
 async function renderCerts(){ 
-  const userCerts = firebaseCerts.filter(c => c.userUid === currentUser?.uid); 
-  document.getElementById('certificados').innerHTML=`<h2>Certificados Disponíveis</h2><div class="grid">${CERTS.map(c=>`<div class="card"><b>${c[0]}</b><p class="hint">Requer ${c[1]} pontos.</p><button class="secondary" ${(currentUserData?.points||0)<c[1]?'disabled':''} onclick="window.askCert('${c[0]}',${c[1]})">Solicitar</button></div>`).join('')}</div><h2>Minhas Solicitações</h2><div class="list">${userCerts.length ? userCerts.map(c=>`<div class="item"><div class="item-head"><div><b>${c.nome}</b><p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>${c.motivo ? `<p class="hint" style="color:#c0392b">Motivo da rejeição: ${c.motivo}</p>` : ''}</div><span class="pill ${c.status==='Aprovado'?'ok':c.status==='Rejeitado'?'bad':'gold'}">${c.status}</span></div>${c.certificadoUrl && c.status === 'Aprovado' ? `<div class="actions"><button class="secondary" onclick="window.open('${c.certificadoUrl}','_blank')">📄 BAIXAR CERTIFICADO</button></div>` : ''}</div>`).join('') : '<div class="empty">Nenhuma solicitação de certificado.</div>'}</div>`; 
+  const userCerts = firebaseCerts.filter(c => String(c.userUid) === String(currentUser?.uid));
+  
+  document.getElementById('certificados').innerHTML = `
+    <h2>📜 Certificados Disponíveis</h2>
+    <div class="grid">
+      ${CERTS.map(cert => {
+        const jaSolicitado = userCerts.some(uc => uc.nome === cert[0] && uc.status !== 'Rejeitado');
+        const temPontos = (currentUserData?.points || 0) >= cert[1];
+        const disabled = jaSolicitado || !temPontos;
+        let tooltip = '';
+        if (jaSolicitado) tooltip = 'Você já solicitou este certificado';
+        else if (!temPontos) tooltip = `Você precisa de ${cert[1]} pontos (você tem ${currentUserData?.points || 0})`;
+        
+        return `
+          <div class="card">
+            <b>${cert[0]}</b>
+            <p class="hint">Requer ${cert[1]} pontos.</p>
+            <p class="hint">💰 Você tem ${currentUserData?.points || 0} pontos</p>
+            <button class="secondary" ${disabled ? 'disabled' : ''} 
+                onclick="window.askCert('${cert[0]}',${cert[1]})"
+                title="${tooltip}">
+              ${jaSolicitado ? '✓ Já solicitado' : (temPontos ? 'Solicitar' : 'Pontos insuficientes')}
+            </button>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    
+    <h2 style="margin-top: 24px">📋 Minhas Solicitações</h2>
+    <div class="list">
+      ${userCerts.length ? userCerts.map(c => `
+        <div class="item">
+          <div class="item-head">
+            <div>
+              <b>${c.nome}</b>
+              <p class="hint">Solicitado em ${new Date(c.requestDate).toLocaleDateString('pt-BR')}</p>
+              ${c.motivo ? `<p class="hint" style="color:#c0392b">📝 Motivo: ${c.motivo}</p>` : ''}
+              ${c.certificadoUrl ? `<p class="hint" style="color:#198754">✅ Certificado aprovado! Clique no botão abaixo para baixar.</p>` : ''}
+            </div>
+            <span class="pill ${c.status === 'Aprovado' ? 'ok' : (c.status === 'Rejeitado' ? 'bad' : 'gold')}">
+              ${c.status === 'Aprovado' ? '✅ Aprovado' : (c.status === 'Rejeitado' ? '❌ Rejeitado' : '⏳ Pendente')}
+            </span>
+          </div>
+          ${c.certificadoUrl && c.status === 'Aprovado' ? `
+            <div class="actions">
+              <button class="secondary" onclick="window.open('${c.certificadoUrl}', '_blank')">
+                📄 BAIXAR CERTIFICADO
+              </button>
+            </div>
+          ` : ''}
+          ${c.status === 'Rejeitado' ? `
+            <div class="actions">
+              <button class="secondary" onclick="window.askCert('${c.nome}', ${c.pts})">
+                🔄 Solicitar novamente
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('') : '<div class="empty">📭 Nenhuma solicitação de certificado encontrada.</div>'}
+    </div>
+  `; 
 }
+
+// ==================== FUNÇÃO ASK CERT CORRIGIDA ====================
 window.askCert = async function(nome, pts){ 
-  if(firebaseCerts.some(c=>c.userUid===currentUser?.uid && c.nome===nome && c.status!=='Rejeitado')){ 
-    return toast('Você já solicitou este certificado.'); 
-  } 
+  if ((currentUserData?.points || 0) < pts) {
+    toast(`❌ Você precisa de ${pts} pontos para solicitar este certificado.`);
+    return;
+  }
+  
+  const jaSolicitado = firebaseCerts.some(c => 
+    String(c.userUid) === String(currentUser?.uid) && 
+    c.nome === nome && 
+    c.status !== 'Rejeitado'
+  );
+  
+  if(jaSolicitado){ 
+    toast('❌ Você já solicitou este certificado. Aguarde a análise.');
+    return; 
+  }
+  
   const certData = { 
     id: Date.now().toString(), 
-    userUid: currentUser?.uid, 
-    usuario: currentUserData?.profile?.nome || 'Colaborador', 
+    userUid: currentUser?.uid,
+    usuario: currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador', 
     nome: nome, 
     pts: pts, 
     status: 'Pendente', 
     requestDate: new Date().toISOString(), 
     certificadoUrl: '', 
     motivo: '' 
-  }; 
+  };
+  
   await saveCertToFirebase(certData); 
-  toast('📜 Certificado solicitado para análise.'); 
+  toast('📜 Certificado solicitado! Aguarde a análise do administrador.');
   renderAll(); 
 };
-function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
-function renderCommunity(){const el=document.getElementById('comunidade');if(!el)return;const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat limpo a cada 24h</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',firebaseSettings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',firebaseSettings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat salvo no Firebase. Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real via Firebase!</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem para os colaboradores..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${firebaseSettings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${firebaseSettings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50)}
-window.sendChat=async function(e){e.preventDefault();const text=chatText.value.trim();if(!text)return;await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');chatText.value='';renderCommunity()};
-window.openProfile=function(uid){const p=firebaseUsers.find(x=>x.uid===uid);if(!p)return;const online=firebaseUsers.some(o=>o.uid===p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000);document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;document.getElementById('profileModal').style.display='flex'};
-window.saveGroups=async function(e){e.preventDefault();const newSettings = { whatsappConteudos: waConteudos.value.trim(), whatsappForum: waForum.value.trim() };await saveSettingsToFirebase(newSettings);toast('Grupos de WhatsApp atualizados e salvos no Firebase!');renderCommunity()};
-async function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`}
-window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.profile) currentUserData.profile={};currentUserData.profile.nome=profNome.value;currentUserData.profile.cidade=profCidade.value;currentUserData.profile.telefone=profTel.value;currentUserData.profile.bio=profBio.value;await saveUserToFirebase(currentUserData);toast('Perfil atualizado.');const profileTask=currentUserData.tasks?.find(t=>t.id===1);if(profileTask&&!profileTask.done&&currentUserData.profile.nome&&currentUserData.profile.cidade&&currentUserData.profile.telefone){profileTask.done=true;currentUserData.points = (currentUserData.points || 0) + profileTask.pontos;await saveUserToFirebase(currentUserData);toast(`+${profileTask.pontos} pontos: Perfil completo!`);}renderAll()};
-function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: clique 2x e pressione V 2x para acessar. Atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
-window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
 // ==================== FUNÇÕES ADMIN ====================
 window.verPerfilColaborador = function(uid, nome) {
-  console.log('🔍 VER PERFIL CHAMADO:', uid, nome);
   let modal = document.getElementById('profileModalGlobal');
   if(!modal) {
     modal = document.createElement('div');
@@ -967,11 +1038,11 @@ async function renderAdmin(){
                 <span class="pill gold">⏳ Pendente</span>
               </div>
               <div class="actions">
-                <button class="ok" onclick="window.openApproveCertModal('${c.id}')">✅ APROVAR (inserir link)</button>
+                <button class="ok" onclick="window.openApproveCertModal('${c.id}')">✅ APROVAR</button>
                 <button class="danger" onclick="window.rejectCertPrompt('${c.id}')">❌ REJEITAR</button>
               </div>
             </div>
-          `).join('') : '<div class="empty">🎉 Nenhuma solicitação de certificado pendente!</div>'}
+          `).join('') : '<div class="empty">🎉 Nenhuma solicitação pendente!</div>'}
         </div>
         
         <h2 style="margin-top:18px">✅ CERTIFICADOS APROVADOS (${approvedCerts.length})</h2>
@@ -982,15 +1053,15 @@ async function renderAdmin(){
                 <div>
                   <b>${c.nome}</b>
                   <p class="hint">👤 ${c.usuario}</p>
-                  ${c.certificadoUrl ? `<p class="hint">🔗 Link: <a href="${c.certificadoUrl}" target="_blank">Clique aqui para baixar</a></p>` : ''}
+                  ${c.certificadoUrl ? `<p class="hint">🔗 Link: <a href="${c.certificadoUrl}" target="_blank">Clique aqui</a></p>` : ''}
                 </div>
                 <span class="pill ok">✅ Aprovado</span>
               </div>
               <div class="actions">
-                <button class="danger" onclick="window.deleteCertFromFirebase('${c.id}')">🗑️ EXCLUIR CERTIFICADO</button>
+                <button class="danger" onclick="window.deleteCertFromFirebase('${c.id}')">🗑️ EXCLUIR</button>
               </div>
             </div>
-          `).join('') : '<div class="empty">Nenhum certificado aprovado ainda.</div>'}
+          `).join('') : '<div class="empty">Nenhum certificado aprovado.</div>'}
         </div>
         
         <h2 style="margin-top:18px">❌ CERTIFICADOS REJEITADOS (${rejectedCerts.length})</h2>
@@ -1006,7 +1077,7 @@ async function renderAdmin(){
                 <span class="pill bad">❌ Rejeitado</span>
               </div>
               <div class="actions">
-                <button class="danger" onclick="window.deleteCertFromFirebase('${c.id}')">🗑️ EXCLUIR CERTIFICADO</button>
+                <button class="danger" onclick="window.deleteCertFromFirebase('${c.id}')">🗑️ EXCLUIR</button>
               </div>
             </div>
           `).join('') : '<div class="empty">Nenhum certificado rejeitado.</div>'}
@@ -1038,7 +1109,6 @@ async function renderAdmin(){
   `;
 }
 
-// Tornar a função de exclusão global
 window.deleteCertFromFirebase = deleteCertFromFirebase;
 
 window.openApproveCertModal = function(certId){
@@ -1050,7 +1120,7 @@ window.openApproveCertModal = function(certId){
     <p>📅 Solicitado em: ${new Date(cert.requestDate).toLocaleString('pt-BR')}</p>
     <label>🔗 Link do certificado (URL):</label>
     <input type="url" id="certLink" placeholder="https://..." style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid var(--line)">
-    <p class="hint" style="margin-top:8px">Cole o link onde o colaborador poderá baixar o certificado (Google Drive, Dropbox, site, etc).</p>
+    <p class="hint" style="margin-top:8px">Cole o link do certificado (Google Drive, Dropbox, etc).</p>
     <br><br>
     <div class="actions">
       <button class="ok" onclick="window.approveCertWithLink('${certId}')">✅ APROVAR</button>
@@ -1065,24 +1135,24 @@ window.closeCertModal = function(){ document.getElementById('certModal').style.d
 window.approveCertWithLink = async function(certId){
   const link = document.getElementById('certLink')?.value.trim();
   if(!link) return toast('Insira o link do certificado');
-  if(!link.startsWith('http://') && !link.startsWith('https://')) return toast('Insira um link válido (começando com http:// ou https://)');
+  if(!link.startsWith('http://') && !link.startsWith('https://')) return toast('Link inválido');
   const cert = firebaseCerts.find(c => c.id == certId);
   if(cert){
     cert.status = 'Aprovado';
     cert.certificadoUrl = link;
     await saveCertToFirebase(cert);
-    toast(`✅ Certificado "${cert.nome}" aprovado! Link disponível para o colaborador.`);
+    toast(`✅ Certificado "${cert.nome}" aprovado!`);
     renderAll();
     closeCertModal();
   }
 };
 
 window.rejectCertPrompt = async function(certId){
-  const motivo = prompt('Informe o motivo da rejeição (aparecerá para o colaborador):', 'Não atende aos critérios necessários');
+  const motivo = prompt('Motivo da rejeição:', 'Não atende aos critérios');
   if(motivo === null) return;
-  if(motivo.trim() === '') return toast('Informe um motivo para rejeição');
+  if(motivo.trim() === '') return toast('Informe um motivo');
   const cert = firebaseCerts.find(c => c.id == certId);
-  if(cert){ cert.status = 'Rejeitado'; cert.motivo = motivo; await saveCertToFirebase(cert); toast(`❌ Certificado "${cert.nome}" rejeitado.`); renderAll(); }
+  if(cert){ cert.status = 'Rejeitado'; cert.motivo = motivo; await saveCertToFirebase(cert); toast(`❌ Certificado rejeitado.`); renderAll(); }
 };
 
 window.createCollaboratorAccount = async function() {
@@ -1092,9 +1162,6 @@ window.createCollaboratorAccount = async function() {
   const cidade = document.getElementById('newCollabCidade')?.value.trim() || 'Itacarambi';
   if(!email || !nome || !senha) return toast('Preencha todos os campos');
   if(senha.length < 6) return toast('Senha deve ter no mínimo 6 caracteres');
-  
-  const existingUser = firebaseUsers.find(u => u.email === email);
-  if(existingUser) return toast('Este e-mail já está cadastrado');
   
   try {
     const userCredential = await window.cpBlogApi.createFirebaseUser(email, senha, nome);
@@ -1120,44 +1187,111 @@ window.createCollaboratorAccount = async function() {
     renderAdmin();
     renderCommunity();
   } catch (error) {
-    if(error.code === 'auth/email-already-in-use') { toast('❌ Este e-mail já está em uso no Firebase.'); }
+    if(error.code === 'auth/email-already-in-use') { toast('❌ Este e-mail já está em uso.'); }
     else { toast('❌ Erro: ' + error.message); }
   }
 };
 
 window.deleteCollaborator = async function(uid) {
-  if(!confirm(`⚠️ Remover colaborador permanentemente? Esta ação é irreversível!`)) return;
+  if(!confirm(`⚠️ Remover colaborador permanentemente?`)) return;
   try {
     await window.cpBlogApi.deleteUserFirebase(uid);
     await syncUsersFromFirebase();
-    toast('✅ Colaborador removido com sucesso!');
+    toast('✅ Colaborador removido!');
     renderAdmin();
     renderCommunity();
   } catch(e) { 
-    console.error('Erro ao excluir:', e);
     toast('Erro ao excluir: ' + e.message);
   }
 };
 
 window.resetCollaboratorPassword = function(email) {
-  const newPassword = prompt(`Nova senha para ${email}:`, 'novaSenha123');
-  if(!newPassword || newPassword.length < 6) return toast('Mínimo 6 caracteres');
-  toast(`✅ Senha atualizada! (O usuário deve redefinir senha via Firebase "Esqueci minha senha")`);
-  renderAdmin();
+  toast(`✅ Solicite redefinição de senha pelo Firebase.`);
 };
 
 window.saveMaterial = saveMaterial;
 window.editMaterial = editMaterial;
 window.deleteMaterial = deleteMaterial;
 
-// ==================== INICIALIZAÇÃO ====================
-let db = null;
-try {
-  const saved = localStorage.getItem('cpCentralDB');
-  if(saved) db = JSON.parse(saved);
-  else db = { settings: { whatsappConteudos: '', whatsappForum: '' } };
-} catch(e) { db = { settings: { whatsappConteudos: '', whatsappForum: '' } }; }
+// ==================== FUNÇÕES DE COMUNIDADE, PERFIL E BLOG ====================
+function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 
+function renderCommunity(){
+  const el=document.getElementById('comunidade');
+  if(!el)return;
+  const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);
+  el.innerHTML=`<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span>${onlineUsersList.length} online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat salvo no Firebase</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos',firebaseSettings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum',firebaseSettings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b>${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente enquanto a plataforma está aberta.</p></div><div class="card stat"><span>Mensagens no chat</span><b>${firebaseMessages.length}</b><p class="hint">Chat em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list">${firebaseUsers.map(p=>`<div class="item profile-card"><div class="avatar">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o=>o.uid===p.uid)?'<span class="online-dot"></span>':''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid?' (você)':''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma.</p></div><button class="ghost" onclick="renderCommunity()">Atualizar</button></div><div class="chat-box" id="chatBox">${firebaseMessages.slice(-80).map(m=>`<div class="msg ${m.user === currentUserData?.profile?.nome?'me':''}"><b>${m.user} · ${m.city||''}</b>${m.text}<br><small>${new Date(m.time).toLocaleString('pt-BR')}</small></div>`).join('')}</div><form class="actions" onsubmit="window.sendChat(event)"><input id="chatText" placeholder="Escreva uma mensagem..." required><button class="secondary">Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ?`<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${firebaseSettings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${firebaseSettings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>`:''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`;
+  setTimeout(()=>{const box=document.getElementById('chatBox');if(box)box.scrollTop=box.scrollHeight},50);
+}
+
+window.sendChat=async function(e){
+  e.preventDefault();
+  const text=chatText.value.trim();
+  if(!text)return;
+  await sendMessageToFirebase(text, currentUserData?.profile?.nome || 'Colaborador', currentUserData?.profile?.cidade || '');
+  chatText.value='';
+  renderCommunity();
+};
+
+window.openProfile=function(uid){
+  const p=firebaseUsers.find(x=>x.uid===uid);
+  if(!p)return;
+  const online=firebaseUsers.some(o=>o.uid===p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000);
+  document.getElementById('profileModalBody').innerHTML=`<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome||p.email||'?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>${online?'<span class="pill ok"><span class="online-dot"></span>Online agora</span>':'<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`;
+  document.getElementById('profileModal').style.display='flex';
+};
+
+window.closeProfile=function(){
+  document.getElementById('profileModal').style.display='none';
+};
+
+window.saveGroups=async function(e){
+  e.preventDefault();
+  const newSettings = { whatsappConteudos: waConteudos.value.trim(), whatsappForum: waForum.value.trim() };
+  await saveSettingsToFirebase(newSettings);
+  toast('Grupos de WhatsApp atualizados!');
+  renderCommunity();
+};
+
+async function renderProfile(){
+  document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`;
+}
+
+window.saveProfile=async function(e){
+  e.preventDefault();
+  if(!currentUserData.profile) currentUserData.profile={};
+  currentUserData.profile.nome=profNome.value;
+  currentUserData.profile.cidade=profCidade.value;
+  currentUserData.profile.telefone=profTel.value;
+  currentUserData.profile.bio=profBio.value;
+  await saveUserToFirebase(currentUserData);
+  toast('Perfil atualizado.');
+  const profileTask=currentUserData.tasks?.find(t=>t.id===1);
+  if(profileTask&&!profileTask.done&&currentUserData.profile.nome&&currentUserData.profile.cidade&&currentUserData.profile.telefone){
+    profileTask.done=true;
+    currentUserData.points = (currentUserData.points || 0) + profileTask.pontos;
+    await saveUserToFirebase(currentUserData);
+    toast(`+${profileTask.pontos} pontos: Perfil completo!`);
+  }
+  renderAll();
+};
+
+function renderBlog(){
+  document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;
+  setTimeout(window.refreshBlogFeed,300);
+}
+
+window.refreshBlogFeed=async function(){
+  const box=document.getElementById('liveBlogPosts');
+  if(!box)return;
+  if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase...</div>';return}
+  try{
+    const posts=await window.cpBlogApi.loadPosts();
+    box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>';
+  }catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}
+}
+
+// ==================== INICIALIZAÇÃO ====================
 document.getElementById('loginForm').onsubmit = async e => {
   e.preventDefault();
   const email = document.getElementById('email').value.trim();
