@@ -1,3 +1,6 @@
+Aqui está o código completo com as alterações solicitadas. O chat agora será limpo automaticamente todos os dias à meia-noite (00:00), mantendo o aviso "Chat limpo a cada 24h", e tanto administradores quanto colaboradores podem falar no chat normalmente.
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -182,6 +185,16 @@
         const snap = await getDoc(settingsRef);
         if(snap.exists()) return snap.data();
         return { whatsappConteudos: '', whatsappForum: '' };
+      },
+      async clearAllMessages() {
+        const messagesCollection = collection(firestore, 'messages');
+        const snap = await getDocs(messagesCollection);
+        const deletePromises = [];
+        snap.forEach(doc => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        await Promise.all(deletePromises);
+        return true;
       }
     };
     
@@ -235,6 +248,7 @@ let firebaseSettings = { whatsappConteudos: '', whatsappForum: '' };
 let firebaseCertSettings = {};
 let messagesUnsubscribe = null;
 let currentUserData = null;
+let chatCleanupInterval = null;
 
 // ==================== NÍVEIS E CERTIFICADOS ====================
 const LEVELS = [
@@ -366,6 +380,35 @@ async function sendMessageToFirebase(text, userName, userCity) {
   await window.cpBlogApi.saveMessage(msg);
 }
 
+async function clearChatMessages() {
+  if(!window.cpBlogApi) return;
+  try {
+    await window.cpBlogApi.clearAllMessages();
+    toast('🧹 Chat limpo automaticamente às 00:00! Um novo ciclo começa.');
+    if(currentTab === 'comunidade') renderCommunity();
+  } catch(e) {
+    console.error('Erro ao limpar chat:', e);
+  }
+}
+
+function startChatCleanupScheduler() {
+  if(chatCleanupInterval) clearInterval(chatCleanupInterval);
+  
+  function scheduleNextCleanup() {
+    const now = new Date();
+    const nextMidnight = new Date(now);
+    nextMidnight.setHours(24, 0, 0, 0);
+    const msUntilMidnight = nextMidnight - now;
+    
+    setTimeout(() => {
+      clearChatMessages();
+      scheduleNextCleanup();
+    }, msUntilMidnight);
+  }
+  
+  scheduleNextCleanup();
+}
+
 async function syncMaterialsFromFirebase() {
   if(!window.cpBlogApi) return;
   try {
@@ -486,7 +529,6 @@ function makeQuestions(){
      const posCorreta = Math.floor(Math.random() * 4);
      alternativas.splice(posCorreta, 0, correct);
      
-     // Para os módulos 1 a 4, remover o texto específico do parque
      let perguntaTexto = `Questão ${i+1}: Sobre "${theme}"`;
      if(mi+1 >= 1 && mi+1 <= 4) {
        perguntaTexto = `Questão ${i+1}: Sobre "${theme}"`;
@@ -572,6 +614,7 @@ async function startApp(){
   await syncSettingsFromFirebase();
   await syncCertSettingsFromFirebase();
   await initMessagesListener();
+  startChatCleanupScheduler();
   renderNav();
   renderAll();
   showTab('dashboard');
@@ -582,6 +625,7 @@ async function startApp(){
 window.logout=async function(){
   if(onlineInterval) clearInterval(onlineInterval);
   if(messagesUnsubscribe) messagesUnsubscribe();
+  if(chatCleanupInterval) clearInterval(chatCleanupInterval);
   localStorage.removeItem('cpSession');
   location.reload();
 };
@@ -813,7 +857,7 @@ window.saveProfile=async function(e){e.preventDefault();if(!currentUserData.prof
 function renderBlog(){document.getElementById('blog').innerHTML=`<div class="blog-hero"><h2>Blog Caminhos do Peruaçu ao vivo</h2><p>Painel de Colaborador: clique 2x e pressione V 2x para acessar. Atualize a página para visualizar as publicações.</p><div class="actions"><button class="secondary" onclick="document.getElementById('blogFrame').src='blog.html?central='+Date.now();window.refreshBlogFeed()">Atualizar blog</button><button class="ghost" onclick="window.open('blog.html','_blank')">Abrir em nova aba</button></div></div><div class="card" style="margin-top:16px;padding:0;overflow:hidden"><iframe id="blogFrame" src="blog.html" title="Blog Caminhos do Peruaçu" style="width:100%;height:720px;border:0;background:#fff"></iframe></div><h2>Posts recentes no blog</h2><div id="liveBlogPosts" class="list"><div class="empty">Carregando posts do blog...</div></div>`;setTimeout(window.refreshBlogFeed,300)}
 window.refreshBlogFeed=async function(){const box=document.getElementById('liveBlogPosts');if(!box)return;if(!window.cpBlogApi){box.innerHTML='<div class="empty">Conexão com Firebase ainda carregando...</div>';return}try{const posts=await window.cpBlogApi.loadPosts();box.innerHTML=posts.slice(0,6).map(p=>`<div class="item item-head"><div><b>${p.title}</b><p class="hint">${p.category||'ECOTURISMO'} · ${new Date(p.date||Date.now()).toLocaleDateString('pt-BR')}</p></div><button class="ghost" onclick="window.open('blog.html?p=${p.id}','_blank')">Ver</button></div>`).join('')||'<div class="empty">Nenhum post encontrado.</div>'}catch(error){box.innerHTML='<div class="empty">Erro: '+error.message+'</div>'}}
 
-// ==================== FUNÇÕES ADMIN CORRIGIDAS ====================
+// ==================== FUNÇÕES ADMIN ====================
 window.verPerfilColaborador = function(uid, nome) {
   let modal = document.getElementById('profileModalGlobal');
   if(!modal) {
@@ -1293,3 +1337,4 @@ if(session){
 </script>
 </body>
 </html>
+```
