@@ -276,12 +276,10 @@ const navItems=[['dashboard','⌂','Dashboard'],['treinamento','▣','Treinament
 const defaultTasks = [
   {id:1,titulo:'Completar o perfil público',descricao:'Revise nome, cidade, telefone e bio.',pontos:20,done:false},
   {id:2,titulo:'Baixar o kit comercial',descricao:'Acesse a aba Materiais e clique em "Baixar" no Material de Serviço.',pontos:20,done:false},
-  {id:3,titulo:'Mapear 3 possíveis parceiros',descricao:'Cadastre contatos de pousadas, guias ou restaurantes.',pontos:30,done:false},
-  {id:4,titulo:'Enviar relato de experiência',descricao:'Publique um conteúdo para aprovação.',pontos:40,done:false},
-  {id:5,titulo:'Atualizar status de parceiros',descricao:'Mantenha o funil comercial organizado.',pontos:30,done:false},
-  {id:6,titulo:'🎯 Criar 3 conteúdos para o blog',descricao:'Tenha 3 conteúdos aprovados pelo administrador.',pontos:100,done:false,tipo:'especial'},
-  {id:7,titulo:'🤝 Cadastrar 2 parceiros',descricao:'Tenha 2 parceiros aprovados pelo administrador.',pontos:100,done:false,tipo:'especial'},
-  {id:8,titulo:'⏱️ Ficar 3 horas online',descricao:'Acumule 3 horas de tempo ativo na plataforma.',pontos:100,done:false,tipo:'especial'}
+  {id:3,titulo:'🎯 Criar 3 conteúdos para o blog',descricao:'Tenha 3 conteúdos aprovados pelo administrador.',pontos:100,done:false,tipo:'especial'},
+  {id:4,titulo:'🤝 Cadastrar 2 parceiros',descricao:'Tenha 2 parceiros aprovados pelo administrador.',pontos:100,done:false,tipo:'especial'},
+  {id:5,titulo:'⏱️ Ficar 3 horas online',descricao:'Acumule 3 horas de tempo ativo na plataforma.',pontos:100,done:false,tipo:'especial'},
+  {id:6,titulo:'📚 Concluir todos os módulos do treinamento',descricao:'Complete todos os 5 módulos do treinamento.',pontos:300,done:false,tipo:'especial'}
 ];
 
 const seedRanking=[];
@@ -417,7 +415,7 @@ function startOnlineTracking(){
   if(onlineInterval) clearInterval(onlineInterval);
   onlineInterval = setInterval(async () => {
     if(currentUser && currentUser.role !== 'admin' && document.hasFocus() && currentUserData){
-      const task = currentUserData.tasks?.find(t => t.id === 8);
+      const task = currentUserData.tasks?.find(t => t.id === 5);
       if(task && !task.done){
         currentUserData.onlineTime = (currentUserData.onlineTime || 0) + 1;
         if(currentUserData.onlineTime >= 10800){
@@ -436,28 +434,42 @@ function startOnlineTracking(){
 }
 async function checkSpecialTasks(){
   if(!currentUserData) return;
-  // Tarefa 6: 3 conteúdos aprovados
-  const task6 = currentUserData.tasks?.find(t => t.id === 6);
-  if(task6 && !task6.done){
+  // Tarefa 3: 3 conteúdos aprovados
+  const task3 = currentUserData.tasks?.find(t => t.id === 3);
+  if(task3 && !task3.done){
     const approvedContents = (currentUserData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
     if(approvedContents >= 3){
-      task6.done = true;
-      currentUserData.points = (currentUserData.points || 0) + task6.pontos;
+      task3.done = true;
+      currentUserData.points = (currentUserData.points || 0) + task3.pontos;
       await saveUserToFirebase(currentUserData);
-      toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
+      toast(`🎉 Tarefa "${task3.titulo}" concluída! +${task3.pontos} pontos!`);
       confetti();
       if(currentTab === 'tarefas') renderTasks();
     }
   }
-  // Tarefa 7: 2 parceiros aprovados
-  const task7 = currentUserData.tasks?.find(t => t.id === 7);
-  if(task7 && !task7.done){
+  // Tarefa 4: 2 parceiros aprovados
+  const task4 = currentUserData.tasks?.find(t => t.id === 4);
+  if(task4 && !task4.done){
     const approvedPartners = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
     if(approvedPartners >= 2){
-      task7.done = true;
-      currentUserData.points = (currentUserData.points || 0) + task7.pontos;
+      task4.done = true;
+      currentUserData.points = (currentUserData.points || 0) + task4.pontos;
       await saveUserToFirebase(currentUserData);
-      toast(`🎉 Tarefa "${task7.titulo}" concluída! +${task7.pontos} pontos!`);
+      toast(`🎉 Tarefa "${task4.titulo}" concluída! +${task4.pontos} pontos!`);
+      confetti();
+      if(currentTab === 'tarefas') renderTasks();
+    }
+  }
+  // Tarefa 6: Todos os módulos concluídos
+  const task6 = currentUserData.tasks?.find(t => t.id === 6);
+  if(task6 && !task6.done){
+    const totalModules = 5;
+    const completedModules = Object.keys(currentUserData.training?.completedAt || {}).filter(k => k >= 1 && k <= 5).length;
+    if(completedModules >= totalModules){
+      task6.done = true;
+      currentUserData.points = (currentUserData.points || 0) + task6.pontos;
+      await saveUserToFirebase(currentUserData);
+      toast(`🎉 Tarefa "${task6.titulo}" concluída! +${task6.pontos} pontos!`);
       confetti();
       if(currentTab === 'tarefas') renderTasks();
     }
@@ -513,7 +525,7 @@ async function renderAll(){
 }
 
 // ==================== DASHBOARD ====================
-function renderDashboard(){const doneTasks=currentUserData?.tasks?.filter(t=>t.done).length || 0,closed=firebasePartners.filter(p=>p.status==='Aprovado' && p.userUid === currentUser?.uid).length,ans=totalAnswered(),nl=nextLevel(),pct=nl[1]===0?100:Math.min(100,Math.round((currentUserData?.points||0)/nl[1]*100));document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${currentUserData?.points || 0}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${currentUserData?.tasks?.length || 8} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
+function renderDashboard(){const doneTasks=currentUserData?.tasks?.filter(t=>t.done).length || 0,closed=firebasePartners.filter(p=>p.status==='Aprovado' && p.userUid === currentUser?.uid).length,ans=totalAnswered(),nl=nextLevel(),pct=nl[1]===0?100:Math.min(100,Math.round((currentUserData?.points||0)/nl[1]*100));document.getElementById('dashboard').innerHTML=`<div class="grid"><div class="card stat"><span>Pontos</span><b>${currentUserData?.points || 0}</b></div><div class="card stat"><span>Nível</span><b>${level()}</b></div><div class="card stat"><span>Treino</span><b>${ans}/50</b></div><div class="card stat"><span>Tarefas / Parceiros</span><b>${doneTasks}/${currentUserData?.tasks?.length || 6} · ${closed}</b></div></div><div class="card" style="margin-top:16px"><div class="item-head"><div><h2>Progresso até ${nl[0]}</h2><p class="hint">Pontuação dinâmica atualizada em tempo real.</p></div><span class="pill gold">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
 
 // ==================== TREINAMENTO ====================
 function makeQuestions(){
@@ -578,19 +590,18 @@ async function deleteMaterial(id){if(!confirm('Remover este material permanentem
 // ==================== TAREFAS ====================
 function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas</h2><div class="list">${(currentUserData?.tasks || []).map(t=>{
   let progresso = '';
-  if(t.id === 6 && !t.done){ const aprovados = (currentUserData?.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length; progresso = `<p class="hint">📊 Progresso: ${aprovados}/3 conteúdos aprovados</p>`; }
-  if(t.id === 7 && !t.done){ const aprovados = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length; progresso = `<p class="hint">📊 Progresso: ${aprovados}/2 parceiros aprovados</p>`; }
-  if(t.id === 8 && !t.done){ const horas = Math.floor((currentUserData?.onlineTime || 0) / 3600); const minutos = Math.floor(((currentUserData?.onlineTime || 0) % 3600) / 60); progresso = `<p class="hint">⏱️ Progresso: ${horas}h ${minutos}m / 3h online</p>`; }
+  if(t.id === 3 && !t.done){ const aprovados = (currentUserData?.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length; progresso = `<p class="hint">📊 Progresso: ${aprovados}/3 conteúdos aprovados</p>`; }
+  if(t.id === 4 && !t.done){ const aprovados = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length; progresso = `<p class="hint">📊 Progresso: ${aprovados}/2 parceiros aprovados</p>`; }
+  if(t.id === 5 && !t.done){ const horas = Math.floor((currentUserData?.onlineTime || 0) / 3600); const minutos = Math.floor(((currentUserData?.onlineTime || 0) % 3600) / 60); progresso = `<p class="hint">⏱️ Progresso: ${horas}h ${minutos}m / 3h online</p>`; }
+  if(t.id === 6 && !t.done){ const totalModules = 5; const completedModules = Object.keys(currentUserData?.training?.completedAt || {}).filter(k => k >= 1 && k <= 5).length; progresso = `<p class="hint">📚 Progresso: ${completedModules}/${totalModules} módulos concluídos</p>`; }
   return `<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pontos</span>${progresso}</div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`;
 }).join('')}</div>`}
 window.doneTask=async function(id){let t=currentUserData.tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = currentUserData.profile.nome && currentUserData.profile.cidade && currentUserData.profile.telefone;if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}
 else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e clicando em "Baixar" no Material de Serviço!');}
-else if(t.id===3){toast('Conclua esta tarefa cadastrando 3 parceiros na aba Parceiros!');}
-else if(t.id===4){toast('Conclua esta tarefa enviando um conteúdo que seja aprovado pelo admin!');}
-else if(t.id===5){toast('Conclua esta tarefa mantendo parceiros atualizados!');}
-else if(t.id===6){toast('Esta tarefa será concluída automaticamente ao ter 3 conteúdos aprovados!');}
-else if(t.id===7){toast('Esta tarefa será concluída automaticamente ao ter 2 parceiros aprovados!');}
-else if(t.id===8){toast('Esta tarefa será concluída automaticamente ao acumular 3 horas online!');}
+else if(t.id===3){toast('Esta tarefa será concluída automaticamente ao ter 3 conteúdos aprovados!');}
+else if(t.id===4){toast('Esta tarefa será concluída automaticamente ao ter 2 parceiros aprovados!');}
+else if(t.id===5){toast('Esta tarefa será concluída automaticamente ao acumular 3 horas online!');}
+else if(t.id===6){toast('Esta tarefa será concluída automaticamente ao completar todos os 5 módulos do treinamento!');}
 else{t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}await saveUserToFirebase(currentUserData);renderAll()}
 
 // ==================== PARCEIROS ====================
