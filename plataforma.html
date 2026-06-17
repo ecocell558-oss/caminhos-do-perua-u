@@ -26,6 +26,20 @@
     const firestore = getFirestore(app);
     const auth = getAuth(app);
     
+    // --- REGRAS DE SEGURANÇA: Permitir exclusão apenas para admin ---
+    // No Firebase Console, configure as regras assim:
+    // rules_version = '2';
+    // service cloud.firestore {
+    //   match /databases/{database}/documents {
+    //     match /partners/{document} {
+    //       allow read: if true;
+    //       allow create: if true;
+    //       allow update: if true;
+    //       allow delete: if request.auth != null && request.auth.uid == "JrfKdbpG0VNPN63wGOPqtYpfIMT2";
+    //     }
+    //   }
+    // }
+    
     window.cpBlogApi = {
       userEmail: '',
       userUid: '',
@@ -235,7 +249,7 @@ let firebaseSettings = { whatsappConteudos: '', whatsappForum: '' };
 let firebaseCertSettings = {};
 let messagesUnsubscribe = null;
 let currentUserData = null;
-let isUpdatingChat = false; // Prevent re-render loops
+let isUpdatingChat = false;
 
 // ==================== NÍVEIS E CERTIFICADOS ====================
 const LEVELS = [
@@ -538,6 +552,39 @@ window.showPartnerHelp=function(){alert('🟢 COMISSÃO DO COLABORADOR:\n\n• P
 window.editPartner = function(partnerId){ const partner = getAllPartners().find(p => p.id == partnerId); if(!partner) return toast('Parceiro não encontrado'); if(currentUser?.role !== 'admin' && partner.userUid !== currentUser?.uid) { return toast('Você só pode editar seus próprios parceiros'); } window.editingPartnerId = partnerId; window.editingPartnerData = partner; renderPartners(); setTimeout(() => { document.getElementById('pnome').value = partner.nome; document.getElementById('pcat').value = partner.categoria; document.getElementById('pcidade').value = partner.cidade; document.getElementById('pcontato').value = partner.contato; document.getElementById('pobs').value = partner.obs || ''; const planoOption = partner.plano === 'Comum' ? 'Comum|69.90' : 'Premium|149.90'; document.getElementById('pplano').value = planoOption; }, 100); }
 window.cancelEditPartner = function(){ window.editingPartnerId = null; window.editingPartnerData = null; renderPartners(); }
 window.openPartnerAttachment = function(partnerId, field){ const partner = getAllPartners().find(p => p.id == partnerId); if(!partner || !partner[field]) return toast('Anexo não encontrado.'); const w = window.open('','_blank'); if(partner[field].startsWith('data:application/pdf')) w.document.write(`<iframe src="${partner[field]}" style="width:100%;height:100vh;border:0"></iframe>`); else w.document.write(`<img src="${partner[field]}" style="max-width:100%;height:auto">`); w.document.close(); }
+
+// ==================== FUNÇÃO DELETAR PARCEIRO CORRIGIDA ====================
+window.deletePartner = async function(partnerId){ 
+  if(!confirm('⚠️ Excluir este parceiro permanentemente? Esta ação não pode ser desfeita!')) return; 
+  
+  // Verificar se o usuário está autenticado
+  if(!currentUser || !currentUser.uid) {
+    toast('❌ Você precisa estar logado para excluir parceiros.');
+    return;
+  }
+  
+  // Verificar permissão: apenas admin pode excluir
+  if(currentUser.uid !== ADMIN_UID) {
+    toast('❌ Apenas o administrador pode excluir parceiros permanentemente.');
+    return;
+  }
+  
+  try { 
+    await window.cpBlogApi.deletePartnerFirebase(partnerId); 
+    await syncPartnersFromFirebase(); 
+    toast('✅ Parceiro removido com sucesso!'); 
+    renderPartners(); 
+    if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); 
+  } catch(error) { 
+    console.error('Erro ao excluir parceiro:', error);
+    toast('❌ Erro ao excluir parceiro: ' + error.message); 
+  } 
+}
+
+window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
+window.addPartner = async function(e){ e.preventDefault(); if(!currentUser || !currentUser.uid) { toast('Usuário não autenticado. Faça login novamente.'); return; } const [plano, valor] = document.getElementById('pplano').value.split('|'); const posFile = document.getElementById('pos').files[0]; const pixFile = document.getElementById('ppix').files[0]; const isAdminUser = (currentUser?.role === 'admin'); let osData = window.editingPartnerData?.osData || ''; let pixData = window.editingPartnerData?.pixData || ''; if(posFile) { toast('Processando imagem da Ordem de Serviço...'); osData = await processFile(posFile, 400); } if(pixFile) { toast('Processando imagem do Comprovante Pix...'); pixData = await processFile(pixFile, 400); } let partnerStatus = window.editingPartnerId ? (window.editingPartnerData?.status || 'Pendente') : 'Pendente'; let partnerAwarded = window.editingPartnerId ? (window.editingPartnerData?.awarded || false) : false; let partnerComissaoPaga = window.editingPartnerId ? (window.editingPartnerData?.comissaoPaga || false) : false; if(isAdminUser && !window.editingPartnerId) { partnerStatus = 'Aprovado'; partnerAwarded = true; partnerComissaoPaga = true; } const partnerData = { nome: document.getElementById('pnome').value || '', categoria: document.getElementById('pcat').value || '', cidade: document.getElementById('pcidade').value || '', contato: document.getElementById('pcontato').value || '', plano: plano || 'Comum', valor: Number(valor) || 69.90, obs: document.getElementById('pobs').value || '', osData: osData || '', pixData: pixData || '', status: partnerStatus, awarded: partnerAwarded, comissaoPaga: partnerComissaoPaga, colaboradorEmail: currentUser?.email || '', colaboradorNome: isAdminUser ? 'Administrador' : (currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador'), userUid: currentUser?.uid || '', createdAt: window.editingPartnerId ? (window.editingPartnerData?.createdAt || new Date().toISOString()) : new Date().toISOString() }; if(window.editingPartnerId) partnerData.id = window.editingPartnerId; try { await window.cpBlogApi.savePartner(partnerData); await syncPartnersFromFirebase(); toast(window.editingPartnerId ? '✏️ Parceiro atualizado com sucesso!' : (isAdminUser ? '✅ Parceiro adicionado diretamente como APROVADO!' : '🤝 Parceiro enviado para aprovação do admin!')); window.editingPartnerId = null; window.editingPartnerData = null; renderPartners(); document.getElementById('pos').value = ''; document.getElementById('ppix').value = ''; } catch(error) { toast('Erro ao salvar parceiro: ' + error.message); } };
+
+// ==================== RENDER PARCEIROS ====================
 function renderPartners(){
   let partnersToShow = getAllPartners();
   let isAdminView = (currentUser?.role === 'admin');
@@ -548,9 +595,6 @@ function renderPartners(){
   document.getElementById('parceiros').innerHTML = `${helpPartners()}<div class="blog-hero"><h2>${isAdminView ? ' GESTÃO DE PARCEIROS - ADMIN' : 'Captação de parceiros para o app Peruaçu'}</h2><div class="comission-badge">💰 Você recebe 30% de comissão por cada plano fechado! (R$ 20,97 no plano comum | R$ 44,97 no plano premium)</div><p>${isAdminView ? 'Aqui você pode adicionar, editar e excluir parceiros diretamente. Parceiros adicionados pelo admin já são salvos como APROVADOS automaticamente.' : 'Cadastre clientes captados para publicação na vitrine online. A aprovação depende da ordem de serviço assinada, pagamento do plano e comprovante Pix.'}</p><div class="actions"><span class="pill gold">Plano comum: R$ 69,90/mês</span><span class="pill gold">Plano premium: R$ 149,90/mês</span>${isAdminView ? `<span class="pill gold">📊 Total: ${partnersToShow.length} parceiros</span>` : ''}</div></div><div class="split" style="margin-top:16px"><form class="card" onsubmit="window.addPartner(event)"><h2>${window.editingPartnerId ? '✏️ Editar parceiro' : (isAdminView ? '➕ ADICIONAR PARCEIRO (Admin)' : '📝 Cadastrar parceiro captado')}</h2><label>Nome do parceiro/cliente</label><input id="pnome" required value="${window.editingPartnerData?.nome || ''}"><label>Categoria</label><select id="pcat"><option>Pousada</option><option>Restaurante</option><option>Guia</option><option>Artesanato</option><option>Agência</option><option>Outros</option></select><label>Cidade</label><input id="pcidade" required value="${window.editingPartnerData?.cidade || ''}"><label>Contato</label><input id="pcontato" required value="${window.editingPartnerData?.contato || ''}"><label>Plano contratado</label><select id="pplano"><option value="Comum|69.90">Comum - R$ 69,90/mês (comissão: R$ 20,97)</option><option value="Premium|149.90">Premium - R$ 149,90/mês (comissão: R$ 44,97)</option></select>${!isAdminView || window.editingPartnerId ? `<label>Ordem de serviço assinada (imagem/PDF)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (imagem/PDF)</label><input id="ppix" type="file" accept="image/*,.pdf">` : `<p class="hint" style="background:#eef4ef;padding:8px;border-radius:8px">⚡ Como ADMIN, parceiros são salvos diretamente como APROVADOS. Anexos são opcionais.</p><label>Ordem de serviço (opcional)</label><input id="pos" type="file" accept="image/*,.pdf"><label>Comprovante Pix (opcional)</label><input id="ppix" type="file" accept="image/*,.pdf">`}<label>Observações</label><textarea id="pobs" placeholder="Detalhes do serviço, endereço, Instagram...">${window.editingPartnerData?.obs || ''}</textarea><button class="secondary">${window.editingPartnerId ? '💾 Salvar alterações' : (isAdminView ? '✅ Adicionar Parceiro (Aprovado)' : '📤 Enviar para aprovação')}</button>${window.editingPartnerId ? `<button class="ghost" onclick="window.cancelEditPartner()">Cancelar</button>` : ''}</form><div><h2>⏳ PARCEIROS PENDENTES (${pendingPartners.length})</h2><div class="list">${pendingPartners.length ? pendingPartners.map(p => `<div class="item"><div class="item-head"><div><b>📌 ${p.nome}</b><p class="hint">👤 ${p.colaboradorNome || p.colaboradorEmail} · ${p.categoria} · ${p.cidade}</p></div><span class="pill gold">📅 ${new Date(p.createdAt).toLocaleDateString('pt-BR')}</span></div><div class="partner-detail-card"><p><strong>📞 Contato:</strong> ${p.contato || 'Não informado'}</p><p><strong>💰 Plano:</strong> ${p.plano} - R$ ${Number(p.valor).toFixed(2)} (Comissão: R$ ${(p.valor * 0.3).toFixed(2)})</p><p><strong>📝 Observações:</strong> ${p.obs || 'Nenhuma'}</p></div><div class="actions">${p.osData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','osData')">📄 Ver Ordem</button>` : '<span class="hint">⚠️ Sem ordem</span>'}${p.pixData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','pixData')">💰 Ver Pix</button>` : '<span class="hint">⚠️ Sem Pix</span>'}${isAdminView ? `<button class="ok" onclick="window.approvePartner('${p.id}', true, '${p.colaboradorEmail}')">✅ APROVAR</button><button class="danger" onclick="window.approvePartner('${p.id}', false, '${p.colaboradorEmail}')">❌ REJEITAR</button><button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">🗑️ Excluir</button>` : `<button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">Excluir</button>`}</div></div>`).join('') : '<div class="empty">🎉 Nenhum parceiro pendente!</div>'}</div><h2 style="margin-top:18px">✅ PARCEIROS APROVADOS (${approvedPartners.length})</h2><div class="list">${approvedPartners.length ? approvedPartners.map(p => `<div class="item"><div class="item-head"><div><b>📌 ${p.nome}</b><p class="hint">👤 ${p.colaboradorNome || p.colaboradorEmail} · ${p.categoria} · ${p.cidade}</p><p class="hint">📞 ${p.contato} · ${p.plano} - R$ ${Number(p.valor).toFixed(2)}</p>${p.obs ? `<p class="hint">📝 Obs: ${p.obs}</p>` : ''}</div><span class="pill ok">✅ Aprovado</span></div><p class="hint">💰 Comissão: R$ ${(p.valor * 0.3).toFixed(2)} · ${p.userUid === currentUser?.uid ? 'Você recebeu +100 pontos' : 'Colaborador recebeu +100 pontos'}</p><div class="actions">${p.osData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','osData')">📄 Ver Ordem</button>` : ''}${p.pixData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','pixData')">💰 Ver Pix</button>` : ''}<button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">🗑️ Excluir</button></div></div>`).join('') : '<div class="empty">Nenhum parceiro aprovado ainda.</div>'}</div><h2 style="margin-top:18px">❌ PARCEIROS REJEITADOS (${rejectedPartners.length})</h2><div class="list">${rejectedPartners.length ? rejectedPartners.map(p => `<div class="item"><div class="item-head"><div><b>📌 ${p.nome}</b><p class="hint">👤 ${p.colaboradorNome || p.colaboradorEmail} · ${p.categoria} · ${p.cidade}</p></div><span class="pill bad">❌ Rejeitado</span></div><div class="actions">${p.osData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','osData')">📄 Ver Ordem</button>` : ''}${p.pixData ? `<button class="ghost" onclick="window.openPartnerAttachment('${p.id}','pixData')">💰 Ver Pix</button>` : ''}<button class="ghost" onclick="window.editPartner('${p.id}')">✏️ Editar</button><button class="danger" onclick="window.deletePartner('${p.id}')">🗑️ Excluir</button></div></div>`).join('') : '<div class="empty">Nenhum parceiro rejeitado.</div>'}</div></div></div>`;
   window.editingPartnerId = null; window.editingPartnerData = null;
 }
-window.addPartner = async function(e){ e.preventDefault(); if(!currentUser || !currentUser.uid) { toast('Usuário não autenticado. Faça login novamente.'); return; } const [plano, valor] = document.getElementById('pplano').value.split('|'); const posFile = document.getElementById('pos').files[0]; const pixFile = document.getElementById('ppix').files[0]; const isAdminUser = (currentUser?.role === 'admin'); let osData = window.editingPartnerData?.osData || ''; let pixData = window.editingPartnerData?.pixData || ''; if(posFile) { toast('Processando imagem da Ordem de Serviço...'); osData = await processFile(posFile, 400); } if(pixFile) { toast('Processando imagem do Comprovante Pix...'); pixData = await processFile(pixFile, 400); } let partnerStatus = window.editingPartnerId ? (window.editingPartnerData?.status || 'Pendente') : 'Pendente'; let partnerAwarded = window.editingPartnerId ? (window.editingPartnerData?.awarded || false) : false; let partnerComissaoPaga = window.editingPartnerId ? (window.editingPartnerData?.comissaoPaga || false) : false; if(isAdminUser && !window.editingPartnerId) { partnerStatus = 'Aprovado'; partnerAwarded = true; partnerComissaoPaga = true; } const partnerData = { nome: document.getElementById('pnome').value || '', categoria: document.getElementById('pcat').value || '', cidade: document.getElementById('pcidade').value || '', contato: document.getElementById('pcontato').value || '', plano: plano || 'Comum', valor: Number(valor) || 69.90, obs: document.getElementById('pobs').value || '', osData: osData || '', pixData: pixData || '', status: partnerStatus, awarded: partnerAwarded, comissaoPaga: partnerComissaoPaga, colaboradorEmail: currentUser?.email || '', colaboradorNome: isAdminUser ? 'Administrador' : (currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador'), userUid: currentUser?.uid || '', createdAt: window.editingPartnerId ? (window.editingPartnerData?.createdAt || new Date().toISOString()) : new Date().toISOString() }; if(window.editingPartnerId) partnerData.id = window.editingPartnerId; try { await window.cpBlogApi.savePartner(partnerData); await syncPartnersFromFirebase(); toast(window.editingPartnerId ? '✏️ Parceiro atualizado com sucesso!' : (isAdminUser ? '✅ Parceiro adicionado diretamente como APROVADO!' : '🤝 Parceiro enviado para aprovação do admin!')); window.editingPartnerId = null; window.editingPartnerData = null; renderPartners(); document.getElementById('pos').value = ''; document.getElementById('ppix').value = ''; } catch(error) { toast('Erro ao salvar parceiro: ' + error.message); } };
-window.deletePartner = async function(partnerId){ if(!confirm('Excluir este parceiro permanentemente?')) return; try { await window.cpBlogApi.deletePartnerFirebase(partnerId); await syncPartnersFromFirebase(); toast('Parceiro removido com sucesso!'); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao excluir parceiro: ' + error.message); } }
-window.approvePartner = async function(partnerId, ok, colaboradorEmail){ let targetPartner = getAllPartners().find(p => p.id == partnerId); if(!targetPartner) return toast('Parceiro não encontrado'); const newStatus = ok ? 'Aprovado' : 'Rejeitado'; try { await window.cpBlogApi.updatePartnerStatus(partnerId, newStatus, ok ? true : false, ok ? true : false); if(ok && !targetPartner.awarded){ const targetUser = firebaseUsers.find(u => u.email === colaboradorEmail || u.uid === targetPartner.userUid); if(targetUser){ targetUser.points = (targetUser.points || 0) + 100; await window.cpBlogApi.saveUser(targetUser); await syncUsersFromFirebase(); } toast(`✅ Parceiro aprovado! +100 pontos para o colaborador. Comissão de R$ ${(targetPartner.valor * 0.3).toFixed(2)}`); } else { toast(ok ? 'Parceiro aprovado.' : 'Parceiro rejeitado.'); } await syncPartnersFromFirebase(); renderPartners(); if(currentUser?.uid === ADMIN_UID && currentTab === 'admin') renderAdmin(); } catch(error) { toast('Erro ao atualizar status: ' + error.message); } }
 
 // ==================== RANKING ====================
 function renderRanking(){const rows=[...seedRanking,{nome:currentUserData?.profile?.nome || 'Colaborador',cidade:currentUserData?.profile?.cidade || '',pontos:currentUserData?.points || 0,me:true},...firebaseUsers.filter(u=>u.uid !== currentUser?.uid).map(u=>({nome:u.profile?.nome || u.email,cidade:u.profile?.cidade || '',pontos:u.points || 0,me:false}))].sort((a,b)=>b.pontos-a.pontos);document.getElementById('ranking').innerHTML=`<h2>Ranking de colaboradores</h2><table class="table"><thead><tr><th>#</th><th>Nome</th><th>Cidade</th><th>Pontos</th></tr></thead><tbody>${rows.slice(0,20).map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${r.nome}${r.me?' (você)':''}</td><td>${r.cidade}</td><td>${r.pontos}</td></tr>`).join('')}</tbody></table>`}
@@ -565,24 +609,16 @@ window.downloadCertificate = function(nome, url) { if(!url || url.trim() === '')
 
 // ==================== COMUNIDADE (CHAT TOTALMENTE FUNCIONAL) ====================
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
-
-// Separate function to update just the chat UI without full re-render
 function updateChatUI() {
   const chatContainer = document.getElementById('chatContainer');
   const chatMessages = document.getElementById('chatMessages');
   if(!chatContainer || !chatMessages) return;
-  
   const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);
   const sortedMessages = [...firebaseMessages].sort((a,b) => new Date(a.time) - new Date(b.time));
-  
-  // Update online count and messages
   const onlineCountSpan = document.getElementById('onlineCount');
   if(onlineCountSpan) onlineCountSpan.textContent = onlineUsersList.length;
-  
   const msgCountSpan = document.getElementById('msgCount');
   if(msgCountSpan) msgCountSpan.textContent = firebaseMessages.length;
-  
-  // Update messages HTML
   chatMessages.innerHTML = sortedMessages.slice(-80).map(m => `
     <div class="msg ${m.user === currentUserData?.profile?.nome ? 'me' : ''}">
       <b>${m.user || 'Anônimo'} · ${m.city || ''}</b>
@@ -590,211 +626,16 @@ function updateChatUI() {
       <small>${m.time ? new Date(m.time).toLocaleString('pt-BR') : 'Agora'}</small>
     </div>
   `).join('');
-  
-  // Scroll to bottom
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
-function escapeHtml(text) {
-  if(!text) return '';
-  return text.replace(/[&<>]/g, function(m) {
-    if(m === '&') return '&amp;';
-    if(m === '<') return '&lt;';
-    if(m === '>') return '&gt;';
-    return m;
-  });
-}
-
-function renderCommunity(){
-  const el = document.getElementById('comunidade');
-  if(!el) return;
-  
-  const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);
-  const sortedMessages = [...firebaseMessages].sort((a,b) => new Date(a.time) - new Date(b.time));
-  
-  el.innerHTML = `
-    <div class="blog-hero">
-      <h2>Comunidade Caminhos do Peruaçu</h2>
-      <p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p>
-      <div class="actions">
-        <span class="pill gold"><span class="online-dot"></span><span id="onlineCount">${onlineUsersList.length}</span> online agora</span>
-        <span class="pill gold">${firebaseUsers.length} colaboradores</span>
-        <span class="pill gold">Chat em tempo real</span>
-      </div>
-    </div>
-    
-    <div class="grid" style="margin-top:16px">
-      <div class="group-card">
-        <h3>Grupo de Conteúdos</h3>
-        <p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>
-        ${groupLink('de conteúdos', firebaseSettings.whatsappConteudos)}
-      </div>
-      <div class="group-card">
-        <h3>Grupo Fórum</h3>
-        <p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>
-        ${groupLink('fórum', firebaseSettings.whatsappForum)}
-      </div>
-      <div class="card stat">
-        <span>Colaboradores online</span>
-        <b id="onlineCount2">${onlineUsersList.length}</b>
-        <p class="hint">Atualiza automaticamente</p>
-      </div>
-      <div class="card stat">
-        <span>Mensagens no chat</span>
-        <b id="msgCount">${firebaseMessages.length}</b>
-        <p class="hint">Mensagens em tempo real!</p>
-      </div>
-    </div>
-    
-    <div class="chat-shell" style="margin-top:16px">
-      <div class="card">
-        <h2>Perfis e online</h2>
-        <div class="list" style="max-height:400px;overflow-y:auto">
-          ${firebaseUsers.map(p => `
-            <div class="item profile-card">
-              <div class="avatar">${(p.profile?.nome || p.email || '?').split(' ').map(x => x[0]).slice(0,2).join('')}</div>
-              <div style="flex:1">
-                <b>${onlineUsersList.some(o => o.uid === p.uid) ? '<span class="online-dot"></span>' : ''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid ? ' (você)' : ''}</b>
-                <p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>
-              </div>
-              <button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="item-head">
-          <div>
-            <h2>Chat dos colaboradores</h2>
-            <p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real!</p>
-          </div>
-          <button class="ghost" onclick="window.refreshChat()">⟳ Atualizar</button>
-        </div>
-        <div id="chatMessages" class="chat-box" style="height:400px;overflow-y:auto">
-          ${sortedMessages.slice(-80).map(m => `
-            <div class="msg ${m.user === currentUserData?.profile?.nome ? 'me' : ''}">
-              <b>${m.user || 'Anônimo'} · ${m.city || ''}</b>
-              ${escapeHtml(m.text)}<br>
-              <small>${m.time ? new Date(m.time).toLocaleString('pt-BR') : 'Agora'}</small>
-            </div>
-          `).join('')}
-        </div>
-        <form id="chatForm" class="actions" onsubmit="event.preventDefault(); window.sendChatMessage();">
-          <input type="text" id="chatInput" placeholder="Digite sua mensagem e pressione Enter..." required autocomplete="off" style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--line); font-size:14px">
-          <button type="submit" class="secondary" style="padding:12px 24px">📤 Enviar</button>
-        </form>
-      </div>
-    </div>
-    
-    ${currentUser?.uid === ADMIN_UID ? `
-      <form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)">
-        <h2>Configurar grupos de WhatsApp</h2>
-        <label>Link do grupo de conteúdos</label>
-        <input id="waConteudos" value="${firebaseSettings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/...">
-        <label>Link do grupo fórum</label>
-        <input id="waForum" value="${firebaseSettings.whatsappForum}" placeholder="https://chat.whatsapp.com/...">
-        <button class="secondary">Salvar grupos</button>
-      </form>
-    ` : ''}
-    
-    <div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()">
-      <div class="modal-card" id="profileModalBody"></div>
-    </div>
-  `;
-  
-  // Focus on input after render
-  setTimeout(() => {
-    const chatInput = document.getElementById('chatInput');
-    if(chatInput) chatInput.focus();
-    const chatMessages = document.getElementById('chatMessages');
-    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, 50);
-}
-
-window.refreshChat = function() {
-  const chatMessages = document.getElementById('chatMessages');
-  if(chatMessages) {
-    const sortedMessages = [...firebaseMessages].sort((a,b) => new Date(a.time) - new Date(b.time));
-    chatMessages.innerHTML = sortedMessages.slice(-80).map(m => `
-      <div class="msg ${m.user === currentUserData?.profile?.nome ? 'me' : ''}">
-        <b>${m.user || 'Anônimo'} · ${m.city || ''}</b>
-        ${escapeHtml(m.text)}<br>
-        <small>${m.time ? new Date(m.time).toLocaleString('pt-BR') : 'Agora'}</small>
-      </div>
-    `).join('');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-  toast('Chat atualizado!');
-};
-
-window.sendChatMessage = async function() {
-  const input = document.getElementById('chatInput');
-  if(!input) {
-    console.error('Campo de chat não encontrado');
-    return;
-  }
-  const text = input.value.trim();
-  if(!text) {
-    toast('Digite uma mensagem antes de enviar');
-    input.focus();
-    return;
-  }
-  
-  const userName = currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador';
-  const userCity = currentUserData?.profile?.cidade || '';
-  
-  try {
-    await sendMessageToFirebase(text, userName, userCity);
-    input.value = '';
-    input.focus();
-    toast('Mensagem enviada!');
-    
-    // Small delay to let Firebase update
-    setTimeout(() => {
-      window.refreshChat();
-    }, 100);
-  } catch(error) {
-    console.error('Erro ao enviar mensagem:', error);
-    toast('Erro ao enviar mensagem: ' + error.message);
-  }
-};
-
+function escapeHtml(text) { if(!text) return ''; return text.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m; }); }
+function renderCommunity(){ const el = document.getElementById('comunidade'); if(!el) return; const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000); const sortedMessages = [...firebaseMessages].sort((a,b) => new Date(a.time) - new Date(b.time)); el.innerHTML = `<div class="blog-hero"><h2>Comunidade Caminhos do Peruaçu</h2><p>Colaboradores conectados, grupos oficiais, fórum interno e perfis públicos em um só lugar.</p><div class="actions"><span class="pill gold"><span class="online-dot"></span><span id="onlineCount">${onlineUsersList.length}</span> online agora</span><span class="pill gold">${firebaseUsers.length} colaboradores</span><span class="pill gold">Chat em tempo real</span></div></div><div class="grid" style="margin-top:16px"><div class="group-card"><h3>Grupo de Conteúdos</h3><p class="hint">Espaço para posts de Instagram, Reels, fotos, legendas e materiais de divulgação.</p>${groupLink('de conteúdos', firebaseSettings.whatsappConteudos)}</div><div class="group-card"><h3>Grupo Fórum</h3><p class="hint">Espaço para dúvidas, ideias, alinhamentos e apoio entre colaboradores.</p>${groupLink('fórum', firebaseSettings.whatsappForum)}</div><div class="card stat"><span>Colaboradores online</span><b id="onlineCount2">${onlineUsersList.length}</b><p class="hint">Atualiza automaticamente</p></div><div class="card stat"><span>Mensagens no chat</span><b id="msgCount">${firebaseMessages.length}</b><p class="hint">Mensagens em tempo real!</p></div></div><div class="chat-shell" style="margin-top:16px"><div class="card"><h2>Perfis e online</h2><div class="list" style="max-height:400px;overflow-y:auto">${firebaseUsers.map(p => `<div class="item profile-card"><div class="avatar">${(p.profile?.nome || p.email || '?').split(' ').map(x => x[0]).slice(0,2).join('')}</div><div style="flex:1"><b>${onlineUsersList.some(o => o.uid === p.uid) ? '<span class="online-dot"></span>' : ''}${p.profile?.nome || p.email}${p.uid === currentUser?.uid ? ' (você)' : ''}</b><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p></div><button class="ghost" onclick="window.openProfile('${p.uid}')">Ver</button></div>`).join('')}</div></div><div class="card"><div class="item-head"><div><h2>Chat dos colaboradores</h2><p class="hint">Converse com a equipe dentro da plataforma. Mensagens em tempo real!</p></div><button class="ghost" onclick="window.refreshChat()">⟳ Atualizar</button></div><div id="chatMessages" class="chat-box" style="height:400px;overflow-y:auto">${sortedMessages.slice(-80).map(m => `<div class="msg ${m.user === currentUserData?.profile?.nome ? 'me' : ''}"><b>${m.user || 'Anônimo'} · ${m.city || ''}</b>${escapeHtml(m.text)}<br><small>${m.time ? new Date(m.time).toLocaleString('pt-BR') : 'Agora'}</small></div>`).join('')}</div><form id="chatForm" class="actions" onsubmit="event.preventDefault(); window.sendChatMessage();"><input type="text" id="chatInput" placeholder="Digite sua mensagem e pressione Enter..." required autocomplete="off" style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--line); font-size:14px"><button type="submit" class="secondary" style="padding:12px 24px">📤 Enviar</button></form></div></div>${currentUser?.uid === ADMIN_UID ? `<form class="card" style="margin-top:16px" onsubmit="window.saveGroups(event)"><h2>Configurar grupos de WhatsApp</h2><label>Link do grupo de conteúdos</label><input id="waConteudos" value="${firebaseSettings.whatsappConteudos}" placeholder="https://chat.whatsapp.com/..."><label>Link do grupo fórum</label><input id="waForum" value="${firebaseSettings.whatsappForum}" placeholder="https://chat.whatsapp.com/..."><button class="secondary">Salvar grupos</button></form>` : ''}<div class="modal-back" id="profileModal" onclick="if(event.target.id==='profileModal')window.closeProfile()"><div class="modal-card" id="profileModalBody"></div></div>`; setTimeout(() => { const chatInput = document.getElementById('chatInput'); if(chatInput) chatInput.focus(); const chatMessages = document.getElementById('chatMessages'); if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight; }, 50); }
+window.refreshChat = function() { const chatMessages = document.getElementById('chatMessages'); if(chatMessages) { const sortedMessages = [...firebaseMessages].sort((a,b) => new Date(a.time) - new Date(b.time)); chatMessages.innerHTML = sortedMessages.slice(-80).map(m => `<div class="msg ${m.user === currentUserData?.profile?.nome ? 'me' : ''}"><b>${m.user || 'Anônimo'} · ${m.city || ''}</b>${escapeHtml(m.text)}<br><small>${m.time ? new Date(m.time).toLocaleString('pt-BR') : 'Agora'}</small></div>`).join(''); chatMessages.scrollTop = chatMessages.scrollHeight; } toast('Chat atualizado!'); };
+window.sendChatMessage = async function() { const input = document.getElementById('chatInput'); if(!input) { console.error('Campo de chat não encontrado'); return; } const text = input.value.trim(); if(!text) { toast('Digite uma mensagem antes de enviar'); input.focus(); return; } const userName = currentUserData?.profile?.nome || currentUser?.nome || 'Colaborador'; const userCity = currentUserData?.profile?.cidade || ''; try { await sendMessageToFirebase(text, userName, userCity); input.value = ''; input.focus(); toast('Mensagem enviada!'); setTimeout(() => { window.refreshChat(); }, 100); } catch(error) { console.error('Erro ao enviar mensagem:', error); toast('Erro ao enviar mensagem: ' + error.message); } };
 window.sendChat = window.sendChatMessage;
-
-window.openProfile = function(uid){
-  const p = firebaseUsers.find(x => x.uid === uid);
-  if(!p) return;
-  const online = firebaseUsers.some(o => o.uid === p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000);
-  document.getElementById('profileModalBody').innerHTML = `
-    <div class="profile-card">
-      <div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome || p.email || '?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div>
-      <div>
-        <h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2>
-        <p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>
-        ${online ? '<span class="pill ok"><span class="online-dot"></span>Online agora</span>' : '<span class="pill">Offline</span>'}
-      </div>
-    </div>
-    <p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p>
-    <div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>
-  `;
-  document.getElementById('profileModal').style.display = 'flex';
-};
-
-window.closeProfile = function(){
-  document.getElementById('profileModal').style.display = 'none';
-};
-
-window.saveGroups = async function(e){
-  e.preventDefault();
-  const newSettings = {
-    whatsappConteudos: document.getElementById('waConteudos')?.value.trim() || '',
-    whatsappForum: document.getElementById('waForum')?.value.trim() || ''
-  };
-  await saveSettingsToFirebase(newSettings);
-  toast('Grupos de WhatsApp atualizados e salvos no Firebase!');
-  renderCommunity();
-};
+window.openProfile = function(uid){ const p = firebaseUsers.find(x => x.uid === uid); if(!p) return; const online = firebaseUsers.some(o => o.uid === p.uid && o.lastSeen && (Date.now() - o.lastSeen) < 45000); document.getElementById('profileModalBody').innerHTML = `<div class="profile-card"><div class="avatar" style="width:72px;height:72px;font-size:24px">${(p.profile?.nome || p.email || '?').split(' ').map(x=>x[0]).slice(0,2).join('')}</div><div><h2 style="margin:0;color:var(--secondary)">${p.profile?.nome || p.email}</h2><p class="hint">${p.profile?.cidade || ''} · ${level(p.points || 0)} · ${p.points || 0} pts</p>${online ? '<span class="pill ok"><span class="online-dot"></span>Online agora</span>' : '<span class="pill">Offline</span>'}</div></div><p style="margin-top:16px">${p.profile?.bio || 'Perfil sem bio.'}</p><div class="actions"><button class="secondary" onclick="window.closeProfile()">Fechar</button></div>`; document.getElementById('profileModal').style.display = 'flex'; };
+window.closeProfile = function(){ document.getElementById('profileModal').style.display = 'none'; };
+window.saveGroups = async function(e){ e.preventDefault(); const newSettings = { whatsappConteudos: document.getElementById('waConteudos')?.value.trim() || '', whatsappForum: document.getElementById('waForum')?.value.trim() || '' }; await saveSettingsToFirebase(newSettings); toast('Grupos de WhatsApp atualizados e salvos no Firebase!'); renderCommunity(); };
 
 // ==================== PERFIL ====================
 async function renderProfile(){document.getElementById('perfil').innerHTML=`<form class="card" onsubmit="window.saveProfile(event)"><h2>Perfil</h2><label>Nome</label><input id="profNome" value="${currentUserData?.profile?.nome || ''}"><label>Cidade</label><input id="profCidade" value="${currentUserData?.profile?.cidade || ''}"><label>Telefone</label><input id="profTel" value="${currentUserData?.profile?.telefone || ''}"><label>Bio</label><textarea id="profBio">${currentUserData?.profile?.bio || ''}</textarea><button class="secondary">Salvar perfil</button></form>`}
