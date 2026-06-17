@@ -250,6 +250,7 @@ let firebaseCertSettings = {};
 let messagesUnsubscribe = null;
 let currentUserData = null;
 let isUpdatingChat = false;
+let kitDownloaded = false;
 
 // ==================== NÍVEIS E CERTIFICADOS ====================
 const LEVELS = [
@@ -274,7 +275,7 @@ const navItems=[['dashboard','⌂','Dashboard'],['treinamento','▣','Treinament
 
 const defaultTasks = [
   {id:1,titulo:'Completar o perfil público',descricao:'Revise nome, cidade, telefone e bio.',pontos:20,done:false},
-  {id:2,titulo:'Baixar o kit comercial',descricao:'Acesse os materiais e simule o download.',pontos:20,done:false},
+  {id:2,titulo:'Baixar o kit comercial',descricao:'Acesse a aba Materiais e clique em "Baixar" no Material de Serviço.',pontos:20,done:false},
   {id:3,titulo:'Mapear 3 possíveis parceiros',descricao:'Cadastre contatos de pousadas, guias ou restaurantes.',pontos:30,done:false},
   {id:4,titulo:'Enviar relato de experiência',descricao:'Publique um conteúdo para aprovação.',pontos:40,done:false},
   {id:5,titulo:'Atualizar status de parceiros',descricao:'Mantenha o funil comercial organizado.',pontos:30,done:false},
@@ -435,6 +436,7 @@ function startOnlineTracking(){
 }
 async function checkSpecialTasks(){
   if(!currentUserData) return;
+  // Tarefa 6: 3 conteúdos aprovados
   const task6 = currentUserData.tasks?.find(t => t.id === 6);
   if(task6 && !task6.done){
     const approvedContents = (currentUserData.contents || []).filter(c => c.status === 'Aprovado' && c.blogStatus === 'Publicado').length;
@@ -447,6 +449,7 @@ async function checkSpecialTasks(){
       if(currentTab === 'tarefas') renderTasks();
     }
   }
+  // Tarefa 7: 2 parceiros aprovados
   const task7 = currentUserData.tasks?.find(t => t.id === 7);
   if(task7 && !task7.done){
     const approvedPartners = firebasePartners.filter(p => p.status === 'Aprovado' && p.userUid === currentUser?.uid).length;
@@ -545,7 +548,29 @@ window.answerQ=async function(idx,choice){const q=modules[currentModule-1].quest
 function renderTraining(){const m=modules.find(x=>x.id===currentModule),prog=m.questions.filter((_,i)=>currentUserData?.training?.answered[currentModule+'-'+i]?.correct).length,start=currentPage*10,qs=m.questions.slice(start,start+10),total=totalAnswered(),phrase=prog<10?'Vamos construir a base com calma.':'Ótimo ritmo. Agora transforme conhecimento em segurança para orientar visitantes e parceiros.',completedAt=currentUserData?.training?.completedAt?.[currentModule],next=completedAt?new Date(new Date(completedAt).getTime()+RETAKE_MS):null;document.getElementById('treinamento').innerHTML=`<div class="training-hero"><div><h2 style="color:#fff;margin:0 0 8px">Sala de Formação do Colaborador</h2><p style="margin:0;color:#eef7f0">${phrase} Sua missão atual é concluir todas as 10 questões do módulo, revisar as explicações e avançar no mapa de aprendizagem.</p><div class="actions"><span class="pill gold">${total}/50 questões</span><span class="pill gold">Módulo ${currentModule}: ${prog}/10</span><span class="pill gold">Módulo completo: ${MODULE_POINTS[currentModule-1]} pontos</span>${completedAt?`<span class="pill gold">Refazer após ${next.toLocaleString('pt-BR')}</span>`:''}</div></div></div><div class="lesson-path">${modules.map(mm=>{const done=mm.questions.filter((_,i)=>currentUserData?.training?.answered[mm.id+'-'+i]?.correct).length,ready=canRetakeModule(mm.id);return`<button class="lesson-node ${mm.id===currentModule?'active':''} ${done===10?'done':''}" onclick="currentModule=${mm.id};currentPage=0;renderTraining()"><b>${mm.id}. ${mm.title}</b><br><small>${done}/10 concluídas · ${MODULE_POINTS[mm.id-1]} pts</small>${ready?'<br><small>Disponível para refazer</small>':''}<div class="bar" style="margin-top:8px"><i style="width:${(done/10)*100}%"></i></div></button>`}).join('')}</div><div class="card"><div class="item-head"><div><b>Módulo ${currentModule} · ${m.title}</b><p class="hint">Responda todas as 10 questões corretamente para concluir o módulo e ganhar ${MODULE_POINTS[currentModule-1]} pontos.</p></div><span class="pill gold">${prog}% do módulo</span></div><div class="bar"><i style="width:${(prog/10)*100}%"></i></div>${canRetakeModule(currentModule)?`<div class="actions"><button class="secondary" onclick="window.retakeModule(${currentModule})">Refazer módulo e pontuar novamente</button></div>`:''}</div><div class="quiz-tools"><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage--;renderTraining()">← Questões anteriores</button><strong>Questões ${start+1} a ${start+qs.length}</strong><button class="ghost" ${currentPage===0?'disabled':''} onclick="currentPage++;renderTraining()">Próximas questões →</button></div>${qs.map((q,idx)=>renderQ(q,start+idx)).join('')}`}
 
 // ==================== MATERIAIS ====================
-function renderMaterials(){document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="${m.link?`window.open('${m.link}','_blank')`:`alert('Download simulado: ${m.titulo}');toast('Download simulado: ${m.titulo}')`}">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`}
+function renderMaterials(){
+  document.getElementById('materiais').innerHTML=`<h2>Materiais para download</h2><p class="hint">Materiais gerenciados pelo painel admin. O download pode ser simulado ou abrir um link configurado.</p><div class="list">${(firebaseMaterials||[]).filter(m=>m.ativo!==false).map(m=>`<div class="item item-head"><div><b>${m.titulo}</b><p class="hint">${m.descricao}</p></div><button class="secondary" onclick="window.handleMaterialDownload('${m.id}','${m.titulo}','${m.link || ''}')">${m.link?'Abrir':'Baixar'}</button></div>`).join('')||'<div class="empty">Nenhum material cadastrado.</div>'}</div>`
+}
+
+window.handleMaterialDownload = async function(id, titulo, link) {
+  if(titulo === 'Material de Serviço') {
+    const task = currentUserData?.tasks?.find(t => t.id === 2);
+    if(task && !task.done) {
+      task.done = true;
+      currentUserData.points = (currentUserData.points || 0) + task.pontos;
+      await saveUserToFirebase(currentUserData);
+      toast(`🎉 Tarefa "Baixar o kit comercial" concluída! +${task.pontos} pontos!`);
+      confetti();
+      if(currentTab === 'tarefas') renderTasks();
+    }
+  }
+  if(link) {
+    window.open(link, '_blank');
+  } else {
+    toast(`Download simulado: ${titulo}`);
+  }
+};
+
 async function saveMaterial(e){e.preventDefault();const id = matId.value ? matId.value.toString() : Date.now().toString();const data={id:id,titulo:matTitulo.value,descricao:matDesc.value,link:matLink.value,ativo:matAtivo.checked};await saveMaterialToFirebase(data);toast('Material salvo com sucesso!');matId.value='';matTitulo.value='';matDesc.value='';matLink.value='';matAtivo.checked=true;renderAdmin();renderMaterials()}
 function editMaterial(id){const m = firebaseMaterials.find(x => x.id == id || x.id === id.toString());if(!m){toast('Material não encontrado');return;}matId.value=m.id;matTitulo.value=m.titulo;matDesc.value=m.descricao;matLink.value=m.link||'';matAtivo.checked=m.ativo!==false;toast('Material carregado para edição.')}
 async function deleteMaterial(id){if(!confirm('Remover este material permanentemente?'))return;await deleteMaterialFromFirebase(id);toast('Material removido com sucesso.');renderAdmin();renderMaterials()}
@@ -559,7 +584,7 @@ function renderTasks(){document.getElementById('tarefas').innerHTML=`<h2>Tarefas
   return `<div class="item item-head"><div><b>${t.titulo}</b><p class="hint">${t.descricao}</p><span class="pill gold">${t.pontos} pontos</span>${progresso}</div><button class="${t.done?'ghost':'secondary'}" ${t.done?'disabled':''} onclick="window.doneTask(${t.id})">${t.done?'Concluída':'Concluir'}</button></div>`;
 }).join('')}</div>`}
 window.doneTask=async function(id){let t=currentUserData.tasks.find(x=>x.id===id);if(t.done)return;if(t.id===1){const perfilCompleto = currentUserData.profile.nome && currentUserData.profile.cidade && currentUserData.profile.telefone;if(!perfilCompleto){toast('Complete seu perfil (nome, cidade e telefone) primeiro!');return;}t.done=true;currentUserData.points = (currentUserData.points || 0) + t.pontos;await saveUserToFirebase(currentUserData);toast(`+${t.pontos} pontos: tarefa concluída`);}
-else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e baixando o conteúdo!');}
+else if(t.id===2){toast('Conclua esta tarefa acessando a aba Materiais e clicando em "Baixar" no Material de Serviço!');}
 else if(t.id===3){toast('Conclua esta tarefa cadastrando 3 parceiros na aba Parceiros!');}
 else if(t.id===4){toast('Conclua esta tarefa enviando um conteúdo que seja aprovado pelo admin!');}
 else if(t.id===5){toast('Conclua esta tarefa mantendo parceiros atualizados!');}
