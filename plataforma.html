@@ -10,7 +10,7 @@
   </style>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, onSnapshot, setDoc, getDoc, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, onSnapshot, setDoc, getDoc, where, deleteField, writeBatch } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     
     const firebaseConfig = {
@@ -135,6 +135,20 @@
         });
         return unsubscribe;
       },
+      async clearOldMessages() {
+        try {
+          const messagesCollection = collection(firestore, 'messages');
+          const snap = await getDocs(messagesCollection);
+          const batch = writeBatch(firestore);
+          snap.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+          console.log('Chat limpo às 00:00');
+        } catch(e) {
+          console.error('Erro ao limpar chat:', e);
+        }
+      },
       async loadCertSettings() {
         const certSettingsRef = doc(firestore, 'settings', 'certificates');
         const snap = await getDoc(certSettingsRef);
@@ -235,7 +249,7 @@ let firebaseSettings = { whatsappConteudos: '', whatsappForum: '' };
 let firebaseCertSettings = {};
 let messagesUnsubscribe = null;
 let currentUserData = null;
-let isUpdatingChat = false; // Prevent re-render loops
+let isUpdatingChat = false;
 
 // ==================== NÍVEIS E CERTIFICADOS ====================
 const LEVELS = [
@@ -376,6 +390,27 @@ async function syncPartnersFromFirebase() {
 }
 function getAllPartners(){ return firebasePartners; }
 
+// ==================== LIMPEZA DO CHAT DIÁRIA ====================
+function scheduleDailyChatCleanup() {
+  const now = new Date();
+  const nextMidnight = new Date(now);
+  nextMidnight.setHours(24, 0, 0, 0);
+  const delay = nextMidnight.getTime() - now.getTime();
+  
+  setTimeout(async () => {
+    if(window.cpBlogApi) {
+      await window.cpBlogApi.clearOldMessages();
+      firebaseMessages = [];
+      if(currentTab === 'comunidade') {
+        isUpdatingChat = true;
+        updateChatUI();
+        setTimeout(() => { isUpdatingChat = false; }, 100);
+      }
+    }
+    scheduleDailyChatCleanup();
+  }, delay);
+}
+
 // ==================== FUNÇÕES DO SISTEMA ====================
 function startOnlineTracking(){
   if(onlineInterval) clearInterval(onlineInterval);
@@ -441,6 +476,7 @@ async function startApp(){
   showTab('dashboard');
   if(currentUser.role !== 'admin') startOnlineTracking();
   await checkSpecialTasks();
+  scheduleDailyChatCleanup();
 }
 window.logout=async function(){
   if(onlineInterval) clearInterval(onlineInterval);
@@ -563,10 +599,9 @@ async function renderCerts(){
 }
 window.downloadCertificate = function(nome, url) { if(!url || url.trim() === '') { toast('❌ Link do certificado não disponível. Entre em contato com o administrador.'); return; } window.open(url, '_blank'); toast(`📄 Abrindo certificado "${nome}"...`); }
 
-// ==================== COMUNIDADE (CHAT TOTALMENTE FUNCIONAL) ====================
+// ==================== COMUNIDADE (CHAT) ====================
 function groupLink(label,link){return `<button class="secondary" onclick="${link?`window.open('${link}','_blank')`:`toast('Link do grupo ${label} ainda não configurado pelo admin.')`}">${link?'Entrar no grupo':'Aguardando link'}</button>`}
 
-// Separate function to update just the chat UI without full re-render
 function updateChatUI() {
   const chatContainer = document.getElementById('chatContainer');
   const chatMessages = document.getElementById('chatMessages');
@@ -575,14 +610,12 @@ function updateChatUI() {
   const onlineUsersList = firebaseUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 45000);
   const sortedMessages = [...firebaseMessages].sort((a,b) => new Date(a.time) - new Date(b.time));
   
-  // Update online count and messages
   const onlineCountSpan = document.getElementById('onlineCount');
   if(onlineCountSpan) onlineCountSpan.textContent = onlineUsersList.length;
   
   const msgCountSpan = document.getElementById('msgCount');
   if(msgCountSpan) msgCountSpan.textContent = firebaseMessages.length;
   
-  // Update messages HTML
   chatMessages.innerHTML = sortedMessages.slice(-80).map(m => `
     <div class="msg ${m.user === currentUserData?.profile?.nome ? 'me' : ''}">
       <b>${m.user || 'Anônimo'} · ${m.city || ''}</b>
@@ -591,7 +624,6 @@ function updateChatUI() {
     </div>
   `).join('');
   
-  // Scroll to bottom
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -703,7 +735,6 @@ function renderCommunity(){
     </div>
   `;
   
-  // Focus on input after render
   setTimeout(() => {
     const chatInput = document.getElementById('chatInput');
     if(chatInput) chatInput.focus();
@@ -750,7 +781,6 @@ window.sendChatMessage = async function() {
     input.focus();
     toast('Mensagem enviada!');
     
-    // Small delay to let Firebase update
     setTimeout(() => {
       window.refreshChat();
     }, 100);
