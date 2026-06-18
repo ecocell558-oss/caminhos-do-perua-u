@@ -45,7 +45,6 @@
     window.db = db;
     window.auth = auth;
     
-    // Forçar permissões de escrita - tentar criar documento de teste
     async function testFirebaseConnection() {
       try {
         const testRef = doc(db, "test", "connection");
@@ -54,8 +53,6 @@
         return true;
       } catch (error) {
         console.error('❌ Firebase connection error:', error);
-        console.log('⚠️ Verifique as regras de segurança do Firebase no console do Firebase: https://console.firebase.google.com/');
-        console.log('⚠️ As regras devem permitir escrita para usuários autenticados');
         return false;
       }
     }
@@ -547,6 +544,137 @@
       .cookie-btn { padding: 6px 14px; font-size: 0.7rem; }
       .notification-prompt { right: 10px; left: 10px; max-width: none; bottom: 80px; }
     }
+
+    /* ESTILOS DO PREVIEW EM TEMPO REAL - SEM BOTÃO, SEMPRE VISÍVEL */
+    .live-preview-container {
+      background: #f8f8f8;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 2px solid var(--brand-gold);
+      display: block;
+    }
+    .live-preview-container .preview-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 700;
+      color: var(--blog-black);
+    }
+    .live-preview-container .preview-label span {
+      background: var(--brand-gold);
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+    }
+    .live-preview-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--blog-border);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .live-preview-card .card-img {
+      aspect-ratio: 16 / 10;
+      background: #f0f0f0;
+      overflow: hidden;
+    }
+    .live-preview-card .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .live-preview-card .card-content {
+      padding: 16px 20px 20px;
+    }
+    .live-preview-card .card-category {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--brand-gold-dark);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .live-preview-card .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .live-preview-card .card-excerpt {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.45;
+    }
+    .live-preview-card .card-meta {
+      font-size: 0.7rem;
+      color: #888;
+      border-top: 1px solid var(--blog-border);
+      padding-top: 12px;
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .live-preview-card .preview-badge {
+      display: inline-block;
+      background: var(--brand-gold);
+      color: #0A0A0A;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+    .live-preview-card .card-content .preview-full {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--blog-border);
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .live-preview-card .preview-gallery {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--blog-border);
+    }
+    .live-preview-card .preview-gallery img {
+      width: 100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .live-preview-card .preview-gallery.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .live-preview-card .preview-gallery.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .live-preview-card .preview-gallery.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .live-preview-card .preview-video {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--blog-border);
+    }
+    .live-preview-card .preview-video .video-placeholder {
+      background: #1a1a2e;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .live-preview-card .preview-link {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--blog-border);
+    }
+    .live-preview-card .preview-link a {
+      display: inline-block;
+      background: var(--brand-gold);
+      color: var(--blog-black);
+      padding: 6px 16px;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
@@ -632,18 +760,43 @@
   </div>
   
   <form id="postForm"><input type="hidden" id="editPostId" value="">
-    <div class="form-group"><label>Título *</label><input type="text" id="postTitle" required></div>
-    <div class="form-group"><label>Categoria</label><input type="text" id="postCategory" value="ECOTURISMO"></div>
-    <div class="form-group"><label>Resumo</label><textarea id="postExcerpt" rows="2"></textarea></div>
-    <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="postFull" rows="4"></textarea></div>
-    <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="postImg"></div>
-    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo - opcional)</label><input type="text" id="postVideo" placeholder="https://www.youtube.com/embed/... ou URL do vídeo"></div>
-    <div class="form-group"><label>Link externo (opcional)</label><input type="text" id="postLink" placeholder="https://..."></div>
-    <div class="image-upload-group"><label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label><div id="galleryImagesContainer"></div><button type="button" id="addImageBtn" class="btn-add-img"><i class="fas fa-plus"></i> Adicionar imagem</button>
+    <div class="form-group"><label>Título *</label><input type="text" id="postTitle" required oninput="updateAdminPreview()"></div>
+    <div class="form-group"><label>Categoria</label><input type="text" id="postCategory" value="ECOTURISMO" oninput="updateAdminPreview()"></div>
+    <div class="form-group"><label>Resumo</label><textarea id="postExcerpt" rows="2" oninput="updateAdminPreview()"></textarea></div>
+    <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="postFull" rows="4" oninput="updateAdminPreview()"></textarea></div>
+    <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="postImg" oninput="updateAdminPreview()"></div>
+    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo - opcional)</label><input type="text" id="postVideo" placeholder="https://www.youtube.com/embed/... ou URL do vídeo" oninput="updateAdminPreview()"></div>
+    <div class="form-group"><label>Link externo (opcional)</label><input type="text" id="postLink" placeholder="https://..." oninput="updateAdminPreview()"></div>
+    <div class="image-upload-group">
+      <label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label>
+      <div id="galleryImagesContainer"></div>
+      <button type="button" id="addImageBtn" class="btn-add-img"><i class="fas fa-plus"></i> Adicionar imagem</button>
       <div class="form-group" style="margin-top:12px;"><label>Layout da galeria</label><div id="layoutSelector"><span data-layout="2" class="layout-opt">2 col</span><span data-layout="3" class="layout-opt active-layout">3 col</span><span data-layout="4" class="layout-opt">4 col</span></div><input type="hidden" id="galleryLayout" value="3"></div>
-      <div class="checkbox-group"><input type="checkbox" id="postAutoCarousel"> <label for="postAutoCarousel"><i class="fas fa-play-circle"></i> Ativar carrossel automático</label></div>
+      <div class="checkbox-group"><input type="checkbox" id="postAutoCarousel" onchange="updateAdminPreview()"> <label for="postAutoCarousel"><i class="fas fa-play-circle"></i> Ativar carrossel automático</label></div>
     </div>
-    <div class="form-group"><label>Destaque</label><select id="postFeatured"><option value="false">Não</option><option value="true">Sim</option></select></div>
+    <div class="form-group"><label>Destaque</label><select id="postFeatured" onchange="updateAdminPreview()"><option value="false">Não</option><option value="true">Sim</option></select></div>
+    
+    <!-- PREVIEW EM TEMPO REAL - SEMPRE VISÍVEL -->
+    <div id="adminLivePreview" class="live-preview-container">
+      <div class="preview-label">
+        <span><i class="fas fa-pencil-alt"></i> PRÉ-VISUALIZAÇÃO EM TEMPO REAL</span>
+        <span>AO VIVO</span>
+      </div>
+      <div id="adminPreviewContent" class="live-preview-card">
+        <div class="card-img"><img src="https://placehold.co/800x500/f0f0f0/999?text=Imagem+de+capa" alt="Preview"></div>
+        <div class="card-content">
+          <div class="card-category">ECOTURISMO</div>
+          <div class="card-title">Título da publicação</div>
+          <div class="card-excerpt">Resumo da publicação aparecerá aqui...</div>
+          <div class="preview-full"></div>
+          <div class="preview-gallery cols-3"></div>
+          <div class="preview-video"></div>
+          <div class="preview-link"></div>
+          <div class="card-meta"><span>📅 Hoje</span><span class="preview-badge">PRÉVIA</span></div>
+        </div>
+      </div>
+    </div>
+    
     <button type="submit" class="btn-admin"><i class="fas fa-save"></i> Publicar/Atualizar</button>
     <button type="button" id="cancelEditBtn" class="btn-admin" style="display:none; background:#aaa;">Cancelar</button>
   </form>
@@ -659,13 +812,13 @@
   </div>
   
   <form id="contributorForm">
-    <div class="form-group"><label>Título *</label><input type="text" id="contribTitle" required></div>
-    <div class="form-group"><label>Categoria</label><input type="text" id="contribCategory" value="ECOTURISMO"></div>
-    <div class="form-group"><label>Resumo</label><textarea id="contribExcerpt" rows="2"></textarea></div>
-    <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="contribFull" rows="4"></textarea></div>
-    <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="contribImg"></div>
-    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo)</label><input type="text" id="contribVideo" placeholder="https://www.youtube.com/embed/... ou URL do vídeo"></div>
-    <div class="form-group"><label>Link externo</label><input type="text" id="contribLink" placeholder="https://..."></div>
+    <div class="form-group"><label>Título *</label><input type="text" id="contribTitle" required oninput="updateContribPreview()"></div>
+    <div class="form-group"><label>Categoria</label><input type="text" id="contribCategory" value="ECOTURISMO" oninput="updateContribPreview()"></div>
+    <div class="form-group"><label>Resumo</label><textarea id="contribExcerpt" rows="2" oninput="updateContribPreview()"></textarea></div>
+    <div class="form-group"><label>Conteúdo (HTML)</label><textarea id="contribFull" rows="4" oninput="updateContribPreview()"></textarea></div>
+    <div class="form-group"><label>Imagem capa (URL)</label><input type="text" id="contribImg" oninput="updateContribPreview()"></div>
+    <div class="form-group"><label>Vídeo (URL YouTube/Vimeo)</label><input type="text" id="contribVideo" placeholder="https://www.youtube.com/embed/... ou URL do vídeo" oninput="updateContribPreview()"></div>
+    <div class="form-group"><label>Link externo</label><input type="text" id="contribLink" placeholder="https://..." oninput="updateContribPreview()"></div>
     
     <div class="image-upload-group">
       <label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label>
@@ -683,8 +836,29 @@
       </div>
       
       <div class="checkbox-group">
-        <input type="checkbox" id="contribAutoCarousel"> 
+        <input type="checkbox" id="contribAutoCarousel" onchange="updateContribPreview()"> 
         <label for="contribAutoCarousel"><i class="fas fa-play-circle"></i> Ativar carrossel automático</label>
+      </div>
+    </div>
+    
+    <!-- PREVIEW EM TEMPO REAL DO COLABORADOR - SEMPRE VISÍVEL -->
+    <div id="contribLivePreview" class="live-preview-container">
+      <div class="preview-label">
+        <span><i class="fas fa-pencil-alt"></i> PRÉ-VISUALIZAÇÃO EM TEMPO REAL</span>
+        <span>AO VIVO</span>
+      </div>
+      <div id="contribPreviewContent" class="live-preview-card">
+        <div class="card-img"><img src="https://placehold.co/800x500/f0f0f0/999?text=Imagem+de+capa" alt="Preview"></div>
+        <div class="card-content">
+          <div class="card-category">ECOTURISMO</div>
+          <div class="card-title">Título da publicação</div>
+          <div class="card-excerpt">Resumo da publicação aparecerá aqui...</div>
+          <div class="preview-full"></div>
+          <div class="preview-gallery cols-3"></div>
+          <div class="preview-video"></div>
+          <div class="preview-link"></div>
+          <div class="card-meta"><span>📅 Hoje</span><span class="preview-badge">PRÉVIA</span></div>
+        </div>
       </div>
     </div>
     
@@ -750,38 +924,24 @@
   
   const AUTHORIZED_ADMIN_EMAIL = "guia.caminhosdoperuacu@gmail.com";
   
-  // Função para converter URL do YouTube para embed
   function convertToEmbedUrl(url) {
     if (!url) return '';
-    
-    // Se já for embed do YouTube
     if (url.includes('youtube.com/embed/')) return url;
-    
-    // YouTube padrão: https://www.youtube.com/watch?v=ID
     if (url.includes('youtube.com/watch')) {
       const urlParams = new URLSearchParams(url.split('?')[1]);
       const videoId = urlParams.get('v');
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
-    
-    // YouTube youtu.be
     if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1].split('?')[0];
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
-    
-    // Vimeo
     if (url.includes('vimeo.com/')) {
       const videoId = url.split('vimeo.com/')[1].split('?')[0];
       if (videoId) return `https://player.vimeo.com/video/${videoId}`;
     }
-    
-    // Já é embed do Vimeo
     if (url.includes('player.vimeo.com/video/')) return url;
-    
-    // Se for URL direta do Vimeo com embed
     if (url.includes('vimeo.com/embed/')) return url;
-    
     return url;
   }
   
@@ -1288,6 +1448,133 @@
     pag.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.classList.contains('disabled'))return; let v=btn.dataset.page; if(v==='prev'&&currentPage>1)currentPage--; else if(v==='next'&&currentPage<total)currentPage++; else if(!isNaN(parseInt(v)))currentPage=parseInt(v); renderGrid(); renderPagination(); document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'}); }));
   }
   
+  // ========== FUNÇÕES DE VISUALIZAÇÃO EM TEMPO REAL - ATUALIZAÇÃO AUTOMÁTICA ==========
+  
+  function updateAdminPreview() {
+    const preview = document.getElementById('adminPreviewContent');
+    if(!preview) return;
+    const title = document.getElementById('postTitle').value || 'Título da publicação';
+    const category = document.getElementById('postCategory').value || 'ECOTURISMO';
+    const excerpt = document.getElementById('postExcerpt').value || 'Resumo da publicação aparecerá aqui...';
+    const full = document.getElementById('postFull').value || '';
+    const img = document.getElementById('postImg').value || 'https://placehold.co/800x500/f0f0f0/999?text=Imagem+de+capa';
+    const video = document.getElementById('postVideo').value || '';
+    const link = document.getElementById('postLink').value || '';
+    const galleryImgs = tempGallery.filter(u => u && u.trim());
+    const layout = selectedLayout || 3;
+    const autoCarousel = document.getElementById('postAutoCarousel')?.checked || false;
+    
+    const titleEl = preview.querySelector('.card-title');
+    const catEl = preview.querySelector('.card-category');
+    const excerptEl = preview.querySelector('.card-excerpt');
+    const imgEl = preview.querySelector('.card-img img');
+    const fullEl = preview.querySelector('.preview-full');
+    const galleryEl = preview.querySelector('.preview-gallery');
+    const videoEl = preview.querySelector('.preview-video');
+    const linkEl = preview.querySelector('.preview-link');
+    
+    if(titleEl) titleEl.textContent = title;
+    if(catEl) catEl.textContent = category;
+    if(excerptEl) excerptEl.textContent = excerpt;
+    if(imgEl) imgEl.src = img;
+    if(fullEl) fullEl.innerHTML = full;
+    
+    if(galleryEl) {
+      if(galleryImgs.length > 0) {
+        galleryEl.style.display = 'grid';
+        galleryEl.className = `preview-gallery cols-${Math.min(layout, 4)}`;
+        galleryEl.innerHTML = galleryImgs.slice(0, 6).map(u => `<img src="${u}" alt="Galeria">`).join('');
+      } else {
+        galleryEl.style.display = 'none';
+        galleryEl.innerHTML = '';
+      }
+    }
+    
+    if(videoEl) {
+      const embed = convertToEmbedUrl(video);
+      if(embed) {
+        videoEl.style.display = 'block';
+        videoEl.innerHTML = `<div class="video-placeholder"><i class="fas fa-play-circle"></i> Vídeo: ${embed.includes('youtube') ? 'YouTube' : 'Vimeo'}</div>`;
+      } else {
+        videoEl.style.display = 'none';
+        videoEl.innerHTML = '';
+      }
+    }
+    
+    if(linkEl) {
+      if(link) {
+        linkEl.style.display = 'block';
+        linkEl.innerHTML = `<a href="${link}" target="_blank"><i class="fas fa-external-link-alt"></i> ${link}</a>`;
+      } else {
+        linkEl.style.display = 'none';
+        linkEl.innerHTML = '';
+      }
+    }
+  }
+  
+  function updateContribPreview() {
+    const preview = document.getElementById('contribPreviewContent');
+    if(!preview) return;
+    const title = document.getElementById('contribTitle').value || 'Título da publicação';
+    const category = document.getElementById('contribCategory').value || 'ECOTURISMO';
+    const excerpt = document.getElementById('contribExcerpt').value || 'Resumo da publicação aparecerá aqui...';
+    const full = document.getElementById('contribFull').value || '';
+    const img = document.getElementById('contribImg').value || 'https://placehold.co/800x500/f0f0f0/999?text=Imagem+de+capa';
+    const video = document.getElementById('contribVideo').value || '';
+    const link = document.getElementById('contribLink').value || '';
+    const galleryImgs = contribTempGallery.filter(u => u && u.trim());
+    const layout = contribSelectedLayout || 3;
+    
+    const titleEl = preview.querySelector('.card-title');
+    const catEl = preview.querySelector('.card-category');
+    const excerptEl = preview.querySelector('.card-excerpt');
+    const imgEl = preview.querySelector('.card-img img');
+    const fullEl = preview.querySelector('.preview-full');
+    const galleryEl = preview.querySelector('.preview-gallery');
+    const videoEl = preview.querySelector('.preview-video');
+    const linkEl = preview.querySelector('.preview-link');
+    
+    if(titleEl) titleEl.textContent = title;
+    if(catEl) catEl.textContent = category;
+    if(excerptEl) excerptEl.textContent = excerpt;
+    if(imgEl) imgEl.src = img;
+    if(fullEl) fullEl.innerHTML = full;
+    
+    if(galleryEl) {
+      if(galleryImgs.length > 0) {
+        galleryEl.style.display = 'grid';
+        galleryEl.className = `preview-gallery cols-${Math.min(layout, 4)}`;
+        galleryEl.innerHTML = galleryImgs.slice(0, 6).map(u => `<img src="${u}" alt="Galeria">`).join('');
+      } else {
+        galleryEl.style.display = 'none';
+        galleryEl.innerHTML = '';
+      }
+    }
+    
+    if(videoEl) {
+      const embed = convertToEmbedUrl(video);
+      if(embed) {
+        videoEl.style.display = 'block';
+        videoEl.innerHTML = `<div class="video-placeholder"><i class="fas fa-play-circle"></i> Vídeo: ${embed.includes('youtube') ? 'YouTube' : 'Vimeo'}</div>`;
+      } else {
+        videoEl.style.display = 'none';
+        videoEl.innerHTML = '';
+      }
+    }
+    
+    if(linkEl) {
+      if(link) {
+        linkEl.style.display = 'block';
+        linkEl.innerHTML = `<a href="${link}" target="_blank"><i class="fas fa-external-link-alt"></i> ${link}</a>`;
+      } else {
+        linkEl.style.display = 'none';
+        linkEl.innerHTML = '';
+      }
+    }
+  }
+  
+  // ========== FIM FUNÇÕES DE VISUALIZAÇÃO EM TEMPO REAL ==========
+  
   function refreshAdminPanel() {
     if(!currentUser || currentRole !== 'admin') return;
     
@@ -1361,6 +1648,7 @@
     document.getElementById('cancelEditBtn').style.display = 'block';
     document.querySelector('#postForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar';
     window.scrollTo({top: 0, behavior: 'smooth'});
+    updateAdminPreview();
   }
   
   function renderGalleryInputs() { 
@@ -1369,11 +1657,11 @@
     tempGallery.forEach((url, idx) => { 
       const row = document.createElement('div'); 
       row.className = 'image-input-row'; 
-      row.innerHTML = `<input type="text" class="gallery-img-input" data-idx="${idx}" value="${url || ''}" placeholder="URL imagem ${idx+1}"><button type="button" class="btn-add-img remove-img-btn" data-idx="${idx}">Remover</button>`; 
+      row.innerHTML = `<input type="text" class="gallery-img-input" data-idx="${idx}" value="${url || ''}" placeholder="URL imagem ${idx+1}" oninput="updateAdminPreview()"><button type="button" class="btn-add-img remove-img-btn" data-idx="${idx}">Remover</button>`; 
       c.appendChild(row); 
     }); 
-    document.querySelectorAll('.gallery-img-input').forEach(inp => inp.addEventListener('change', (e) => { let i = parseInt(inp.dataset.idx); if(!isNaN(i)) tempGallery[i] = inp.value; })); 
-    document.querySelectorAll('.remove-img-btn').forEach(btn => btn.addEventListener('click', (e) => { let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { tempGallery.splice(i,1); renderGalleryInputs(); } })); 
+    document.querySelectorAll('.gallery-img-input').forEach(inp => inp.addEventListener('change', (e) => { let i = parseInt(inp.dataset.idx); if(!isNaN(i)) tempGallery[i] = inp.value; updateAdminPreview(); })); 
+    document.querySelectorAll('.remove-img-btn').forEach(btn => btn.addEventListener('click', (e) => { let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { tempGallery.splice(i,1); renderGalleryInputs(); updateAdminPreview(); } })); 
   }
   
   function renderContribGalleryInputs() { 
@@ -1382,11 +1670,11 @@
     contribTempGallery.forEach((url, idx) => { 
       const row = document.createElement('div'); 
       row.className = 'image-input-row'; 
-      row.innerHTML = `<input type="text" class="contrib-gallery-img-input" data-idx="${idx}" value="${url || ''}" placeholder="URL imagem ${idx+1}"><button type="button" class="btn-add-img contrib-remove-img-btn" data-idx="${idx}">Remover</button>`; 
+      row.innerHTML = `<input type="text" class="contrib-gallery-img-input" data-idx="${idx}" value="${url || ''}" placeholder="URL imagem ${idx+1}" oninput="updateContribPreview()"><button type="button" class="btn-add-img contrib-remove-img-btn" data-idx="${idx}">Remover</button>`; 
       c.appendChild(row); 
     }); 
-    document.querySelectorAll('.contrib-gallery-img-input').forEach(inp => inp.addEventListener('change', (e) => { let i = parseInt(inp.dataset.idx); if(!isNaN(i)) contribTempGallery[i] = inp.value; })); 
-    document.querySelectorAll('.contrib-remove-img-btn').forEach(btn => btn.addEventListener('click', (e) => { let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { contribTempGallery.splice(i,1); renderContribGalleryInputs(); } })); 
+    document.querySelectorAll('.contrib-gallery-img-input').forEach(inp => inp.addEventListener('change', (e) => { let i = parseInt(inp.dataset.idx); if(!isNaN(i)) contribTempGallery[i] = inp.value; updateContribPreview(); })); 
+    document.querySelectorAll('.contrib-remove-img-btn').forEach(btn => btn.addEventListener('click', (e) => { let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { contribTempGallery.splice(i,1); renderContribGalleryInputs(); updateContribPreview(); } })); 
   }
   
   async function refreshContributorList() {
@@ -1539,6 +1827,7 @@
     if(tempGallery.length < 6) { 
       tempGallery.push(""); 
       renderGalleryInputs(); 
+      updateAdminPreview();
     } else alert("Máx 6 imagens"); 
   });
   
@@ -1547,12 +1836,14 @@
     document.getElementById('galleryLayout').value = selectedLayout; 
     document.querySelectorAll('#layoutSelector .layout-opt').forEach(o => o.classList.remove('active-layout')); 
     opt.classList.add('active-layout'); 
+    updateAdminPreview();
   }));
   
   document.getElementById('contribAddImageBtn')?.addEventListener('click', () => { 
     if(contribTempGallery.length < 6) { 
       contribTempGallery.push(""); 
       renderContribGalleryInputs(); 
+      updateContribPreview();
     } else alert("Máx 6 imagens"); 
   });
   
@@ -1561,6 +1852,7 @@
     document.getElementById('contribGalleryLayout').value = contribSelectedLayout; 
     document.querySelectorAll('#contribLayoutSelector .layout-opt').forEach(o => o.classList.remove('active-layout')); 
     opt.classList.add('active-layout'); 
+    updateContribPreview();
   }));
   
   document.getElementById('postForm')?.addEventListener('submit', async (e) => { 
@@ -1627,6 +1919,7 @@
     document.getElementById('postForm').reset();
     tempGallery = [];
     renderGalleryInputs();
+    updateAdminPreview();
   });
   
   document.getElementById('clearAllBtn')?.addEventListener('click', async () => { 
@@ -1751,6 +2044,30 @@
   
   window.initCarousel = initCarousel;
   window.openLightbox = openLightbox;
+  
+  // Atualizar previews automaticamente quando qualquer input mudar
+  document.addEventListener('input', (e) => {
+    if(e.target.id === 'postTitle' || e.target.id === 'postCategory' || 
+       e.target.id === 'postExcerpt' || e.target.id === 'postFull' || 
+       e.target.id === 'postImg' || e.target.id === 'postVideo' || 
+       e.target.id === 'postLink') {
+      updateAdminPreview();
+    }
+    if(e.target.id === 'contribTitle' || e.target.id === 'contribCategory' || 
+       e.target.id === 'contribExcerpt' || e.target.id === 'contribFull' || 
+       e.target.id === 'contribImg' || e.target.id === 'contribVideo' || 
+       e.target.id === 'contribLink') {
+      updateContribPreview();
+    }
+  });
+  
+  // Inicializar previews
+  setTimeout(() => {
+    updateAdminPreview();
+    updateContribPreview();
+  }, 100);
+  
+  console.log('👀 Visualização em tempo real ATIVADA automaticamente! O preview é atualizado enquanto você digita.');
 </script>
 </body>
 </html>
