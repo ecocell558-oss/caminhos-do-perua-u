@@ -663,6 +663,34 @@
         display: none !important;
       }
     }
+
+    /* ========== AJUSTE PARA O HERO OCUPAR 100% DA TELA ========== */
+    .hero-full {
+      height: 100vh;
+      max-height: none;
+      min-height: 100vh;
+    }
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .slide-bg {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+    .slide-content {
+      bottom: 10%;
+    }
+    @media (max-width: 768px) {
+      .hero-full {
+        height: 100vh;
+        min-height: 100vh;
+      }
+    }
   </style>
 </head>
 <body>
