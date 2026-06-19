@@ -607,11 +607,6 @@
     .search-input-wrapper .clear-search.show {
       display: block;
     }
-    .search-results-count {
-      font-size: 0.85rem;
-      color: var(--meta-color);
-      white-space: nowrap;
-    }
     
     .filters-section {
       display: flex;
@@ -1846,7 +1841,6 @@
         <input type="text" id="searchInput" placeholder="Buscar publicações...">
         <button class="clear-search" id="clearSearchBtn"><i class="fas fa-times-circle"></i></button>
       </div>
-      <span class="search-results-count" id="searchResultsCount"></span>
     </div>
     
     <div class="filters-section">
@@ -2541,9 +2535,6 @@
       
       return true;
     });
-    
-    document.getElementById('searchResultsCount').textContent = 
-      filteredPosts.length > 0 ? `${filteredPosts.length} resultado${filteredPosts.length > 1 ? 's' : ''}` : '';
     
     currentPage = 1;
     renderGrid();
