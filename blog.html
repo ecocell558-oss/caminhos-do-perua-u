@@ -296,14 +296,14 @@
     .main-header { background: white; border-bottom: 1px solid var(--blog-border); position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,0.98); backdrop-filter: blur(12px); }
     [data-theme="dark"] .main-header { background: rgba(10,10,10,0.98); }
     
-    .header-container { display: flex; align-items: center; justify-content: space-between; height: 70px; flex-wrap: wrap; gap: 10px; }
-    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .header-container { display: flex; align-items: center; justify-content: space-between; height: 70px; flex-wrap: nowrap; gap: 10px; padding: 0 20px; max-width: 1280px; margin: 0 auto; }
+    .logo-area { display: flex; align-items: center; gap: 12px; flex-shrink: 1; min-width: 0; }
     .logo-icon { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brand-gold); flex-shrink: 0; }
     .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
-    .logo-text { display: flex; flex-direction: column; }
-    .logo-text h1 { font-size: 1.3rem; font-weight: 800; line-height: 1.2; color: var(--blog-text); }
-    .logo-text span { font-size: 0.65rem; font-weight: 500; color: var(--brand-gold-dark); letter-spacing: 0.3px; }
-    .header-actions { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+    .logo-text { display: flex; flex-direction: column; min-width: 0; }
+    .logo-text h1 { font-size: 1.3rem; font-weight: 800; line-height: 1.2; color: var(--blog-text); white-space: nowrap; }
+    .logo-text span { font-size: 0.65rem; font-weight: 500; color: var(--brand-gold-dark); letter-spacing: 0.3px; white-space: nowrap; }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
     
     .dark-mode-toggle {
       background: none;
@@ -318,6 +318,7 @@
       font-size: 1.1rem;
       color: var(--blog-text);
       transition: 0.3s;
+      flex-shrink: 0;
     }
     .dark-mode-toggle:hover {
       background: var(--brand-gold);
@@ -330,6 +331,215 @@
     .back-home { background: #EAEAEA; padding: 8px 18px; border-radius: 40px; text-decoration: none; font-weight: 500; font-size: 0.8rem; color: var(--blog-dark); transition: 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     [data-theme="dark"] .back-home { background: #333; color: #EAEAEA; }
     .back-home:hover { background: var(--brand-gold); color: #0A0A0A; }
+    
+    /* ===== CABEÇALHO VERSÃO MOBILE ===== */
+    @media (max-width: 768px) {
+      .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        height: 60px;
+        gap: 8px;
+      }
+      
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+      }
+      
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+      }
+      
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+      }
+      
+      .logo-text h1 {
+        font-size: 1rem;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+      
+      .logo-text span {
+        font-size: 0.5rem;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+      
+      .header-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      
+      .dark-mode-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        border: 1px solid var(--blog-border);
+        border-radius: 50%;
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--blog-text);
+        transition: 0.3s;
+        padding: 0;
+        flex-shrink: 0;
+      }
+      
+      .dark-mode-toggle:hover {
+        background: var(--brand-gold);
+        color: #0A0A0A;
+        border-color: var(--brand-gold);
+      }
+      
+      .share-blog-btn {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+        border-radius: 30px;
+        background: var(--brand-gold);
+        color: var(--blog-black);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      
+      .share-blog-btn span {
+        display: inline;
+      }
+      
+      .share-blog-btn i {
+        font-size: 0.7rem;
+      }
+      
+      .back-home {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+        border-radius: 30px;
+        background: #EAEAEA;
+        color: var(--blog-dark);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      
+      [data-theme="dark"] .back-home {
+        background: #333;
+        color: #EAEAEA;
+      }
+      
+      .back-home span {
+        display: inline;
+      }
+      
+      .back-home i {
+        font-size: 0.7rem;
+      }
+    }
+    
+    /* ===== TELAS MUITO PEQUENAS (ATÉ 400px) ===== */
+    @media (max-width: 400px) {
+      .header-container {
+        padding: 8px 12px;
+        height: 55px;
+        gap: 6px;
+      }
+      
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .logo-text h1 {
+        font-size: 0.85rem;
+      }
+      
+      .logo-text span {
+        font-size: 0.45rem;
+      }
+      
+      .dark-mode-toggle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+      }
+      
+      .share-blog-btn {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
+      
+      .share-blog-btn span {
+        display: none;
+      }
+      
+      .back-home {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
+      
+      .back-home span {
+        display: none;
+      }
+    }
+    
+    /* ===== TELAS MUITO PEQUENAS (ATÉ 360px) ===== */
+    @media (max-width: 360px) {
+      .header-container {
+        padding: 6px 10px;
+        height: 50px;
+        gap: 4px;
+      }
+      
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .logo-text h1 {
+        font-size: 0.75rem;
+      }
+      
+      .logo-text span {
+        font-size: 0.4rem;
+      }
+      
+      .dark-mode-toggle {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+      }
+      
+      .share-blog-btn {
+        padding: 4px 6px;
+        font-size: 0.6rem;
+      }
+      
+      .back-home {
+        padding: 4px 6px;
+        font-size: 0.6rem;
+      }
+    }
     
     .search-container {
       display: flex;
@@ -485,7 +695,6 @@
       height: 100%;
       object-fit: cover;
     }
-    /* BOTÕES DE NAVEGAÇÃO DO CARROSSEL */
     .card-img .carousel-container .carousel-btn {
       position: absolute;
       top: 50%;
@@ -582,7 +791,6 @@
     .featured-img .carousel-container .carousel-next {
       right: 12px;
     }
-    /* DOTS VISÍVEIS NO DESTAQUE */
     .featured-img .carousel-container .carousel-dots {
       display: flex !important;
       position: absolute;
@@ -634,7 +842,6 @@
       object-fit: cover;
     }
     
-    /* IMAGEM NO MODAL - MOSTRA COMPLETA COM CONTAIN */
     .modal-image-wrapper {
       width: 100%;
       max-height: 500px;
@@ -705,7 +912,6 @@
     #modalCarouselArea .carousel-container .carousel-next {
       right: 12px;
     }
-    /* DOTS VISÍVEIS NO MODAL */
     #modalCarouselArea .carousel-container .carousel-dots {
       display: flex !important;
       position: absolute;
@@ -806,7 +1012,6 @@
     .page-btn.disabled { opacity: 0.4; cursor: default; }
     .footer { background: var(--blog-black); color: #aaa; padding: 48px 0 32px; margin-top: 60px; border-top: 4px solid var(--brand-gold); }
     
-    /* CARROSSEL - ESTILOS GLOBAIS */
     .carousel-container { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 12px; }
     .carousel-slides { display: flex; transition: transform 0.5s ease-in-out; height: 100%; }
     .carousel-slide { min-width: 100%; height: 100%; }
@@ -1551,65 +1756,40 @@
     }
     
     @media (max-width: 768px) {
-      .header-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; gap: 12px; }
-      .logo-area { display: flex; align-items: center; gap: 12px; flex: 1; }
-      .logo-icon { width: 44px; height: 44px; flex-shrink: 0; }
-      .logo-text { display: flex; flex-direction: column; justify-content: center; }
-      .logo-text h1 { font-size: 1.1rem; line-height: 1.25; }
-      .logo-text span { font-size: 0.58rem; letter-spacing: 0.3px; }
-      .header-actions { display: flex; gap: 10px; flex-shrink: 0; }
-      .share-blog-btn { padding: 7px 14px; font-size: 0.75rem; }
-      .share-blog-btn i { font-size: 0.75rem; }
-      .back-home { padding: 7px 14px; font-size: 0.75rem; }
-      .back-home i { font-size: 0.75rem; }
-      .dark-mode-toggle { width: 34px; height: 34px; font-size: 0.95rem; }
-      .search-input-wrapper input { padding: 10px 16px 10px 40px; font-size: 0.85rem; }
-    }
-    
-    @media (max-width: 600px) {
-      .header-container { padding: 10px 14px; gap: 10px; }
-      .logo-icon { width: 42px; height: 42px; }
-      .logo-text h1 { font-size: 1rem; }
-      .logo-text span { font-size: 0.55rem; }
-      .share-blog-btn { padding: 6px 12px; font-size: 0.7rem; }
-      .back-home { padding: 6px 12px; font-size: 0.7rem; }
-    }
-    
-    @media (max-width: 500px) {
-      .header-container { padding: 8px 12px; gap: 8px; }
-      .logo-icon { width: 40px; height: 40px; }
-      .logo-text h1 { font-size: 0.95rem; }
-      .logo-text span { font-size: 0.52rem; }
-      .share-blog-btn { padding: 5px 10px; font-size: 0.68rem; }
-      .back-home { padding: 5px 10px; font-size: 0.68rem; }
-      .dark-mode-toggle { width: 30px; height: 30px; font-size: 0.8rem; }
-    }
-    
-    @media (max-width: 450px) {
-      .logo-icon { width: 38px; height: 38px; }
-      .logo-text h1 { font-size: 0.88rem; }
-      .logo-text span { font-size: 0.5rem; }
+      .header-container { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; gap: 8px; }
+      .logo-area { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+      .logo-icon { width: 40px; height: 40px; flex-shrink: 0; }
+      .logo-text { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+      .logo-text h1 { font-size: 1rem; line-height: 1.2; white-space: nowrap; }
+      .logo-text span { font-size: 0.5rem; letter-spacing: 0.3px; white-space: nowrap; }
+      .header-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+      .dark-mode-toggle { width: 32px; height: 32px; font-size: 0.9rem; }
+      .share-blog-btn { padding: 6px 10px; font-size: 0.7rem; }
+      .share-blog-btn span { display: inline; }
+      .back-home { padding: 6px 10px; font-size: 0.7rem; }
+      .back-home span { display: inline; }
     }
     
     @media (max-width: 400px) {
-      .header-container { padding: 8px 10px; }
+      .header-container { padding: 8px 12px; gap: 6px; }
       .logo-icon { width: 36px; height: 36px; }
-      .logo-text h1 { font-size: 0.82rem; }
-      .logo-text span { font-size: 0.47rem; }
+      .logo-text h1 { font-size: 0.85rem; }
+      .logo-text span { font-size: 0.45rem; }
+      .dark-mode-toggle { width: 28px; height: 28px; font-size: 0.75rem; }
       .share-blog-btn { padding: 5px 8px; font-size: 0.65rem; }
+      .share-blog-btn span { display: none; }
       .back-home { padding: 5px 8px; font-size: 0.65rem; }
+      .back-home span { display: none; }
     }
     
     @media (max-width: 360px) {
-      .logo-icon { width: 34px; height: 34px; }
-      .logo-text h1 { font-size: 0.78rem; }
-      .logo-text span { font-size: 0.44rem; }
-      .share-blog-btn span { display: none; }
-      .share-blog-btn i { margin: 0; }
-      .back-home span { display: none; }
-      .back-home i { margin: 0; }
-      .share-blog-btn { padding: 6px 9px; }
-      .back-home { padding: 6px 9px; }
+      .header-container { padding: 6px 10px; gap: 4px; }
+      .logo-icon { width: 32px; height: 32px; }
+      .logo-text h1 { font-size: 0.75rem; }
+      .logo-text span { font-size: 0.4rem; }
+      .dark-mode-toggle { width: 26px; height: 26px; font-size: 0.65rem; }
+      .share-blog-btn { padding: 4px 6px; font-size: 0.6rem; }
+      .back-home { padding: 4px 6px; font-size: 0.6rem; }
     }
   </style>
 </head>
@@ -2084,30 +2264,25 @@
   function getYouTubeEmbedUrl(url) {
     if (!url) return '';
     
-    // Se já for embed, retorna
     if (url.includes('youtube.com/embed/')) return url;
     if (url.includes('player.vimeo.com/video/')) return url;
     
-    // YouTube - watch?v=ID
     if (url.includes('youtube.com/watch')) {
       const urlParams = new URLSearchParams(url.split('?')[1]);
       const videoId = urlParams.get('v');
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
     
-    // YouTube - youtu.be/ID
     if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1].split('?')[0];
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
     
-    // YouTube - shorts
     if (url.includes('youtube.com/shorts/')) {
       const videoId = url.split('shorts/')[1].split('?')[0];
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
     
-    // Vimeo
     if (url.includes('vimeo.com/')) {
       const videoId = url.split('vimeo.com/')[1].split('?')[0];
       if (videoId) return `https://player.vimeo.com/video/${videoId}`;
@@ -2420,6 +2595,24 @@
   
   // ========== FUNÇÕES PRINCIPAIS ==========
   
+  function getOptimizedImageUrl(url, width = 800, height = 450) {
+    if (!url || !url.trim()) {
+      return `https://placehold.co/${width}x${height}/f0f0f0/999?text=Sem+Imagem`;
+    }
+    
+    if (url.includes('placehold.co')) return url;
+    
+    if (url.includes('unsplash.com') || url.includes('images.unsplash.com')) {
+      return `${url}?w=${width}&h=${height}&fit=crop&crop=center&auto=format`;
+    }
+    
+    if (url.includes('imgur.com')) {
+      return url.replace(/\.(jpg|jpeg|png|gif)/i, 'm.$1');
+    }
+    
+    return url;
+  }
+  
   async function loadPostsFromFirebase() {
     try {
       const q = query(postsCollection, orderBy("date", "desc"));
@@ -2634,7 +2827,6 @@
       });
     });
     
-    // Criar dots se necessário
     if(dotsContainer && showDots && images.length > 1) {
       dotsContainer.innerHTML = images.map((_, i) => 
         `<button class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></button>`
@@ -2656,7 +2848,6 @@
     function goToSlide(idx) { 
       currentIndex = (idx + images.length) % images.length; 
       slidesDiv.style.transform = `translateX(-${currentIndex * 100}%)`;
-      // Atualizar dots
       if(dotsContainer && showDots) {
         dotsContainer.querySelectorAll('.carousel-dot').forEach((dot, i) => {
           dot.classList.toggle('active', i === currentIndex);
@@ -2825,7 +3016,6 @@
       
       const imgSrc = getOptimizedImageUrl(getImageSrc(post));
       
-      // NA PÁGINA INICIAL: carrossel SEM dots (showDots = false)
       card.innerHTML = `
         <div class="card-img" id="cardImg-${post.id}">
           ${hasCarousel ? renderCarouselHTML(allImages, true, `card${post.id}`, false) : `<img src="${imgSrc}" loading="lazy" style="cursor:pointer; width:100%; height:100%; object-fit:cover;">`}
@@ -2884,14 +3074,12 @@
     const hasCarousel = (post.autoCarousel && galleryImgs.length >= 2);
     const embedVideo = convertToEmbedUrl(post.video || '');
     
-    // Verifica se o vídeo é válido
     const isValidVideo = embedVideo && (embedVideo.includes('youtube.com/embed') || embedVideo.includes('player.vimeo.com/video'));
     
     let videoHtml = '';
     if (isValidVideo) {
       videoHtml = `<div class="video-wrapper"><iframe src="${embedVideo}" frameborder="0" allowfullscreen></iframe></div>`;
     } else if (post.video && post.video.trim()) {
-      // Vídeo inválido - mostra mensagem de erro
       videoHtml = `
         <div class="video-wrapper" style="display:flex; align-items:center; justify-content:center; background:#1a1a2e; min-height:200px;">
           <div class="video-error">
@@ -2917,7 +3105,6 @@
     
     const imgSrc = getOptimizedImageUrl(getImageSrc(post));
     
-    // NO MODAL: carrossel COM dots (showDots = true)
     bodyDiv.innerHTML = `
       <div>
         <span style="background:var(--brand-gold); padding:4px 14px; border-radius:20px; display:inline-block;">${post.category || 'ECOTURISMO'}</span>
@@ -2938,7 +3125,6 @@
         </div>
         <div style="margin:20px 0;">${post.full || ''}</div>
         
-        <!-- SHARE BAR -->
         <div class="share-bar">
           <button class="share-btn whatsapp" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-whatsapp"></i> WhatsApp</button>
           <button class="share-btn facebook" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-facebook-f"></i> Facebook</button>
@@ -2974,7 +3160,6 @@
       });
     });
     
-    // Iniciar carrossel do modal com dots
     if(hasCarousel) {
       setTimeout(() => {
         const allImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
@@ -3068,7 +3253,6 @@
     pag.querySelectorAll('.page-btn').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.classList.contains('disabled'))return; let v=btn.dataset.page; if(v==='prev'&&currentPage>1)currentPage--; else if(v==='next'&&currentPage<total)currentPage++; else if(!isNaN(parseInt(v)))currentPage=parseInt(v); renderGrid(); renderPagination(); document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'}); }));
   }
   
-  // ========== POSTS RELACIONADOS ==========
   function renderRelatedPosts(currentPost) {
     if (!currentPost) return '';
     
@@ -3102,8 +3286,6 @@
       </div>
     `;
   }
-  
-  // ========== FUNÇÕES DE VISUALIZAÇÃO EM TEMPO REAL ==========
   
   function updateAdminPreview() {
     const preview = document.getElementById('adminPreviewContent');
@@ -3267,8 +3449,6 @@
     }
   }
   
-  // ========== PAINEL ADMIN ==========
-  
   function refreshAdminPanel() {
     if(!currentUser || currentRole !== 'admin') return;
     
@@ -3402,8 +3582,6 @@
       `).join('');
     }
   }
-  
-  // ========== LOGIN / LOGOUT ==========
   
   function showAdminLoginModal() {
     document.getElementById('adminLoginModal').style.display = 'flex';
@@ -3756,7 +3934,6 @@
   let keyPressTimerContrib = null;
   
   document.addEventListener('keydown', (e) => {
-    // Admin: CCC (3x a tecla C)
     if (e.key === 'c' || e.key === 'C') {
       adminKeyCount++;
       if (keyPressTimerAdmin) clearTimeout(keyPressTimerAdmin);
@@ -3774,7 +3951,6 @@
       }
     }
     
-    // Colaborador: VV (2x a tecla V)
     if (e.key === 'v' || e.key === 'V') {
       contribKeyCount++;
       if (keyPressTimerContrib) clearTimeout(keyPressTimerContrib);
@@ -3792,7 +3968,6 @@
       }
     }
     
-    // Fechar modais com ESC
     if (e.key === 'Escape') {
       if (document.getElementById('lightboxModal').style.display === 'flex') {
         closeLightbox();
@@ -3802,7 +3977,6 @@
       }
     }
     
-    // Navegação no lightbox com setas
     if (document.getElementById('lightboxModal').style.display === 'flex') {
       if (e.key === 'ArrowLeft') prevLightboxImage();
       if (e.key === 'ArrowRight') nextLightboxImage();
@@ -3811,30 +3985,11 @@
   
   // ========== INICIALIZAÇÃO ==========
   
-  // Função para otimizar URL de imagem
-  function getOptimizedImageUrl(url, width = 800, height = 450) {
-    if (!url || !url.trim()) {
-      return `https://placehold.co/${width}x${height}/f0f0f0/999?text=Sem+Imagem`;
-    }
-    
-    if (url.includes('placehold.co')) return url;
-    
-    if (url.includes('unsplash.com') || url.includes('images.unsplash.com')) {
-      return `${url}?w=${width}&h=${height}&fit=crop&crop=center&auto=format`;
-    }
-    
-    if (url.includes('imgur.com')) {
-      return url.replace(/\.(jpg|jpeg|png|gif)/i, 'm.$1');
-    }
-    
-    return url;
-  }
-  
-  // Tornar funções globais
   window.getOptimizedImageUrl = getOptimizedImageUrl;
   window.convertToEmbedUrl = convertToEmbedUrl;
   window.initCarousel = initCarousel;
   window.openLightbox = openLightbox;
+  window.getYouTubeEmbedUrl = getYouTubeEmbedUrl;
   
   loadThemePreference();
   initCookieConsent();
@@ -3865,21 +4020,20 @@
   
   console.log('🚀 Blog atualizado com:');
   console.log('  🌙 Modo escuro');
+  console.log('  📱 Cabeçalho mobile compacto (igual à primeira versão)');
   console.log('  🔍 Barra de busca em tempo real');
   console.log('  📂 Filtros por categoria');
   console.log('  🏷️ Filtros por tags');
-  console.log('  🔗 Posts relacionados (agora ABAIXO dos comentários)');
-  console.log('  💬 Comentários (com opção de ativar/desativar)');
+  console.log('  🔗 Posts relacionados (abaixo dos comentários)');
+  console.log('  💬 Comentários salvando no Firebase');
   console.log('  📐 Imagens com object-fit: cover (preenchem todo o quadrado)');
   console.log('  🎠 Carrossel com setas de navegação (◀ ▶)');
   console.log('  ⚪ 3 pontinhos (dots) APENAS no destaque e nos posts abertos');
   console.log('  🎬 Vídeo do YouTube funcionando corretamente');
-  console.log('  📏 Aviso do tamanho ideal da imagem (1200x675) nos painéis');
+  console.log('  📏 Aviso do tamanho ideal da imagem (1200x675)');
   console.log('  👀 Preview em tempo real automático');
   console.log('  📝 Painel Admin (CCC) e Colaborador (VV)');
   console.log('  📤 Compartilhamento antes dos comentários');
 </script>
 </body>
 </html>
-
-
