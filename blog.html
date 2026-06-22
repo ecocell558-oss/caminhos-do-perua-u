@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#0A0A0A">
   
-  <title>Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo</title>
-  <meta name="description" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
+  <!-- ===== META TAGS DINÂMICAS (serão preenchidas via JavaScript) ===== -->
+  <title id="pageTitle">Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo</title>
+  <meta name="description" id="pageDescription" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
   
-  <!-- ===== META TAGS OG (serão atualizadas dinamicamente) ===== -->
   <meta property="og:type" content="website">
   <meta property="og:title" id="ogTitle" content="Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo">
   <meta property="og:description" id="ogDescription" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
@@ -25,41 +25,97 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
-  <script type="module">
-    const firebaseConfig = {
-      apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
-      authDomain: "caminhos-peruacu-blog.firebaseapp.com",
-      projectId: "caminhos-peruacu-blog",
-      storageBucket: "caminhos-peruacu-blog.firebasestorage.app",
-      messagingSenderId: "427400451429",
-      appId: "1:427400451429:web:0a1a4eb36bdc94bc0c3d8c"
-    };
+  <!-- ===== SCRIPT PARA CARREGAR O POST ANTES DE RENDERIZAR (CRÍTICO PARA META TAGS) ===== -->
+  <script>
+    // Função para obter parâmetro da URL
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
     
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, limit, where, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    // Função para atualizar as meta tags APENAS com dados do post
+    function updateMetaTagsDirect(title, description, imageUrl) {
+      // Título da página
+      document.title = title;
+      document.getElementById('pageTitle').textContent = title;
+      
+      // Meta description
+      document.getElementById('pageDescription').setAttribute('content', description);
+      
+      // OG Tags
+      document.getElementById('ogTitle').setAttribute('content', title);
+      document.getElementById('ogDescription').setAttribute('content', description);
+      document.getElementById('ogImage').setAttribute('content', imageUrl);
+      
+      // Twitter Tags
+      document.getElementById('twitterTitle').setAttribute('content', title);
+      document.getElementById('twitterDescription').setAttribute('content', description);
+      document.getElementById('twitterImage').setAttribute('content', imageUrl);
+    }
     
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    
-    window.db = db;
-    window.auth = auth;
-    
-    async function testFirebaseConnection() {
+    // Função para carregar um post específico do Firebase
+    async function loadPostForMetaTags(postId) {
       try {
-        const testRef = doc(db, "test", "connection");
-        await setDoc(testRef, { timestamp: new Date().toISOString() });
-        console.log('✅ Firebase connection test successful');
-        return true;
+        // Configuração do Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
+          authDomain: "caminhos-peruacu-blog.firebaseapp.com",
+          projectId: "caminhos-peruacu-blog",
+          storageBucket: "caminhos-peruacu-blog.firebasestorage.app",
+          messagingSenderId: "427400451429",
+          appId: "1:427400451429:web:0a1a4eb36bdc94bc0c3d8c"
+        };
+        
+        // Importa o Firebase dinamicamente
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+        const { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Tenta buscar o post pelo ID
+        const postRef = doc(db, "posts", postId);
+        const postSnap = await getDoc(postRef);
+        
+        if (postSnap.exists()) {
+          const post = postSnap.data();
+          
+          // Pega a imagem (prioridade: galeria[0] > img > padrão)
+          let imageUrl = "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg";
+          if (post.gallery && post.gallery.length > 0 && post.gallery[0].trim()) {
+            imageUrl = post.gallery[0];
+          } else if (post.img && post.img.trim()) {
+            imageUrl = post.img;
+          }
+          
+          const title = post.title || 'Blog Caminhos do Peruaçu';
+          const description = (post.excerpt || post.title || '').substring(0, 160);
+          
+          // ATUALIZA AS META TAGS
+          updateMetaTagsDirect(
+            `${title} · Blog Caminhos do Peruaçu`,
+            description,
+            imageUrl
+          );
+          
+          console.log('✅ Meta tags atualizadas para o post:', title);
+          console.log('🖼️ Imagem:', imageUrl);
+        } else {
+          console.log('⚠️ Post não encontrado:', postId);
+        }
       } catch (error) {
-        console.error('❌ Firebase connection error:', error);
-        return false;
+        console.error('❌ Erro ao carregar post para meta tags:', error);
       }
     }
     
-    testFirebaseConnection();
-    console.log('🔥 Firebase conectado com sucesso!');
+    // EXECUTA IMEDIATAMENTE ao carregar a página
+    (async function() {
+      const postId = getUrlParameter('p');
+      if (postId) {
+        console.log('🔍 Carregando post para meta tags:', postId);
+        await loadPostForMetaTags(postId);
+      }
+    })();
   </script>
   
   <style>
@@ -2287,6 +2343,13 @@
     const twitterDescription = document.getElementById('twitterDescription');
     const twitterImage = document.getElementById('twitterImage');
     
+    // Atualiza o título da página
+    document.title = title;
+    document.getElementById('pageTitle').textContent = title;
+    
+    // Atualiza a meta description
+    document.getElementById('pageDescription').setAttribute('content', description);
+    
     if (ogTitle) ogTitle.setAttribute('content', title);
     if (ogDescription) ogDescription.setAttribute('content', description);
     if (ogImage) ogImage.setAttribute('content', imageUrl);
@@ -2295,13 +2358,6 @@
     if (twitterTitle) twitterTitle.setAttribute('content', title);
     if (twitterDescription) twitterDescription.setAttribute('content', description);
     if (twitterImage) twitterImage.setAttribute('content', imageUrl);
-    
-    // Atualiza também a tag title do HTML
-    document.title = title;
-    
-    // Atualiza a meta description
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', description);
     
     console.log('📸 Meta tags atualizadas:', { title, description, imageUrl });
   }
@@ -2452,7 +2508,6 @@
     const titleText = `${post.title} · Blog Caminhos do Peruaçu`;
     const descText = (post.excerpt || post.title || "").substring(0, 160);
     
-    // Atualiza as meta tags OG para o compartilhamento correto
     updateMetaTags(titleText, descText, imageUrl, generateShareUrl(post.id));
     
     console.log('✅ Meta tags atualizadas para o post:', post.title);
@@ -2668,6 +2723,7 @@
       renderTagFilters();
       applyFilters();
       
+      // Verifica se há um post específico na URL
       const urlParams = new URLSearchParams(window.location.search);
       const postIdParam = urlParams.get('p');
       if(postIdParam) {
@@ -2678,7 +2734,6 @@
           setTimeout(() => openModal(targetPost), 200);
           history.replaceState({}, document.title, window.location.pathname);
         } else {
-          // Se não encontrar o post, restaura as meta tags padrão
           restoreDefaultMetaTags();
         }
       } else {
@@ -2864,7 +2919,7 @@
     return p.img && p.img.trim() ? p.img : "https://placehold.co/1200x675/F5B81B/0A0A0A?text=Peruaçu"; 
   }
   
-  // ========== FUNÇÃO DE CARROSSEL MELHORADA - SEMPRE COM SETAS ==========
+  // ========== FUNÇÃO DE CARROSSEL ==========
   function initCarousel(containerId, images, autoStart = true, showDots = false) {
     const container = document.getElementById(containerId);
     if(!container || !images.length) {
@@ -3158,7 +3213,7 @@
     });
   }
   
-  // ========== FUNÇÃO DE COMPARTILHAMENTO COM IMAGEM ==========
+  // ========== FUNÇÃO DE COMPARTILHAMENTO ==========
   function getPostShareImage(post) {
     if (!post) return '';
     
@@ -3181,12 +3236,10 @@
     
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
-    const imageUrl = getPostShareImage(post);
+    const excerpt = (post.excerpt || '').substring(0, 120);
     
-    // Atualiza as meta tags antes de compartilhar
-    updateMetaTagsForPost(post);
-    
-    const message = `📰 *${title}*\n\n${post.excerpt || ''}\n\n🔗 ${url}`;
+    // Mensagem APENAS com título + resumo + link (sem imagem na mensagem)
+    const message = `📰 *${title}*\n\n${excerpt}\n\n🔗 ${url}`;
     
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   }
@@ -3200,9 +3253,6 @@
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
     
-    // Atualiza as meta tags antes de compartilhar
-    updateMetaTagsForPost(post);
-    
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`, '_blank');
   }
   
@@ -3215,9 +3265,6 @@
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
     
-    // Atualiza as meta tags antes de compartilhar
-    updateMetaTagsForPost(post);
-    
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
   }
   
@@ -3229,9 +3276,6 @@
     
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
-    
-    // Atualiza as meta tags antes de compartilhar
-    updateMetaTagsForPost(post);
     
     window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
   }
@@ -3429,7 +3473,6 @@
     document.body.style.overflow = ''; 
     window.currentModalPost = null; 
     
-    // Restaura as meta tags padrão ao fechar o modal
     restoreDefaultMetaTags();
   }
   
@@ -4232,8 +4275,8 @@
   console.log('  📏 Aviso do tamanho ideal da imagem (1200x675)');
   console.log('  👀 Preview em tempo real automático');
   console.log('  📝 Painel Admin (CCC) e Colaborador (VV)');
-  console.log('  📤 Compartilhamento com IMAGEM do post via meta tags OG');
-  console.log('  🖼️ Meta tags atualizadas dinamicamente para cada post');
+  console.log('  📤 Compartilhamento: APENAS título + resumo + link');
+  console.log('  🖼️ Meta tags OG atualizadas com a imagem do post');
 </script>
 </body>
 </html>
