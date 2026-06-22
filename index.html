@@ -383,6 +383,37 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; pointer-events: none; }
     .gallery-item:hover img { transform: scale(1.03); }
     
+    .more-photos-indicator {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      color: var(--brand-primary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 5;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.2);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .more-photos-indicator svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: var(--brand-primary);
+      stroke-width: 2;
+    }
+    @media (min-width: 641px) {
+      .more-photos-indicator { display: none; }
+    }
+
     /* LIGHTBOX */
     .lightbox {
       position: fixed;
@@ -790,6 +821,36 @@
     window.addEventListener('resize', checkScroll);
     checkScroll();
   })();
+  
+  // MOBILE GALLERY
+  function setupMobileGallery() {
+    const galleryContainer = document.getElementById('galleryContainer');
+    if(!galleryContainer) return;
+    const allItems = Array.from(galleryContainer.querySelectorAll('.gallery-item'));
+    if(allItems.length === 0) return;
+    const isMobile = window.innerWidth < 641;
+    allItems.forEach(item => {
+      item.style.display = '';
+      const existingIndicator = item.querySelector('.more-photos-indicator');
+      if(existingIndicator) existingIndicator.remove();
+    });
+    if(isMobile) {
+      const visibleCount = Math.max(1, allItems.length - 6);
+      for(let i = visibleCount; i < allItems.length; i++) { allItems[i].style.display = 'none'; }
+      const lastVisibleIndex = visibleCount - 1;
+      if(lastVisibleIndex >= 0 && allItems[lastVisibleIndex]) {
+        const lastVisible = allItems[lastVisibleIndex];
+        const indicator = document.createElement('div');
+        indicator.className = 'more-photos-indicator';
+        indicator.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> ${allItems.length - visibleCount} fotos`;
+        lastVisible.style.position = 'relative';
+        lastVisible.appendChild(indicator);
+      }
+    }
+  }
+  
+  window.addEventListener('load', () => { setupMobileGallery(); });
+  window.addEventListener('resize', () => { setupMobileGallery(); });
   
   // MOBILE MENU
   const menuBtn = document.getElementById('menuToggleBtn'), menuOverlay = document.getElementById('mobileMenuOverlay'), menuPanel = document.getElementById('mobileMenuPanel'), menuLinks = document.querySelectorAll('[data-menu-link]');
