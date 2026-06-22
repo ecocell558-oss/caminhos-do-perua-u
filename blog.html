@@ -12,14 +12,14 @@
   <meta property="og:type" content="website">
   <meta property="og:title" id="ogTitle" content="Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo">
   <meta property="og:description" id="ogDescription" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
-  <meta property="og:image" id="ogImage" content="https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg">
+  <meta property="og:image" id="ogImage" content="https://raw.githubusercontent.com/ecocell558-oss/imagens/main/logo-peruacu.png">
   <meta property="og:url" id="ogUrl" content="https://www.caminhosdoperuacu.com.br/blog">
   <meta property="og:site_name" content="Caminhos do Peruaçu">
   
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" id="twitterTitle" content="Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo">
   <meta name="twitter:description" id="twitterDescription" content="Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.">
-  <meta name="twitter:image" id="twitterImage" content="https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg">
+  <meta name="twitter:image" id="twitterImage" content="https://raw.githubusercontent.com/ecocell558-oss/imagens/main/logo-peruacu.png">
   
   <link rel="icon" type="image/png" href="logoperuacu.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -2276,6 +2276,9 @@
   
   const AUTHORIZED_ADMIN_EMAIL = "guia.caminhosdoperuacu@gmail.com";
   
+  // ========== URL DA LOGO DO BLOG ==========
+  const LOGO_URL = "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/logo-peruacu.png";
+  
   // ========== FUNÇÃO PARA ATUALIZAR META TAGS OG ==========
   function updateMetaTags(title, description, imageUrl, url) {
     const ogTitle = document.getElementById('ogTitle');
@@ -2304,6 +2307,35 @@
     if (metaDesc) metaDesc.setAttribute('content', description);
     
     console.log('📸 Meta tags atualizadas:', { title, description, imageUrl });
+  }
+  
+  // ========== FUNÇÃO PARA PEGAR A IMAGEM DO POST (SEMPRE USA A LOGO) ==========
+  function getPostShareImage(post) {
+    // SEMPRE RETORNA A LOGO DO BLOG PARA COMPARTILHAMENTO
+    return LOGO_URL;
+  }
+  
+  // ========== FUNÇÃO PARA ATUALIZAR META TAGS DO POST (USA A LOGO) ==========
+  function updateMetaTagsForPost(post) {
+    if(!post) return;
+    
+    const imageUrl = getPostShareImage(post); // SEMPRE A LOGO
+    const titleText = `${post.title} · Blog Caminhos do Peruaçu`;
+    const descText = (post.excerpt || post.title || "").substring(0, 160);
+    
+    updateMetaTags(titleText, descText, imageUrl, generateShareUrl(post.id));
+    
+    console.log('✅ Meta tags atualizadas para o post:', post.title);
+    console.log('🖼️ Imagem usada (LOGO):', imageUrl);
+  }
+  
+  function restoreDefaultMetaTags() {
+    const defaultTitle = 'Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo';
+    const defaultDesc = 'Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.';
+    const defaultImage = LOGO_URL;
+    const defaultUrl = 'https://www.caminhosdoperuacu.com.br/blog';
+    
+    updateMetaTags(defaultTitle, defaultDesc, defaultImage, defaultUrl);
   }
   
   // ========== FUNÇÃO PARA EXTRAIR ID DO VÍDEO DO YOUTUBE ==========
@@ -2444,19 +2476,6 @@
       return post.img;
     }
     return "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg";
-  }
-  
-  function updateMetaTagsForPost(post) {
-    if(!post) return;
-    const imageUrl = getPostImageUrl(post);
-    const titleText = `${post.title} · Blog Caminhos do Peruaçu`;
-    const descText = (post.excerpt || post.title || "").substring(0, 160);
-    
-    // Atualiza as meta tags OG para o compartilhamento correto
-    updateMetaTags(titleText, descText, imageUrl, generateShareUrl(post.id));
-    
-    console.log('✅ Meta tags atualizadas para o post:', post.title);
-    console.log('🖼️ Imagem do post:', imageUrl);
   }
   
   function generateShareUrl(postId) {
@@ -2673,12 +2692,11 @@
       if(postIdParam) {
         const targetPost = posts.find(p => p.id === postIdParam && p.status === 'approved');
         if(targetPost) {
-          // ATUALIZA AS META TAGS COM A IMAGEM DO POST ESPECÍFICO
+          // ATUALIZA AS META TAGS COM A LOGO DO BLOG
           updateMetaTagsForPost(targetPost);
           setTimeout(() => openModal(targetPost), 200);
           history.replaceState({}, document.title, window.location.pathname);
         } else {
-          // Se não encontrar o post, restaura as meta tags padrão
           restoreDefaultMetaTags();
         }
       } else {
@@ -2692,15 +2710,6 @@
       console.error("Erro ao carregar posts:", error);
       document.getElementById('newsGrid').innerHTML = '<div style="text-align:center; padding:40px;">Erro ao carregar publicações.</div>';
     }
-  }
-  
-  function restoreDefaultMetaTags() {
-    const defaultTitle = 'Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo';
-    const defaultDesc = 'Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.';
-    const defaultImage = 'https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg';
-    const defaultUrl = 'https://www.caminhosdoperuacu.com.br/blog';
-    
-    updateMetaTags(defaultTitle, defaultDesc, defaultImage, defaultUrl);
   }
   
   async function approvePost(postId) {
@@ -3158,21 +3167,7 @@
     });
   }
   
-  // ========== FUNÇÃO DE COMPARTILHAMENTO COM IMAGEM ==========
-  function getPostShareImage(post) {
-    if (!post) return '';
-    
-    if (post.gallery && post.gallery.length > 0 && post.gallery[0].trim()) {
-      return post.gallery[0];
-    }
-    
-    if (post.img && post.img.trim()) {
-      return post.img;
-    }
-    
-    return "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg";
-  }
-  
+  // ========== FUNÇÃO DE COMPARTILHAMENTO COM A LOGO ==========
   function sharePostOnWhatsApp(post) {
     if (!post) {
       shareBlog('wa');
@@ -3181,9 +3176,8 @@
     
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
-    const imageUrl = getPostShareImage(post);
+    // A IMAGEM SERÁ A LOGO (definida nas meta tags)
     
-    // Atualiza as meta tags antes de compartilhar
     updateMetaTagsForPost(post);
     
     const message = `📰 *${title}*\n\n${post.excerpt || ''}\n\n🔗 ${url}`;
@@ -3200,7 +3194,6 @@
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
     
-    // Atualiza as meta tags antes de compartilhar
     updateMetaTagsForPost(post);
     
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`, '_blank');
@@ -3215,7 +3208,6 @@
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
     
-    // Atualiza as meta tags antes de compartilhar
     updateMetaTagsForPost(post);
     
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
@@ -3230,7 +3222,6 @@
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
     
-    // Atualiza as meta tags antes de compartilhar
     updateMetaTagsForPost(post);
     
     window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
@@ -3248,7 +3239,7 @@
     if(post.status !== 'approved') return;
     window.currentModalPost = post;
     
-    // ATUALIZA AS META TAGS COM A IMAGEM DO POST AO ABRIR O MODAL
+    // ATUALIZA AS META TAGS COM A LOGO DO BLOG
     updateMetaTagsForPost(post);
     
     const modalDiv = document.getElementById('newsModal');
@@ -4232,8 +4223,8 @@
   console.log('  📏 Aviso do tamanho ideal da imagem (1200x675)');
   console.log('  👀 Preview em tempo real automático');
   console.log('  📝 Painel Admin (CCC) e Colaborador (VV)');
-  console.log('  📤 Compartilhamento com IMAGEM do post via meta tags OG');
-  console.log('  🖼️ Meta tags atualizadas dinamicamente para cada post');
+  console.log('  📤 Compartilhamento com a LOGO do blog via meta tags OG');
+  console.log('  🖼️ Meta tags atualizadas dinamicamente com a LOGO para cada post');
 </script>
 </body>
 </html>
