@@ -2821,17 +2821,33 @@
     return p.img && p.img.trim() ? p.img : "https://placehold.co/1200x675/F5B81B/0A0A0A?text=Peruaçu"; 
   }
   
+  // ========== FUNÇÃO DE CARROSSEL MELHORADA - SEMPRE COM SETAS ==========
   function initCarousel(containerId, images, autoStart = true, showDots = false) {
     const container = document.getElementById(containerId);
-    if(!container || !images.length) return;
+    if(!container || !images.length) {
+      console.warn('Carrossel: container ou imagens não encontrados', containerId, images);
+      return;
+    }
+    
     const slidesDiv = container.querySelector('.carousel-slides');
     const prevBtn = container.querySelector('.carousel-prev');
     const nextBtn = container.querySelector('.carousel-next');
     const dotsContainer = container.querySelector('.carousel-dots');
-    if(!slidesDiv) return;
-    let currentIndex = 0, intervalId = null;
-    slidesDiv.innerHTML = images.map(img => `<div class="carousel-slide"><img src="${img}" style="cursor:pointer; width:100%; height:100%; object-fit:cover;"></div>`).join('');
     
+    if(!slidesDiv) {
+      console.warn('Carrossel: slidesDiv não encontrado em', containerId);
+      return;
+    }
+    
+    let currentIndex = 0;
+    let intervalId = null;
+    
+    // Limpa slides existentes
+    slidesDiv.innerHTML = images.map(img => 
+      `<div class="carousel-slide"><img src="${img}" style="cursor:pointer; width:100%; height:100%; object-fit:cover;" loading="lazy"></div>`
+    ).join('');
+    
+    // Evento de clique nas imagens para abrir lightbox
     slidesDiv.querySelectorAll('.carousel-slide img').forEach((img, idx) => {
       img.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2839,7 +2855,9 @@
       });
     });
     
+    // SEMPRE mostrar os dots se showDots for true E tiver mais de 1 imagem
     if(dotsContainer && showDots && images.length > 1) {
+      dotsContainer.style.display = 'flex !important';
       dotsContainer.innerHTML = images.map((_, i) => 
         `<button class="carousel-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></button>`
       ).join('');
@@ -2854,13 +2872,25 @@
         });
       });
     } else if(dotsContainer) {
+      dotsContainer.style.display = 'none';
       dotsContainer.innerHTML = '';
+    }
+    
+    // SEMPRE mostrar as setas se houver mais de 1 imagem
+    if(prevBtn && nextBtn) {
+      if(images.length > 1) {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+      } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
     }
     
     function goToSlide(idx) { 
       currentIndex = (idx + images.length) % images.length; 
       slidesDiv.style.transform = `translateX(-${currentIndex * 100}%)`;
-      if(dotsContainer && showDots) {
+      if(dotsContainer && showDots && images.length > 1) {
         dotsContainer.querySelectorAll('.carousel-dot').forEach((dot, i) => {
           dot.classList.toggle('active', i === currentIndex);
         });
@@ -2873,6 +2903,7 @@
         intervalId = setInterval(() => { goToSlide(currentIndex + 1); }, 4000); 
       }
     }
+    
     function stopAuto() { 
       if(intervalId) { 
         clearInterval(intervalId); 
@@ -2880,17 +2911,23 @@
       } 
     }
     
+    // Eventos das setas
     if(prevBtn) {
+      prevBtn.removeEventListener('click', () => {});
       prevBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if(images.length <= 1) return;
         stopAuto();
         goToSlide(currentIndex - 1);
         if(autoStart) startAuto();
       });
     }
+    
     if(nextBtn) {
+      nextBtn.removeEventListener('click', () => {});
       nextBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if(images.length <= 1) return;
         stopAuto();
         goToSlide(currentIndex + 1);
         if(autoStart) startAuto();
@@ -2898,9 +2935,14 @@
     }
     
     if(autoStart && images.length > 1) startAuto();
+    
+    // Salva o interval para limpeza
     carouselIntervals.push(intervalId);
+    
+    console.log(`🔄 Carrossel inicializado: ${containerId} | ${images.length} imagens | auto: ${autoStart} | dots: ${showDots}`);
   }
   
+  // ========== FUNÇÃO DE RENDERIZAÇÃO DO CARROSSEL ==========
   function renderCarouselHTML(images, autoCarousel, uniqueId, showDots = false) {
     if(!images.length) return '';
     const id = `carousel-${uniqueId}-${Date.now()}`;
@@ -2971,7 +3013,7 @@
     let featured = posts.find(p=>p.isFeatured && p.status === 'approved') || posts.find(p=>p.status === 'approved');
     if(!featured) return;
     const allImages = featured.gallery?.filter(u=>u&&u.trim()) || [];
-    const hasCarousel = (featured.autoCarousel && allImages.length >= 2);
+    const hasCarousel = (allImages.length >= 2);
     const heroDiv = document.getElementById('heroDestaque');
     heroDiv.innerHTML = `<div class="featured-card"><div class="featured-img" id="heroImgContainer">${hasCarousel ? renderCarouselHTML(allImages, true, 'hero', true) : `<img src="${getOptimizedImageUrl(getImageSrc(featured))}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;">`}</div><div class="featured-content"><div class="featured-badge">DESTAQUE</div><h2>${featured.title}</h2><p>${(featured.excerpt || '').substring(0,120)}</p><button class="read-link" data-featured="true">Ler matéria <i class="fas fa-arrow-right"></i></button></div></div>`;
     
@@ -3020,7 +3062,7 @@
     
     pagePosts.forEach((post) => {
       const allImages = post.gallery?.filter(u=>u&&u.trim()) || [];
-      const hasCarousel = (post.autoCarousel && allImages.length >= 2);
+      const hasCarousel = (allImages.length >= 2);
       const card = document.createElement('div'); 
       card.className = 'news-card';
       const tagsHtml = renderPostTags(post.tags);
@@ -3030,7 +3072,7 @@
       
       card.innerHTML = `
         <div class="card-img" id="cardImg-${post.id}">
-          ${hasCarousel ? renderCarouselHTML(allImages, true, `card${post.id}`, false) : `<img src="${imgSrc}" loading="lazy" style="cursor:pointer; width:100%; height:100%; object-fit:cover;">`}
+          ${hasCarousel ? renderCarouselHTML(allImages, post.autoCarousel || false, `card${post.id}`, false) : `<img src="${imgSrc}" loading="lazy" style="cursor:pointer; width:100%; height:100%; object-fit:cover;">`}
         </div>
         <div class="card-content">
           <div class="card-category">${post.category || 'ECOTURISMO'}${post.video ? ' 🎬' : ''}${post.link ? ' 🔗' : ''}</div>
@@ -3048,7 +3090,18 @@
       `;
       grid.appendChild(card);
       
-      if(!hasCarousel) {
+      // SEMPRE inicializar o carrossel se houver 2+ imagens
+      if(hasCarousel) {
+        setTimeout(() => {
+          const allImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
+          if(allImgs.length >= 2) {
+            const carouselContainer = card.querySelector('.carousel-container');
+            if(carouselContainer) {
+              initCarousel(carouselContainer.id, allImgs, post.autoCarousel || false, false);
+            }
+          }
+        }, 100);
+      } else {
         const cardImg = card.querySelector('.card-img img');
         if(cardImg) {
           cardImg.addEventListener('click', (e) => {
@@ -3057,14 +3110,6 @@
             openLightbox(imgs.filter(i=>i && i.trim()), 0);
           });
         }
-      } else {
-        setTimeout(() => {
-          const allImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
-          if(allImgs.length) {
-            const carouselContainer = card.querySelector('.carousel-container');
-            if(carouselContainer) initCarousel(carouselContainer.id, allImgs, true, false);
-          }
-        }, 100);
       }
     });
     
@@ -3083,7 +3128,7 @@
     const modalDiv = document.getElementById('newsModal');
     const bodyDiv = document.getElementById('modalBodyContent');
     const galleryImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
-    const hasCarousel = (post.autoCarousel && galleryImgs.length >= 2);
+    const hasCarousel = (galleryImgs.length >= 2);
     const embedVideo = convertToEmbedUrl(post.video || '');
     
     const isValidVideo = embedVideo && (embedVideo.includes('youtube.com/embed') || embedVideo.includes('player.vimeo.com/video'));
@@ -3175,9 +3220,11 @@
     if(hasCarousel) {
       setTimeout(() => {
         const allImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
-        if(allImgs.length) {
-          const carouselContainer = bodyDiv.querySelector('.carousel-container');
-          if(carouselContainer) initCarousel(carouselContainer.id, allImgs, true, true);
+        if(allImgs.length >= 2) {
+          const carouselContainer = bodyDiv.querySelector('#modalCarouselArea .carousel-container');
+          if(carouselContainer) {
+            initCarousel(carouselContainer.id, allImgs, true, true);
+          }
         }
       }, 100);
     }
@@ -4039,7 +4086,7 @@
   console.log('  🔗 Posts relacionados (abaixo dos comentários)');
   console.log('  💬 Comentários salvando no Firebase');
   console.log('  📐 Imagens com object-fit: cover (preenchem todo o quadrado)');
-  console.log('  🎠 Carrossel com setas de navegação (◀ ▶)');
+  console.log('  🎠 Carrossel com setas de navegação SEMPRE VISÍVEIS (◀ ▶)');
   console.log('  ⚪ 3 pontinhos (dots) APENAS no destaque e nos posts abertos');
   console.log('  🎬 Vídeo do YouTube funcionando corretamente');
   console.log('  📏 Aviso do tamanho ideal da imagem (1200x675)');
