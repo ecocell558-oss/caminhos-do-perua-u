@@ -2842,12 +2842,10 @@
     let currentIndex = 0;
     let intervalId = null;
     
-    // Limpa slides existentes
     slidesDiv.innerHTML = images.map(img => 
       `<div class="carousel-slide"><img src="${img}" style="cursor:pointer; width:100%; height:100%; object-fit:cover;" loading="lazy"></div>`
     ).join('');
     
-    // Evento de clique nas imagens para abrir lightbox
     slidesDiv.querySelectorAll('.carousel-slide img').forEach((img, idx) => {
       img.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2855,7 +2853,6 @@
       });
     });
     
-    // SEMPRE mostrar os dots se showDots for true E tiver mais de 1 imagem
     if(dotsContainer && showDots && images.length > 1) {
       dotsContainer.style.display = 'flex !important';
       dotsContainer.innerHTML = images.map((_, i) => 
@@ -2876,7 +2873,6 @@
       dotsContainer.innerHTML = '';
     }
     
-    // SEMPRE mostrar as setas se houver mais de 1 imagem
     if(prevBtn && nextBtn) {
       if(images.length > 1) {
         prevBtn.style.display = 'flex';
@@ -2911,7 +2907,6 @@
       } 
     }
     
-    // Eventos das setas
     if(prevBtn) {
       prevBtn.removeEventListener('click', () => {});
       prevBtn.addEventListener('click', (e) => {
@@ -2936,7 +2931,6 @@
     
     if(autoStart && images.length > 1) startAuto();
     
-    // Salva o interval para limpeza
     carouselIntervals.push(intervalId);
     
     console.log(`🔄 Carrossel inicializado: ${containerId} | ${images.length} imagens | auto: ${autoStart} | dots: ${showDots}`);
@@ -3090,7 +3084,6 @@
       `;
       grid.appendChild(card);
       
-      // SEMPRE inicializar o carrossel se houver 2+ imagens
       if(hasCarousel) {
         setTimeout(() => {
           const allImgs = post.gallery?.filter(u=>u&&u.trim()) || [];
@@ -3122,6 +3115,83 @@
     });
   }
   
+  // ========== FUNÇÃO DE COMPARTILHAMENTO COM IMAGEM ==========
+  function getPostShareImage(post) {
+    if (!post) return '';
+    
+    // Tenta pegar a primeira imagem da galeria
+    if (post.gallery && post.gallery.length > 0 && post.gallery[0].trim()) {
+      return post.gallery[0];
+    }
+    
+    // Se não tiver galeria, usa a imagem de capa
+    if (post.img && post.img.trim()) {
+      return post.img;
+    }
+    
+    // Imagem padrão do blog
+    return "https://raw.githubusercontent.com/ecocell558-oss/imagens/main/Parque-Nacional-Cavernas-do-Perua%C3%A7u-MG-20-800x533.jpg";
+  }
+  
+  function sharePostOnWhatsApp(post) {
+    if (!post) {
+      shareBlog('wa');
+      return;
+    }
+    
+    const url = generateShareUrl(post.id);
+    const title = post.title || 'Blog Caminhos do Peruaçu';
+    const imageUrl = getPostShareImage(post);
+    
+    // Monta a mensagem com título, link e a imagem (o WhatsApp mostra a imagem automaticamente)
+    const message = `📰 *${title}*\n\n${post.excerpt || ''}\n\n🔗 ${url}\n\n📸 ${imageUrl}`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+  }
+  
+  function sharePostOnFacebook(post) {
+    if (!post) {
+      shareBlog('fb');
+      return;
+    }
+    
+    const url = generateShareUrl(post.id);
+    const imageUrl = getPostShareImage(post);
+    const title = post.title || 'Blog Caminhos do Peruaçu';
+    
+    // Facebook usa og:image meta tag, mas também podemos passar via parâmetro
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`, '_blank');
+  }
+  
+  function sharePostOnTwitter(post) {
+    if (!post) {
+      shareBlog('tw');
+      return;
+    }
+    
+    const url = generateShareUrl(post.id);
+    const title = post.title || 'Blog Caminhos do Peruaçu';
+    const imageUrl = getPostShareImage(post);
+    
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
+  }
+  
+  function sharePostOnTelegram(post) {
+    if (!post) {
+      shareBlog('telegram');
+      return;
+    }
+    
+    const url = generateShareUrl(post.id);
+    const title = post.title || 'Blog Caminhos do Peruaçu';
+    const imageUrl = getPostShareImage(post);
+    
+    const message = `📰 *${title}*\n\n${post.excerpt || ''}\n\n🔗 ${url}`;
+    
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+  }
+  
+  // ========== FUNÇÃO DE ABRIR MODAL ==========
   async function openModal(post) {
     if(post.status !== 'approved') return;
     window.currentModalPost = post;
@@ -3152,6 +3222,7 @@
     const shareUrl = generateShareUrl(post.id);
     const relatedHtml = renderRelatedPosts(post);
     const tagsHtml = renderPostTags(post.tags);
+    const postImageUrl = getPostShareImage(post);
     
     if (post.allowComments !== false) {
       await loadComments(post.id);
@@ -3183,10 +3254,10 @@
         <div style="margin:20px 0;">${post.full || ''}</div>
         
         <div class="share-bar">
-          <button class="share-btn whatsapp" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-          <button class="share-btn facebook" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-facebook-f"></i> Facebook</button>
-          <button class="share-btn twitter" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-twitter"></i> Twitter</button>
-          <button class="share-btn telegram" data-share-url="${shareUrl}" data-title="${post.title}"><i class="fab fa-telegram"></i> Telegram</button>
+          <button class="share-btn whatsapp" data-post-id="${post.id}"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button class="share-btn facebook" data-post-id="${post.id}"><i class="fab fa-facebook-f"></i> Facebook</button>
+          <button class="share-btn twitter" data-post-id="${post.id}"><i class="fab fa-twitter"></i> Twitter</button>
+          <button class="share-btn telegram" data-post-id="${post.id}"><i class="fab fa-telegram"></i> Telegram</button>
           <button class="share-btn copy-link" data-share-url="${shareUrl}"><i class="fas fa-link"></i> Copiar link</button>
         </div>
         
@@ -3277,18 +3348,22 @@
     
     document.querySelectorAll('#modalBodyContent .share-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const url = btn.getAttribute('data-share-url') || shareUrl;
-        const title = btn.getAttribute('data-title') || post.title;
-        if(btn.classList.contains('whatsapp')) {
-          window.open(`https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
-        } else if(btn.classList.contains('facebook')) {
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        } else if(btn.classList.contains('twitter')) {
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
-        } else if(btn.classList.contains('telegram')) {
-          window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
-        } else if(btn.classList.contains('copy-link')) {
-          navigator.clipboard.writeText(url);
+        const postId = btn.getAttribute('data-post-id');
+        const shareUrl = btn.getAttribute('data-share-url');
+        
+        if (postId) {
+          const postToShare = posts.find(p => p.id === postId);
+          if (btn.classList.contains('whatsapp')) {
+            sharePostOnWhatsApp(postToShare);
+          } else if (btn.classList.contains('facebook')) {
+            sharePostOnFacebook(postToShare);
+          } else if (btn.classList.contains('twitter')) {
+            sharePostOnTwitter(postToShare);
+          } else if (btn.classList.contains('telegram')) {
+            sharePostOnTelegram(postToShare);
+          }
+        } else if (shareUrl) {
+          navigator.clipboard.writeText(shareUrl);
           alert('Link da publicação copiado!');
         }
       });
@@ -3940,6 +4015,7 @@
     if(platform === 'wa') window.open(`https://wa.me/?text=${text}%20${url}`, '_blank'); 
     if(platform === 'fb') window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank'); 
     if(platform === 'tw') window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank'); 
+    if(platform === 'telegram') window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
   }
   
   document.getElementById('shareBlogBtn')?.addEventListener('click', () => shareBlog('wa'));
@@ -4049,6 +4125,11 @@
   window.initCarousel = initCarousel;
   window.openLightbox = openLightbox;
   window.getYouTubeEmbedUrl = getYouTubeEmbedUrl;
+  window.sharePostOnWhatsApp = sharePostOnWhatsApp;
+  window.sharePostOnFacebook = sharePostOnFacebook;
+  window.sharePostOnTwitter = sharePostOnTwitter;
+  window.sharePostOnTelegram = sharePostOnTelegram;
+  window.getPostShareImage = getPostShareImage;
   
   loadThemePreference();
   initCookieConsent();
@@ -4092,7 +4173,8 @@
   console.log('  📏 Aviso do tamanho ideal da imagem (1200x675)');
   console.log('  👀 Preview em tempo real automático');
   console.log('  📝 Painel Admin (CCC) e Colaborador (VV)');
-  console.log('  📤 Compartilhamento antes dos comentários');
+  console.log('  📤 Compartilhamento com IMAGEM do post');
+  console.log('  📸 WhatsApp, Facebook, Twitter e Telegram com imagem');
 </script>
 </body>
 </html>
