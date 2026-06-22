@@ -241,14 +241,13 @@
     .slide.active { opacity: 1; z-index: 2; }
     .slide-bg { 
       position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; 
-      filter: none; /* FOSCO / ESCURECIMENTO REMOVIDO - CORES ORIGINAIS */
+      filter: none;
       transform: scale(1); transition: transform 6s ease-out; 
     }
     .slide.active .slide-bg { transform: scale(1.05); }
-    /* OVERLAY: removido o escurecimento, mas mantido gradiente sutil para legibilidade do texto */
     .slide-overlay { 
       position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-      background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.15) 100%); /* escurecimento reduzido drasticamente para preservar cores */
+      background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.15) 100%);
       z-index: 3; 
     }
     .slide-content { 
@@ -383,37 +382,8 @@
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; pointer-events: none; }
     .gallery-item:hover img { transform: scale(1.03); }
     
-    .more-photos-indicator {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px);
-      color: var(--brand-primary);
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 40px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      z-index: 5;
-      letter-spacing: 0.5px;
-      border: 1px solid rgba(255,255,255,0.2);
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    .more-photos-indicator svg {
-      width: 14px;
-      height: 14px;
-      fill: none;
-      stroke: var(--brand-primary);
-      stroke-width: 2;
-    }
-    @media (min-width: 641px) {
-      .more-photos-indicator { display: none; }
-    }
-
+    /* INDICADOR "+ FOTOS" REMOVIDO COMPLETAMENTE */
+    
     /* LIGHTBOX */
     .lightbox {
       position: fixed;
@@ -584,7 +554,7 @@
     summary::-webkit-details-marker { display: none; }
     .faq-answer { padding: 0 24px 24px 24px; color: var(--gray-600); }
     
-    /* MAPA ESTILO - COM ZOOM MAIS AFASTADO MOSTRANDO PARQUE E REGIÃO DO FABIÃO */
+    /* MAPA ESTILO */
     .map-container {
       margin-top: 32px;
       border-radius: var(--radius-md);
@@ -635,7 +605,6 @@
     .splash-subtitle { font-size: 0.75rem; font-weight: 500; color: var(--brand-primary); letter-spacing: 4px; text-transform: uppercase; }
     body.splash-active { overflow: hidden; }
     
-    /* ========== AJUSTE ESPECÍFICO PARA O TEXTO NA VERSÃO MOBILE ========== */
     @media (max-width: 640px) {
       .section-subtitle {
         font-size: 1rem;
@@ -654,7 +623,6 @@
       }
     }
 
-    /* ========== PLATAFORMA LINK - APARECE APENAS EM DESKTOP ========== */
     .plataforma-link {
       display: inline;
     }
@@ -726,7 +694,6 @@
   
   <section id="contato" style="padding:64px 0; background: var(--gray-50);" class="reveal-on-scroll"><div class="container"><h2 class="section-title">Fale comigo e agende</h2><div class="contact-grid reveal-stagger"><div class="contact-info"><h3>📞 Contato direto</h3><div style="margin:20px 0"><p><strong>Telefone:</strong> (38) 99130-7687</p><p><strong>WhatsApp:</strong> <a href="https://wa.me/5538991307687" style="color:#1a1a1a; font-weight:bold">Clique e fale agora</a></p></div><p style="background:rgba(0,0,0,0.1); border-radius:20px; padding:16px;"> Resposta rápida em até 30 minutos.</p></div><div class="form-card"><h3>Pré-agendamento rápido</h3><form id="quickForm"><div class="form-group"><input type="text" id="nome" placeholder="Seu nome completo *" required></div><div class="form-group"><select id="pessoas" required><option value="">Quantas pessoas? *</option><option>1 pessoa</option><option>2 pessoas</option><option>3-4 pessoas</option><option>5+ pessoas</option></select></div><div class="form-group"><select id="dias" required><option value="">Roteiro desejado *</option><option>Meio dia (4-5h)</option><option>1 dia completo</option><option>2 dias</option><option>3-4 dias</option></select></div><div class="form-group"><input type="text" id="data" placeholder="Data prevista (ex: maio/junho)"></div><div class="form-group"><textarea id="msg" rows="3" placeholder="Mensagem adicional"></textarea></div><button type="submit" class="btn-form">Enviar pelo WhatsApp →</button></form></div></div>
     
-    <!-- MAPA DO PARQUE NACIONAL CAVERNAS DO PERUAÇU - COM ZOOM AFASTADO MOSTRANDO JANUÁRIA E REGIÕES PRÓXIMAS -->
     <div class="map-container reveal-on-scroll">
       <iframe 
         src="https://www.google.com/maps?q=Parque+Nacional+Cavernas+do+Peruaçu,+Januária+-+MG&z=10&output=embed"
@@ -779,7 +746,6 @@
     });
   })();
   
-  // SCROLL REVEAL
   (function initScrollReveal() {
     const revealElements = document.querySelectorAll('.reveal-on-scroll, .reveal-stagger');
     revealElements.forEach(el => {
@@ -822,30 +788,35 @@
     checkScroll();
   })();
   
-  // MOBILE GALLERY
+  // GALERIA MOBILE: mantém as fotos ocultas (apenas as primeiras visíveis) mas SEM nenhum indicador "+ fotos"
   function setupMobileGallery() {
     const galleryContainer = document.getElementById('galleryContainer');
     if(!galleryContainer) return;
     const allItems = Array.from(galleryContainer.querySelectorAll('.gallery-item'));
     if(allItems.length === 0) return;
     const isMobile = window.innerWidth < 641;
+    
+    // Remove qualquer indicador que possa ter sobrado
     allItems.forEach(item => {
-      item.style.display = '';
       const existingIndicator = item.querySelector('.more-photos-indicator');
       if(existingIndicator) existingIndicator.remove();
     });
+    
     if(isMobile) {
-      const visibleCount = Math.max(1, allItems.length - 6);
-      for(let i = visibleCount; i < allItems.length; i++) { allItems[i].style.display = 'none'; }
-      const lastVisibleIndex = visibleCount - 1;
-      if(lastVisibleIndex >= 0 && allItems[lastVisibleIndex]) {
-        const lastVisible = allItems[lastVisibleIndex];
-        const indicator = document.createElement('div');
-        indicator.className = 'more-photos-indicator';
-        indicator.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> ${allItems.length - visibleCount} fotos`;
-        lastVisible.style.position = 'relative';
-        lastVisible.appendChild(indicator);
+      // Esconde as fotos extras (apenas as 5 primeiras ficam visíveis)
+      const visibleCount = 5; // 1 grande + 4 pequenas = 5 itens visíveis
+      for(let i = visibleCount; i < allItems.length; i++) {
+        allItems[i].style.display = 'none';
       }
+      // Garante que os primeiros 5 itens fiquem visíveis
+      for(let i = 0; i < Math.min(visibleCount, allItems.length); i++) {
+        allItems[i].style.display = '';
+      }
+    } else {
+      // Em desktop, mostra todas as fotos
+      allItems.forEach(item => {
+        item.style.display = '';
+      });
     }
   }
   
