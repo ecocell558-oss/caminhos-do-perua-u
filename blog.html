@@ -25,10 +25,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
-  <!-- ===== GOOGLE ADSENSE ===== -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3452666512953115"
-     crossorigin="anonymous"></script>
-  
   <script type="module">
     const firebaseConfig = {
       apiKey: "AIzaSyBVz5x3b04nybzJXFpMqsYJAFnDdfFf7fg",
@@ -287,61 +283,6 @@
       background: #1A1A1A;
       color: #EAEAEA;
       border-color: #333;
-    }
-    /* ===== ESTILO DO ANÚNCIO ===== */
-    .ad-container {
-      margin: 24px 0;
-      padding: 16px;
-      background: var(--brand-gold-soft);
-      border: 2px solid var(--brand-gold);
-      border-radius: 12px;
-      position: relative;
-      text-align: center;
-    }
-    .ad-container .ad-badge {
-      position: absolute;
-      top: -10px;
-      right: 12px;
-      background: var(--brand-gold);
-      color: #0A0A0A;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .ad-container .ad-label {
-      font-size: 0.6rem;
-      color: var(--meta-color);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .ad-container .ad-content {
-      min-height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .ad-container .ad-content .ad-placeholder {
-      color: var(--meta-color);
-      font-size: 0.85rem;
-    }
-    .ad-container .ad-content .ad-placeholder i {
-      color: var(--brand-gold);
-      margin-right: 8px;
-    }
-    .ad-container .ad-divider {
-      border: none;
-      border-top: 1px dashed var(--brand-gold);
-      margin: 8px 0;
-    }
-    [data-theme="dark"] .ad-container {
-      background: #1A1A1A;
-      border-color: var(--brand-gold);
-    }
-    [data-theme="dark"] .ad-container .ad-badge {
-      color: #0A0A0A;
     }
 
     body { 
@@ -1954,7 +1895,7 @@
       </div>
     </div>
     <div style="text-align:center; margin-top:40px; font-size:0.7rem;">
-      © 2025 · Carrossel + Vídeos + Compartilhamento + Notificações Push + Anúncios integrados
+      © 2025 · Carrossel + Vídeos + Compartilhamento + Notificações Push
     </div>
   </div>
 </footer>
@@ -2081,21 +2022,6 @@
       <input type="text" id="postLink" placeholder="https://..." oninput="updateAdminPreview()">
     </div>
     
-    <!-- ===== NOVA OPÇÃO: ATIVAR ANÚNCIOS ===== -->
-    <div class="form-group" style="background: var(--brand-gold-soft); padding: 12px 16px; border-radius: 12px; border: 2px solid var(--brand-gold);">
-      <div class="checkbox-group" style="margin: 0;">
-        <input type="checkbox" id="postEnableAd" onchange="updateAdminPreview()">
-        <label for="postEnableAd" style="font-weight: 700; color: var(--blog-text);">
-          <i class="fas fa-ad" style="color: var(--brand-gold);"></i> 
-          Ativar anúncio nesta postagem
-        </label>
-      </div>
-      <div style="font-size: 0.7rem; color: var(--meta-color); margin-top: 4px; padding-left: 32px;">
-        <i class="fas fa-info-circle"></i> 
-        O anúncio aparecerá entre o conteúdo e os comentários da postagem
-      </div>
-    </div>
-    
     <div class="image-upload-group">
       <label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label>
       <div id="galleryImagesContainer"></div>
@@ -2147,13 +2073,6 @@
           <div class="card-excerpt">Resumo da publicação aparecerá aqui...</div>
           <div class="preview-tags"></div>
           <div class="preview-full"></div>
-          <div class="preview-ad" style="display:none; margin:12px 0; padding:12px; background:var(--brand-gold-soft); border:2px solid var(--brand-gold); border-radius:8px; text-align:center;">
-            <span style="font-size:0.6rem; color:var(--meta-color);">PUBLICIDADE</span>
-            <div style="min-height:60px; display:flex; align-items:center; justify-content:center; color:var(--meta-color);">
-              <i class="fas fa-ad" style="color:var(--brand-gold); margin-right:8px;"></i> 
-              <span style="font-size:0.8rem;">Anúncio ativado</span>
-            </div>
-          </div>
           <div class="preview-gallery cols-3"></div>
           <div class="preview-video"></div>
           <div class="preview-link"></div>
@@ -2237,21 +2156,6 @@
       <input type="text" id="contribLink" placeholder="https://..." oninput="updateContribPreview()">
     </div>
     
-    <!-- ===== NOVA OPÇÃO: ATIVAR ANÚNCIOS (COLABORADOR) ===== -->
-    <div class="form-group" style="background: var(--brand-gold-soft); padding: 12px 16px; border-radius: 12px; border: 2px solid var(--brand-gold);">
-      <div class="checkbox-group" style="margin: 0;">
-        <input type="checkbox" id="contribEnableAd" onchange="updateContribPreview()">
-        <label for="contribEnableAd" style="font-weight: 700; color: var(--blog-text);">
-          <i class="fas fa-ad" style="color: var(--brand-gold);"></i> 
-          Ativar anúncio nesta postagem
-        </label>
-      </div>
-      <div style="font-size: 0.7rem; color: var(--meta-color); margin-top: 4px; padding-left: 32px;">
-        <i class="fas fa-info-circle"></i> 
-        O anúncio aparecerá entre o conteúdo e os comentários da postagem
-      </div>
-    </div>
-    
     <div class="image-upload-group">
       <label><i class="fas fa-images"></i> Galeria (máx 6 imagens)</label>
       <div id="contribGalleryContainer"></div>
@@ -2295,13 +2199,6 @@
           <div class="card-excerpt">Resumo da publicação aparecerá aqui...</div>
           <div class="preview-tags"></div>
           <div class="preview-full"></div>
-          <div class="preview-ad" style="display:none; margin:12px 0; padding:12px; background:var(--brand-gold-soft); border:2px solid var(--brand-gold); border-radius:8px; text-align:center;">
-            <span style="font-size:0.6rem; color:var(--meta-color);">PUBLICIDADE</span>
-            <div style="min-height:60px; display:flex; align-items:center; justify-content:center; color:var(--meta-color);">
-              <i class="fas fa-ad" style="color:var(--brand-gold); margin-right:8px;"></i> 
-              <span style="font-size:0.8rem;">Anúncio ativado</span>
-            </div>
-          </div>
           <div class="preview-gallery cols-3"></div>
           <div class="preview-video"></div>
           <div class="preview-link"></div>
@@ -2402,53 +2299,73 @@
     if (twitterDescription) twitterDescription.setAttribute('content', description);
     if (twitterImage) twitterImage.setAttribute('content', imageUrl);
     
+    // Atualiza também a tag title do HTML
     document.title = title;
+    
+    // Atualiza a meta description
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', description);
     
     console.log('📸 Meta tags atualizadas:', { title, description, imageUrl });
   }
   
+  // ========== FUNÇÃO PARA PEGAR A IMAGEM DO POST (SEMPRE USA A LOGO) ==========
   function getPostShareImage(post) {
+    // SEMPRE RETORNA A LOGO DO BLOG PARA COMPARTILHAMENTO
     return LOGO_URL;
   }
   
+  // ========== FUNÇÃO PARA ATUALIZAR META TAGS DO POST (USA A LOGO) ==========
   function updateMetaTagsForPost(post) {
     if(!post) return;
-    const imageUrl = getPostShareImage(post);
+    
+    const imageUrl = getPostShareImage(post); // SEMPRE A LOGO
     const titleText = `${post.title} · Blog Caminhos do Peruaçu`;
     const descText = (post.excerpt || post.title || "").substring(0, 160);
+    
     updateMetaTags(titleText, descText, imageUrl, generateShareUrl(post.id));
+    
+    console.log('✅ Meta tags atualizadas para o post:', post.title);
+    console.log('🖼️ Imagem usada (LOGO):', imageUrl);
   }
   
   function restoreDefaultMetaTags() {
     const defaultTitle = 'Blog Caminhos do Peruaçu · Notícias · Pesquisas · Turismo';
     const defaultDesc = 'Blog oficial do Parque Nacional Cavernas do Peruaçu. Notícias, pesquisas científicas, roteiros de ecoturismo e informações para sua visita.';
-    updateMetaTags(defaultTitle, defaultDesc, LOGO_URL, 'https://www.caminhosdoperuacu.com.br/blog');
+    const defaultImage = LOGO_URL;
+    const defaultUrl = 'https://www.caminhosdoperuacu.com.br/blog';
+    
+    updateMetaTags(defaultTitle, defaultDesc, defaultImage, defaultUrl);
   }
   
   // ========== FUNÇÃO PARA EXTRAIR ID DO VÍDEO DO YOUTUBE ==========
   function getYouTubeEmbedUrl(url) {
     if (!url) return '';
+    
     if (url.includes('youtube.com/embed/')) return url;
     if (url.includes('player.vimeo.com/video/')) return url;
+    
     if (url.includes('youtube.com/watch')) {
       const urlParams = new URLSearchParams(url.split('?')[1]);
       const videoId = urlParams.get('v');
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
+    
     if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1].split('?')[0];
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
+    
     if (url.includes('youtube.com/shorts/')) {
       const videoId = url.split('shorts/')[1].split('?')[0];
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
+    
     if (url.includes('vimeo.com/')) {
       const videoId = url.split('vimeo.com/')[1].split('?')[0];
       if (videoId) return `https://player.vimeo.com/video/${videoId}`;
     }
+    
     return url;
   }
   
@@ -2596,6 +2513,7 @@
   function renderCategoryFilters() {
     const container = document.getElementById('categoryFilters');
     const categories = getUniqueCategories();
+    
     container.innerHTML = `<button class="category-filter-btn active" data-category="all">Todas</button>`;
     categories.forEach(cat => {
       const btn = document.createElement('button');
@@ -2604,6 +2522,7 @@
       btn.textContent = cat;
       container.appendChild(btn);
     });
+    
     container.querySelectorAll('.category-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         container.querySelectorAll('.category-filter-btn').forEach(b => b.classList.remove('active'));
@@ -2618,6 +2537,7 @@
   function renderTagFilters() {
     const container = document.getElementById('tagFilters');
     const tags = getUniqueTags();
+    
     container.innerHTML = `<button class="tag-filter-btn active" data-tag="all">Todas</button>`;
     tags.forEach(tag => {
       const btn = document.createElement('button');
@@ -2626,6 +2546,7 @@
       btn.textContent = '#' + tag;
       container.appendChild(btn);
     });
+    
     container.querySelectorAll('.tag-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         container.querySelectorAll('.tag-filter-btn').forEach(b => b.classList.remove('active'));
@@ -2640,13 +2561,17 @@
   function applyFilters() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     currentSearchTerm = searchTerm;
+    
     filteredPosts = posts.filter(post => {
       if (post.status !== 'approved') return false;
+      
       if (currentCategory !== 'all' && post.category !== currentCategory) return false;
+      
       if (currentTag !== 'all') {
         const postTags = parseTags(post.tags || '');
         if (!postTags.includes(currentTag)) return false;
       }
+      
       if (searchTerm) {
         const titleMatch = post.title.toLowerCase().includes(searchTerm);
         const excerptMatch = (post.excerpt || '').toLowerCase().includes(searchTerm);
@@ -2655,8 +2580,10 @@
         const tagsMatch = (post.tags || '').toLowerCase().includes(searchTerm);
         return titleMatch || excerptMatch || fullMatch || categoryMatch || tagsMatch;
       }
+      
       return true;
     });
+    
     currentPage = 1;
     renderGrid();
     renderPagination();
@@ -2700,9 +2627,11 @@
   function renderComments(postId, allowComments) {
     const comments = commentsCache[postId] || [];
     const count = comments.length;
+    
     if (!allowComments) {
       return `<div class="comments-disabled"><i class="fas fa-comment-slash"></i> Comentários desativados para esta publicação.</div>`;
     }
+    
     return `
       <div class="comments-section">
         <h3><i class="fas fa-comments"></i> Comentários (${count})</h3>
@@ -2724,45 +2653,23 @@
     `;
   }
   
-  // ========== FUNÇÃO PARA GERAR HTML DO ANÚNCIO ==========
-  function renderAdBlock() {
-    return `
-      <div class="ad-container">
-        <span class="ad-badge"><i class="fas fa-ad"></i> PUBLICIDADE</span>
-        <div class="ad-content">
-          <!-- ===== BLOCO DE ANÚNCIO GOOGLE ADSENSE ===== -->
-          <ins class="adsbygoogle"
-               style="display:block"
-               data-ad-client="ca-pub-3452666512953115"
-               data-ad-slot="YOUR_AD_SLOT_HERE"
-               data-ad-format="auto"
-               data-full-width-responsive="true"></ins>
-          <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-          </script>
-          <!-- ===== FIM DO BLOCO DE ANÚNCIO ===== -->
-        </div>
-        <hr class="ad-divider">
-        <div style="font-size:0.55rem; color:var(--meta-color); text-align:center; letter-spacing:0.5px;">
-          <i class="fas fa-shield-alt"></i> Anúncio responsável · Apoie este conteúdo
-        </div>
-      </div>
-    `;
-  }
-  
   // ========== FUNÇÕES PRINCIPAIS ==========
   
   function getOptimizedImageUrl(url, width = 800, height = 450) {
     if (!url || !url.trim()) {
       return `https://placehold.co/${width}x${height}/f0f0f0/999?text=Sem+Imagem`;
     }
+    
     if (url.includes('placehold.co')) return url;
+    
     if (url.includes('unsplash.com') || url.includes('images.unsplash.com')) {
       return `${url}?w=${width}&h=${height}&fit=crop&crop=center&auto=format`;
     }
+    
     if (url.includes('imgur.com')) {
       return url.replace(/\.(jpg|jpeg|png|gif)/i, 'm.$1');
     }
+    
     return url;
   }
   
@@ -2785,6 +2692,7 @@
       if(postIdParam) {
         const targetPost = posts.find(p => p.id === postIdParam && p.status === 'approved');
         if(targetPost) {
+          // ATUALIZA AS META TAGS COM A LOGO DO BLOG
           updateMetaTagsForPost(targetPost);
           setTimeout(() => openModal(targetPost), 200);
           history.replaceState({}, document.title, window.location.pathname);
@@ -2911,7 +2819,6 @@
           autoCarousel: true, 
           isFeatured: true, 
           allowComments: true,
-          enableAd: false,
           date: new Date().toISOString(), 
           status: "approved" 
         },
@@ -2929,7 +2836,6 @@
           autoCarousel: false, 
           isFeatured: false, 
           allowComments: true,
-          enableAd: true,
           date: new Date().toISOString(), 
           status: "approved" 
         },
@@ -2947,7 +2853,6 @@
           autoCarousel: true, 
           isFeatured: false, 
           allowComments: true,
-          enableAd: false,
           date: new Date().toISOString(), 
           status: "approved" 
         }
@@ -3211,15 +3116,12 @@
       
       const imgSrc = getOptimizedImageUrl(getImageSrc(post));
       
-      // Ícone de anúncio se estiver ativado
-      const adIcon = post.enableAd ? ' 📢' : '';
-      
       card.innerHTML = `
         <div class="card-img" id="cardImg-${post.id}">
           ${hasCarousel ? renderCarouselHTML(allImages, post.autoCarousel || false, `card${post.id}`, false) : `<img src="${imgSrc}" loading="lazy" style="cursor:pointer; width:100%; height:100%; object-fit:cover;">`}
         </div>
         <div class="card-content">
-          <div class="card-category">${post.category || 'ECOTURISMO'}${post.video ? ' 🎬' : ''}${post.link ? ' 🔗' : ''}${adIcon}</div>
+          <div class="card-category">${post.category || 'ECOTURISMO'}${post.video ? ' 🎬' : ''}${post.link ? ' 🔗' : ''}</div>
           <div class="card-title">${post.title}</div>
           ${tagsHtml}
           <div class="card-excerpt">${(post.excerpt || '').substring(0,100)}</div>
@@ -3271,10 +3173,15 @@
       shareBlog('wa');
       return;
     }
+    
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
+    // A IMAGEM SERÁ A LOGO (definida nas meta tags)
+    
     updateMetaTagsForPost(post);
+    
     const message = `📰 *${title}*\n\n${post.excerpt || ''}\n\n🔗 ${url}`;
+    
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   }
   
@@ -3283,9 +3190,12 @@
       shareBlog('fb');
       return;
     }
+    
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
+    
     updateMetaTagsForPost(post);
+    
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`, '_blank');
   }
   
@@ -3294,9 +3204,12 @@
       shareBlog('tw');
       return;
     }
+    
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
+    
     updateMetaTagsForPost(post);
+    
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
   }
   
@@ -3305,9 +3218,12 @@
       shareBlog('telegram');
       return;
     }
+    
     const url = generateShareUrl(post.id);
     const title = post.title || 'Blog Caminhos do Peruaçu';
+    
     updateMetaTagsForPost(post);
+    
     window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
   }
   
@@ -3323,6 +3239,7 @@
     if(post.status !== 'approved') return;
     window.currentModalPost = post;
     
+    // ATUALIZA AS META TAGS COM A LOGO DO BLOG
     updateMetaTagsForPost(post);
     
     const modalDiv = document.getElementById('newsModal');
@@ -3349,24 +3266,23 @@
     }
     
     const linkHtml = post.link ? `<a href="${post.link}" target="_blank" class="external-link-btn"><i class="fas fa-external-link-alt"></i> Acessar link externo →</a>` : '';
+    const shareUrl = generateShareUrl(post.id);
     const relatedHtml = renderRelatedPosts(post);
     const tagsHtml = renderPostTags(post.tags);
+    const postImageUrl = getPostShareImage(post);
     
     if (post.allowComments !== false) {
       await loadComments(post.id);
     }
     const commentsHtml = renderComments(post.id, post.allowComments !== false);
-    const commentCount = (commentsCache[post.id] || []).length;
     
-    // ===== ANÚNCIO - aparece se enableAd for true =====
-    const adHtml = post.enableAd ? renderAdBlock() : '';
+    const commentCount = (commentsCache[post.id] || []).length;
     
     const imgSrc = getOptimizedImageUrl(getImageSrc(post));
     
     bodyDiv.innerHTML = `
       <div>
         <span style="background:var(--brand-gold); padding:4px 14px; border-radius:20px; display:inline-block;">${post.category || 'ECOTURISMO'}</span>
-        ${post.enableAd ? ' <span style="background:#dc2626; color:white; padding:2px 10px; border-radius:20px; font-size:0.6rem; font-weight:700;"><i class="fas fa-ad"></i> ANÚNCIO</span>' : ''}
         <h2 style="font-size:1.8rem; margin:18px 0 12px;">${post.title}</h2>
         <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
           <span><i class="far fa-calendar-alt"></i> ${formatDate(post.date)}</span>
@@ -3383,8 +3299,6 @@
           ` : '')}
         </div>
         <div style="margin:20px 0;">${post.full || ''}</div>
-        
-        ${adHtml}
         
         <div class="share-bar">
           <button class="share-btn whatsapp" data-post-id="${post.id}"><i class="fab fa-whatsapp"></i> WhatsApp</button>
@@ -3440,10 +3354,12 @@
         const textInput = bodyDiv.querySelector('#commentText');
         const name = nameInput ? nameInput.value.trim() : '';
         const text = textInput ? textInput.value.trim() : '';
+        
         if (!text) {
           alert('Por favor, escreva um comentário.');
           return;
         }
+        
         try {
           await addComment(post.id, name, text);
           if (textInput) textInput.value = '';
@@ -3480,6 +3396,7 @@
     document.querySelectorAll('#modalBodyContent .share-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const postId = btn.getAttribute('data-post-id');
+        
         if (postId) {
           const postToShare = posts.find(p => p.id === postId);
           if (btn.classList.contains('whatsapp')) {
@@ -3502,6 +3419,8 @@
     document.getElementById('newsModal').style.display = 'none'; 
     document.body.style.overflow = ''; 
     window.currentModalPost = null; 
+    
+    // Restaura as meta tags padrão ao fechar o modal
     restoreDefaultMetaTags();
   }
   
@@ -3518,6 +3437,7 @@
   
   function renderRelatedPosts(currentPost) {
     if (!currentPost) return '';
+    
     const related = posts
       .filter(p => 
         p.id !== currentPost.id && 
@@ -3528,7 +3448,9 @@
          ))
       )
       .slice(0, 3);
+    
     if (related.length === 0) return '';
+    
     return `
       <div class="related-posts-section">
         <h3><i class="fas fa-link"></i> Você também pode gostar</h3>
@@ -3561,7 +3483,6 @@
     const galleryImgs = tempGallery.filter(u => u && u.trim());
     const layout = selectedLayout || 3;
     const allowComments = document.getElementById('postAllowComments')?.checked !== false;
-    const enableAd = document.getElementById('postEnableAd')?.checked === true;
     
     const titleEl = preview.querySelector('.card-title');
     const catEl = preview.querySelector('.card-category');
@@ -3573,14 +3494,9 @@
     const linkEl = preview.querySelector('.preview-link');
     const tagsEl = preview.querySelector('.preview-tags');
     const commentsEl = preview.querySelector('.preview-comments-status');
-    const adEl = preview.querySelector('.preview-ad');
     
     if(titleEl) titleEl.textContent = title;
-    if(catEl) {
-      let categoryText = category;
-      if(enableAd) categoryText += ' 📢';
-      catEl.textContent = categoryText;
-    }
+    if(catEl) catEl.textContent = category;
     if(excerptEl) excerptEl.textContent = excerpt;
     if(imgEl) imgEl.src = img;
     if(fullEl) fullEl.innerHTML = full;
@@ -3631,14 +3547,6 @@
     if(commentsEl) {
       commentsEl.textContent = allowComments ? '💬 Comentários ativados' : '🚫 Comentários desativados';
       commentsEl.style.color = allowComments ? 'var(--meta-color)' : '#dc2626';
-    }
-    
-    if(adEl) {
-      if(enableAd) {
-        adEl.style.display = 'block';
-      } else {
-        adEl.style.display = 'none';
-      }
     }
   }
   
@@ -3656,7 +3564,6 @@
     const galleryImgs = contribTempGallery.filter(u => u && u.trim());
     const layout = contribSelectedLayout || 3;
     const allowComments = document.getElementById('contribAllowComments')?.checked !== false;
-    const enableAd = document.getElementById('contribEnableAd')?.checked === true;
     
     const titleEl = preview.querySelector('.card-title');
     const catEl = preview.querySelector('.card-category');
@@ -3668,14 +3575,9 @@
     const linkEl = preview.querySelector('.preview-link');
     const tagsEl = preview.querySelector('.preview-tags');
     const commentsEl = preview.querySelector('.preview-comments-status');
-    const adEl = preview.querySelector('.preview-ad');
     
     if(titleEl) titleEl.textContent = title;
-    if(catEl) {
-      let categoryText = category;
-      if(enableAd) categoryText += ' 📢';
-      catEl.textContent = categoryText;
-    }
+    if(catEl) catEl.textContent = category;
     if(excerptEl) excerptEl.textContent = excerpt;
     if(imgEl) imgEl.src = img;
     if(fullEl) fullEl.innerHTML = full;
@@ -3726,14 +3628,6 @@
     if(commentsEl) {
       commentsEl.textContent = allowComments ? '💬 Comentários ativados' : '🚫 Comentários desativados';
       commentsEl.style.color = allowComments ? 'var(--meta-color)' : '#dc2626';
-    }
-    
-    if(adEl) {
-      if(enableAd) {
-        adEl.style.display = 'block';
-      } else {
-        adEl.style.display = 'none';
-      }
     }
   }
   
@@ -3776,7 +3670,6 @@
             <strong>${post.title}</strong>
             <br><small>${post.category || 'ECOTURISMO'} ${post.tags ? '| Tags: ' + post.tags : ''}</small>
             <br><small style="color:${post.allowComments !== false ? '#10b981' : '#dc2626'};">${post.allowComments !== false ? '💬 Comentários ativados' : '🚫 Comentários desativados'}</small>
-            ${post.enableAd ? '<br><small style="color:var(--brand-gold);"><i class="fas fa-ad"></i> Anúncio ativado</small>' : ''}
           </div>
           <div>
             <button class="edit-post" data-id="${post.id}">Editar</button>
@@ -3809,7 +3702,6 @@
     document.getElementById('postImg').value = post.img || '';
     document.getElementById('postVideo').value = post.video || '';
     document.getElementById('postLink').value = post.link || '';
-    document.getElementById('postEnableAd').checked = post.enableAd || false;
     tempGallery = [...(post.gallery || [])];
     renderGalleryInputs();
     selectedLayout = post.galleryLayout || 3;
@@ -3864,7 +3756,6 @@
             <strong>${post.title}</strong>
             <br><small>${post.category || 'ECOTURISMO'} ${post.tags ? '| Tags: ' + post.tags : ''}</small>
             <br><small style="color:${post.allowComments !== false ? '#10b981' : '#dc2626'};">${post.allowComments !== false ? '💬 Comentários ativados' : '🚫 Comentários desativados'}</small>
-            ${post.enableAd ? '<br><small style="color:var(--brand-gold);"><i class="fas fa-ad"></i> Anúncio ativado</small>' : ''}
           </div>
           <div>
             ${post.status === 'pending' ? '<span class="pending-badge">⏳ Aguardando aprovação</span>' : '<span style="color:#10b981;">✅ Aprovado</span>'}
@@ -3900,6 +3791,7 @@
         document.getElementById('adminLoginError').innerText = 'Acesso negado! Este email não tem permissão de Administrador.';
         return false;
       }
+      
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       currentUser = userCredential.user;
       currentRole = 'admin';
@@ -3923,6 +3815,7 @@
         document.getElementById('contribLoginError').innerText = 'Este email é de Administrador. Use o acesso Admin.';
         return false;
       }
+      
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       currentUser = userCredential.user;
       currentRole = 'contributor';
@@ -3962,6 +3855,7 @@
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
     const icon = document.querySelector('#darkModeToggle i');
+    
     if (isDark) {
       html.removeAttribute('data-theme');
       localStorage.setItem('theme', 'light');
@@ -3976,6 +3870,7 @@
   function loadThemePreference() {
     const savedTheme = localStorage.getItem('theme');
     const icon = document.querySelector('#darkModeToggle i');
+    
     if (savedTheme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       if (icon) icon.className = 'fas fa-sun';
@@ -4098,7 +3993,6 @@
       autoCarousel: document.getElementById('postAutoCarousel').checked, 
       isFeatured: document.getElementById('postFeatured').value === 'true', 
       allowComments: document.getElementById('postAllowComments').checked !== false,
-      enableAd: document.getElementById('postEnableAd').checked === true,
       date: new Date().toISOString() 
     };
     await savePostToFirebase(postData, editId || null);
@@ -4131,7 +4025,6 @@
       autoCarousel: document.getElementById('contribAutoCarousel').checked, 
       isFeatured: false, 
       allowComments: document.getElementById('contribAllowComments').checked !== false,
-      enableAd: document.getElementById('contribEnableAd').checked === true,
       authorEmail: currentUser.email
     };
     await submitForApproval(postData);
@@ -4228,6 +4121,7 @@
       adminKeyCount++;
       if (keyPressTimerAdmin) clearTimeout(keyPressTimerAdmin);
       keyPressTimerAdmin = setTimeout(() => { adminKeyCount = 0; }, 800);
+      
       if (adminKeyCount >= 3) {
         adminKeyCount = 0;
         if (currentUser && currentRole === 'admin') {
@@ -4239,10 +4133,12 @@
         }
       }
     }
+    
     if (e.key === 'v' || e.key === 'V') {
       contribKeyCount++;
       if (keyPressTimerContrib) clearTimeout(keyPressTimerContrib);
       keyPressTimerContrib = setTimeout(() => { contribKeyCount = 0; }, 800);
+      
       if (contribKeyCount >= 2) {
         contribKeyCount = 0;
         if (currentUser && currentRole === 'contributor') {
@@ -4254,6 +4150,7 @@
         }
       }
     }
+    
     if (e.key === 'Escape') {
       if (document.getElementById('lightboxModal').style.display === 'flex') {
         closeLightbox();
@@ -4262,6 +4159,7 @@
         closeModal();
       }
     }
+    
     if (document.getElementById('lightboxModal').style.display === 'flex') {
       if (e.key === 'ArrowLeft') prevLightboxImage();
       if (e.key === 'ArrowRight') nextLightboxImage();
@@ -4293,14 +4191,14 @@
        e.target.id === 'postTags' || e.target.id === 'postExcerpt' || 
        e.target.id === 'postFull' || e.target.id === 'postImg' || 
        e.target.id === 'postVideo' || e.target.id === 'postLink' ||
-       e.target.id === 'postAllowComments' || e.target.id === 'postEnableAd') {
+       e.target.id === 'postAllowComments') {
       updateAdminPreview();
     }
     if(e.target.id === 'contribTitle' || e.target.id === 'contribCategory' || 
        e.target.id === 'contribTags' || e.target.id === 'contribExcerpt' || 
        e.target.id === 'contribFull' || e.target.id === 'contribImg' || 
        e.target.id === 'contribVideo' || e.target.id === 'contribLink' ||
-       e.target.id === 'contribAllowComments' || e.target.id === 'contribEnableAd') {
+       e.target.id === 'contribAllowComments') {
       updateContribPreview();
     }
   });
@@ -4327,8 +4225,6 @@
   console.log('  📝 Painel Admin (CCC) e Colaborador (VV)');
   console.log('  📤 Compartilhamento com a LOGO do blog via meta tags OG');
   console.log('  🖼️ Meta tags atualizadas dinamicamente com a LOGO para cada post');
-  console.log('  📢 ANÚNCIOS integrados: Admin e Colaborador podem ativar/desativar por postagem!');
-  console.log('  🎯 Anúncio aparece entre o conteúdo e os comentários com estilo profissional');
 </script>
 </body>
 </html>
