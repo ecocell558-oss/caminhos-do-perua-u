@@ -29,6 +29,12 @@
   <link rel="apple-touch-icon" href="logoperuacu.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
+    /* ===== CORREÇÃO: evita efeito elástico (bounce) no iPhone ===== */
+    html, body {
+      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --brand-primary: #F5B81B;
@@ -194,6 +200,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      overscroll-behavior: contain;
     }
     .mobile-menu-panel.active { right: 0; }
     .mobile-menu-header {
@@ -403,9 +410,10 @@
       opacity: 0;
       transition: visibility 0.2s, opacity 0.25s ease;
       backdrop-filter: blur(12px);
+      overscroll-behavior: contain;
     }
     .lightbox.active { visibility: visible; opacity: 1; }
-    .lightbox-content { position: relative; max-width: 94vw; max-height: 88vh; display: flex; align-items: center; justify-content: center; touch-action: pan-y pinch-zoom; }
+    .lightbox-content { position: relative; max-width: 94vw; max-height: 88vh; display: flex; align-items: center; justify-content: center; touch-action: pan-y pinch-zoom; overscroll-behavior: contain; }
     .lightbox-img { max-width: 94vw; max-height: 85vh; width: auto; height: auto; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
     
     .lightbox-actions {
@@ -433,6 +441,7 @@
       -webkit-overflow-scrolling: touch;
       border: 1px solid rgba(255,255,255,0.2);
       box-sizing: border-box;
+      overscroll-behavior: contain;
     }
     .lightbox-actions::-webkit-scrollbar { height: 3px; }
     .lightbox-actions::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -567,6 +576,7 @@
       position: relative;
       width: 100%;
       height: 500px;
+      overscroll-behavior: contain;
     }
     .map-container iframe {
       position: absolute;
